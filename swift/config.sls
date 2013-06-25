@@ -23,4 +23,15 @@
     - template: jinja
     - require:
       - pkg: swift-storage-pkgs
+/etc/default/rsync:
+  file.managed:
+    - source: salt://swift/default_rsync
+    - require:
+      - pkg: swift-base-pkgs
+rsync:
+  service.running:
+    - enable: True
+    - require:
+      - file: /etc/rsyncd.conf
+      - pkg: swift-storage-pkgs
 {% endif %}

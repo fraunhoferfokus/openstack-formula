@@ -1,4 +1,4 @@
-{% if grains['id'] in pillar['swift-nodes']['storage'] %}
+{# only included on storage-nodes #}
 /srv/node:
   file.directory:
     - user: {{ pillar['swift-user'] }}
@@ -7,7 +7,7 @@
       - user
       - group
 
-  {% for dev in pillar['swift-devices'] %}
+{% for dev in pillar['swift-devices'] %}
 /srv/node/{{ dev.split('/')[-1] }}:
   mount.mounted:
     - device: {{dev}}
@@ -24,5 +24,4 @@
     - group: {{ pillar['swift-group'] }}
     - require:
       - file: /srv/node
-  {% endfor %}
-{% endif %}
+{% endfor %}
