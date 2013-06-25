@@ -17,3 +17,19 @@ swift-storage-pkgs:
     {% endfor %}
   {% endif %}
 {% endif %}
+
+{% if pillar['swift-nodes']['proxy'] %}
+  {% if grains['id'] in pillar['swift-nodes']['proxy'] %}
+swift-proxy-pkgs:
+  pkg:
+    - installed
+    - names:
+    {% for pkg in pillar['swift-pkgs']['proxy'] %}
+      - {{ pkg }}
+    {% endfor %}
+    {% if grains['oscodename'] == 'precise' %}
+    - require:
+      - pkgrepo: ubuntu-cloud-repo
+    {% endif %}
+  {% endif %}
+{% endif %}
