@@ -2,34 +2,37 @@ swift-base-pkgs:
   pkg:
     - installed
     - names:
-{% for pkg in pillar['swift-pkgs']['base'] %}
-      - {{ pkg }}
-{% endfor %}
+      - swift
+      - openssh-server
+      - rsync
+      - memcached
+      - python-netifaces
+      - python-xattr
+      - python-memcache
 
-{% if pillar['swift-nodes']['storage'] %}
-  {% if grains['id'] in pillar['swift-nodes']['storage'] %}
+{% if grains['id'] in pillar['swift-nodes']['storage'] %}
 swift-storage-pkgs:
   pkg:
     - installed
     - names:
-    {% for pkg in pillar['swift-pkgs']['storage'] %}
-      - {{ pkg }}
-    {% endfor %}
-  {% endif %}
+      - swift-account
+      - swift-container
+      - swift-object
+      - xfsprogs
 {% endif %}
 
-{% if pillar['swift-nodes']['proxy'] %}
-  {% if grains['id'] in pillar['swift-nodes']['proxy'] %}
+{% if grains['id'] in pillar['swift-nodes']['proxy'] %}
 swift-proxy-pkgs:
   pkg:
     - installed
     - names:
-    {% for pkg in pillar['swift-pkgs']['proxy'] %}
-      - {{ pkg }}
-    {% endfor %}
+      - swift-proxy
+      - memcached
+      - python-keystoneclient
+      - python-swiftclient
+      - python-webob
     {% if grains['oscodename'] == 'precise' %}
     - require:
       - pkgrepo: ubuntu-cloud-repo
     {% endif %}
-  {% endif %}
 {% endif %}

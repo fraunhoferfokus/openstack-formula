@@ -1,11 +1,3 @@
-/etc/swift:
-  file.directory:
-    - user: {{ pillar['swift-user'] }}
-    - group: {{ pillar['swift-group'] }}
-    - mode: 750
-    - require:
-      - pkg: swift-base-pkgs
-
 /etc/swift/swift.conf:
   file.managed:
     - source: salt://swift/swift.conf
@@ -28,10 +20,20 @@
     - source: salt://swift/default_rsync
     - require:
       - pkg: swift-base-pkgs
-rsync:
-  service.running:
-    - enable: True
+{% endif %}
+
+{% if grains['id'] in pillar['swift-nodes']['proxy'] %}
+/etc/memcached.conf:
+  file.managed:
+    - source: salt://swift/proxy_memcached.conf
+    - template: jinja
     - require:
-      - file: /etc/rsyncd.conf
-      - pkg: swift-storage-pkgs
+      - pkg: swift-base-pkgs
+
+/etc/swift/proxy-server.conf:
+  file.managed:
+    - source: salt://swift/proxy-server.conf
+    - template: jinja
+    - require:
+      - pkg: swift-proxy-pkgs
 {% endif %}

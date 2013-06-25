@@ -7,7 +7,8 @@
       - user
       - group
 
-{% for dev in pillar['swift-devices'] %}
+{% for zone in pillar['swift-zones'] %}
+  {% for dev in pillar['swift-devices'][zone] %}
 /srv/node/{{ dev.split('/')[-1] }}:
   mount.mounted:
     - device: {{dev}}
@@ -24,4 +25,5 @@
     - group: {{ pillar['swift-group'] }}
     - require:
       - file: /srv/node
+  {% endfor %}
 {% endfor %}

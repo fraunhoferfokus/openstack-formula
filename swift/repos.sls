@@ -2,8 +2,9 @@
 ubuntu-cloud-key:
   cmd:
     - run
-    - name: apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5EDB1B62EC4926EA
-    - unless: apt-key list | grep -q 5EDB1B62EC4926EA
+    - name: apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5EDB1B62EC4926EA && echo "changed=yes comment='Added key EC4926EA for repo ubuntu-cloud'"
+    - stateful: True
+    - unless: apt-key list | grep -q EC4926EA
 
 ubuntu-cloud-repo:
   pkgrepo:
