@@ -1,4 +1,6 @@
-{% for builder in pillar['swift-builder-ports'].keys() %}
+{# PROXY STUFF #}
+{% if grains['id'] in pillar['swift-nodes']['storage'] %}
+  {% for builder in pillar['swift-builder-ports'].keys() %}
 /etc/swift/{{builder}}:
   cmd.run:
     - cwd: /etc/swift
@@ -8,8 +10,8 @@
     - require:
       - pkg: swift-proxy-pkgs
 
-  {% for zone in pillar['swift-zones'] %}
-    {% for dev in pillar['swift-devices'][zone] %}
+    {% for zone in pillar['swift-zones'] %}
+      {% for dev in pillar['swift-devices'][zone] %}
 
 add_{{dev.split('/')[-1]}}_to_z{{zone}}_in_{{builder.split('.')[0]}}:
   cmd.run:
@@ -20,8 +22,8 @@ add_{{dev.split('/')[-1]}}_to_z{{zone}}_in_{{builder.split('.')[0]}}:
       - cmd: /etc/swift/{{builder}}
     - unless: swift-ring-builder {{builder}} list_parts z{{zone}}-{{pillar['swift-ips']['storage-local']}}:{{pillar['swift-builder-ports'][builder]}}/{{dev.split('/')[-1]}}
 
+      {% endfor %}
     {% endfor %}
-  {% endfor %}
 
 swift-ring-builder {{builder}} rebalance:
   cmd.wait:
@@ -30,9 +32,20 @@ swift-ring-builder {{builder}} rebalance:
       - cmd: /etc/swift/{{builder}}
     - watch:
       - cmd: /etc/swift/{{builder}}
-  {% for zone in pillar['swift-zones'] %}
-    {% for dev in pillar['swift-devices'][zone] %}
+    {% for zone in pillar['swift-zones'] %}
+      {% for dev in pillar['swift-devices'][zone] %}
       - cmd: add_{{dev.split('/')[-1]}}_to_z{{zone}}_in_{{builder.split('.')[0]}}
+      {% endfor %}
     {% endfor %}
   {% endfor %}
-{% endfor %}
+{% endif %}
+
+{# STORAGE STUFF #}
+{% if grains['id'] in pillar['swift-nodes']['storage'] %}
+  {% for ringfile, hash in pillar['swift-ringfile-hashes'].items() %}
+{{ ringfile }}:
+  file.managed:
+    - source: salt://swift/{{ ringfile.split('/')[-1] }}
+    - source_hash: {{ hash }}
+  {% endfor %}
+{% endif %}

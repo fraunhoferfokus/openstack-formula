@@ -1,12 +1,4 @@
 {# only included on storage-nodes #}
-/srv/node:
-  file.directory:
-    - user: {{ pillar['swift-user'] }}
-    - group: {{ pillar['swift-group'] }}
-    - recurse:
-      - user
-      - group
-
 {% for zone in pillar['swift-zones'] %}
   {% for dev in pillar['swift-devices'][zone] %}
 /srv/node/{{ dev.split('/')[-1] }}:

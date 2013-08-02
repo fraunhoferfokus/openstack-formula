@@ -1,5 +1,5 @@
-{% if grains['id'] in pillar['swift-nodes']['proxy'] %}
-proxy-server:
+{# Only included on proxy-nodes #}
+swift-proxy:
   service.running:
     - enabled: True
     - requires:
@@ -17,13 +17,3 @@ memcached:
       - pkg: swift-base-pkgs
     - watch:
       - file: /etc/memcached.conf
-{% endif %}
-
-{% if grains['id'] in pillar['swift-nodes']['storage'] %}
-rsync:
-  service.running:
-    - enable: True
-    - require:
-      - file: /etc/rsyncd.conf
-      - pkg: swift-storage-pkgs
-{% endif %}
