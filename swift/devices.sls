@@ -1,6 +1,6 @@
 {# only included on storage-nodes #}
-{% for zone in pillar['swift-zones'] %}
-  {% for dev in pillar['swift-devices'][zone] %}
+{% for zone in pillar['swift:zones'] %}
+  {% for dev in pillar['swift:devices:'+zone] %}
 /srv/node/{{ dev.split('/')[-1] }}:
   mount.mounted:
     - device: {{dev}}
@@ -13,8 +13,8 @@
       - logbufs=8
     - persist: True
   file.directory:
-    - user: {{ pillar['swift-user'] }}
-    - group: {{ pillar['swift-group'] }}
+    - user: {{ pillar.get('swift:user','swift') }}
+    - group: {{ pillar.get('swift:group','swift') }}
     - require:
       - file: /srv/node
   {% endfor %}

@@ -2,8 +2,8 @@
   file.managed:
     - source: salt://swift/swift.conf
     - template: jinja
-    - user: {{ pillar['swift-user'] }}
-    - group: {{ pillar['swift-group'] }}
+    - user: {{ pillar.get('swift:user','swift') }}
+    - group: {{ pillar.get('swift:group','swift') }}
     - mode: 640
     - require:
       - file: /etc/swift
