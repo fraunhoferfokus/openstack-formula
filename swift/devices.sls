@@ -1,6 +1,6 @@
 {# only included on storage-nodes #}
 {% for zone in pillar['swift:zones'] %}
-  {% for dev in pillar['swift:devices:'+zone] %}
+  {% for dev in pillar.get('swift:devices:'+zone,[]).items() %}
 /srv/node/{{ dev.split('/')[-1] }}:
   mount.mounted:
     - device: {{dev}}

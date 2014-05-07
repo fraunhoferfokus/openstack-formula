@@ -1,5 +1,5 @@
 {# PROXY STUFF #}
-{% if grains['id'] in pillar['swift-nodes']['storage'] %}
+{% if grains['id'] in pillar.get('swift:nodes:storage,[]).items() %}
   {% for builder in pillar['swift-builder-ports'].keys() %}
 /etc/swift/{{builder}}:
   cmd.run:
@@ -41,7 +41,7 @@ swift-ring-builder {{builder}} rebalance:
 {% endif %}
 
 {# STORAGE STUFF #}
-{% if grains['id'] in pillar['swift-nodes']['storage'] %}
+{% if grains['id'] in pillar.get('swift:nodes:storage,[]).items() %}
   {% for ringfile, hash in pillar['swift-ringfile-hashes'].items() %}
 {{ ringfile }}:
   file.managed:

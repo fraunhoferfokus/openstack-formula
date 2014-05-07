@@ -10,7 +10,7 @@ swift-base-pkgs:
       - python-xattr
       - python-memcache
 
-{% if grains['id'] in pillar['swift-nodes']['storage'] %}
+{% if grains['id'] in pillar.get('swift:nodes:storage,[]).items() %}
 swift-storage-pkgs:
   pkg:
     - installed
@@ -21,7 +21,7 @@ swift-storage-pkgs:
       - xfsprogs
 {% endif %}
 
-{% if grains['id'] in pillar['swift-nodes']['proxy'] %}
+{% if grains['id'] in pillar.get('swift:nodes:proxy',[]).items() %}
 swift-proxy-pkgs:
   pkg:
     - installed
