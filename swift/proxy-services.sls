@@ -5,7 +5,7 @@ swift-proxy:
     - requires:
       - pkg: swift-proxy-pkgs
       - service: memcached
-  {% for builder in pillar['swift-builder-ports'].keys() %}
+  {% for builder in salt['pillar.get']('swift:builder_ports'],{}).keys() %}
       - cmd: /etc/swift/{{builder}}
   {% endfor %}
 

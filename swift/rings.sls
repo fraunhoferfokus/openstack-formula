@@ -1,6 +1,6 @@
 {# PROXY STUFF #}
 {% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:storage',[]) %}
-  {% for builder in pillar['swift-builder-ports'].keys() %}
+  {% for builder in salt['pillar.get']('swift:builder_ports',{}).keys() %}
 /etc/swift/{{builder}}:
   cmd.run:
     - cwd: /etc/swift
@@ -16,11 +16,11 @@
 add_{{dev.split('/')[-1]}}_to_z{{zone}}_in_{{builder.split('.')[0]}}:
   cmd.run:
     - cwd: /etc/swift
-    - name: swift-ring-builder {{builder}} add r{{pillar['swift-region']}}z{{zone}}-{{pillar['swift-ips']['storage-local']}}:{{pillar['swift-builder-ports'][builder]}}/{{dev.split('/')[-1]}} 100 && echo "changed=yes comment='Added {{dev}} to zone {{zone}} in region {{pillar['swift-region']}} for builder {{builder}}'" || (echo "changed=no comment='Failed to add {{dev}} to zone {{zone}} in region {{pillar['swift-region']}} for builder {{builder}}'"; false)
+    - name: swift-ring-builder {{builder}} add r{{pillar['swift-region']}}z{{zone}}-{{pillar['swift-ips']['storage-local']}}:{{ salt['pillar.get']('swift:builder_ports:'+builder)}}/{{dev.split('/')[-1]}} 100 && echo "changed=yes comment='Added {{dev}} to zone {{zone}} in region {{pillar['swift-region']}} for builder {{builder}}'" || (echo "changed=no comment='Failed to add {{dev}} to zone {{zone}} in region {{pillar['swift-region']}} for builder {{builder}}'"; false)
     - stateful: True
     - require:
       - cmd: /etc/swift/{{builder}}
-    - unless: swift-ring-builder {{builder}} list_parts z{{zone}}-{{pillar['swift-ips']['storage-local']}}:{{pillar['swift-builder-ports'][builder]}}/{{dev.split('/')[-1]}}
+    - unless: swift-ring-builder {{builder}} list_parts z{{zone}}-{{pillar['swift-ips']['storage-local']}}:{{ salt['pillar.get']('swift:builder_ports:'+builder)}}/{{dev.split('/')[-1]}}
 
       {% endfor %}
     {% endfor %}
