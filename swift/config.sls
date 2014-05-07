@@ -2,13 +2,13 @@
   file.managed:
     - source: salt://swift/swift.conf
     - template: jinja
-    - user: {{ pillar.get('swift:user','swift') }}
-    - group: {{ pillar.get('swift:group','swift') }}
+    - user: {{ salt['pillar.get']('swift:user','swift') }}
+    - group: {{ salt['pillar.get']('swift:group','swift') }}
     - mode: 640
     - require:
       - file: /etc/swift
     
-{% if grains.get('id') in pillar.get('swift:nodes:storage',[]) %}
+{% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:storage',[]) %}
 /etc/rsyncd.conf:
   file.managed:
     - source: salt://swift/rsyncd.conf
@@ -22,7 +22,7 @@
       - pkg: swift-base-pkgs
 {% endif %}
 
-{% if grains.get('id') in pillar.get('swift:nodes:proxy',[]) %}
+{% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:proxy',[]) %}
 /etc/memcached.conf:
   file.managed:
     - source: salt://swift/proxy_memcached.conf
