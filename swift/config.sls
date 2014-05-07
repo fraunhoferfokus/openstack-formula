@@ -8,7 +8,7 @@
     - require:
       - file: /etc/swift
     
-{% if grains['id'] in pillar.get('swift:nodes:storage',[]).items() %}
+{% if grains.get('id') in pillar.get('swift:nodes:storage',[]) %}
 /etc/rsyncd.conf:
   file.managed:
     - source: salt://swift/rsyncd.conf
@@ -22,7 +22,7 @@
       - pkg: swift-base-pkgs
 {% endif %}
 
-{% if grains['id'] in pillar.get('swift:nodes:proxy',[]).items() %}
+{% if grains.get('id') in pillar.get('swift:nodes:proxy',[]) %}
 /etc/memcached.conf:
   file.managed:
     - source: salt://swift/proxy_memcached.conf

@@ -2,11 +2,11 @@ include:
   - swift.packages
   - swift.config
   - swift.dirs
-{% if grains['id'] in pillar.get('swift:nodes:storage,[]).items() %}
+{% if grains.get('id') in pillar.get('swift:nodes:storage',[]) %}
   - swift.devices
   - swift.storage-services
 {% endif %}
-{% if grains['id'] in pillar.get('swift:nodes:proxy',[]).items() %}
+{% if grains.get('id') in pillar.get('swift:nodes:proxy',[]) %}
   - swift.proxy-cert
   - swift.repos
   - swift.rings
