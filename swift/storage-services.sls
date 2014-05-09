@@ -7,7 +7,7 @@ rsync:
       - pkg: swift-storage-pkgs
 
 {# TODO: Copy the ringfiles from proxy to all storage nodes #}
-{% for ringfile in pillar['swift-ringfile-hashes'].keys() %}
+{% for ringfile in salt['pillar.get']('swift:ringfiles').keys() %}
   {% set ring = ringfile.split('/')[-1].split('.')[0] %}
 storage-services-{{ring}}:
   service.running:

@@ -1,11 +1,11 @@
 {# Only included on proxy-nodes #}
 swift-proxy:
   service.running:
-    - enabled: True
+    - enable: True
     - requires:
       - pkg: swift-proxy-pkgs
       - service: memcached
-  {% for builder in salt['pillar.get']('swift:builder_ports'],{}).keys() %}
+  {% for builder in salt['pillar.get']('swift:builder_ports', {'account.builder':0, 'container.builder':0,'object.builder':0}).keys() %}
       - cmd: /etc/swift/{{builder}}
   {% endfor %}
 

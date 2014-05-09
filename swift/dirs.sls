@@ -11,7 +11,7 @@
       - pkg: swift-base-pkgs
 {% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:proxy',[]) %}
     - watch:
-  {% for builder in pillar['swift:builder_ports'].keys() %}
+  {% for builder in ['account.builder','container.builder','object.builder'] %}
       - cmd: /etc/swift/{{builder}}
   {% endfor %}
 {% endif %}
