@@ -2,6 +2,7 @@ include:
   - swift.packages
   - swift.config
   - swift.dirs
+  - swift.rsyslog
 {% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:storage',[]) %}
   - swift.devices
   - swift.storage-services

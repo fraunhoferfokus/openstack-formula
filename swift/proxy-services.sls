@@ -8,6 +8,9 @@ swift-proxy:
   {% for builder in salt['pillar.get']('swift:builder_ports', {'account.builder':0, 'container.builder':0,'object.builder':0}).keys() %}
       - cmd: /etc/swift/{{builder}}
   {% endfor %}
+      - file: /etc/swift/proxy-server.conf
+    - watch:
+      - file: /etc/swift/proxy-server.conf
 
 memcached:
   service.running:
