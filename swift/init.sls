@@ -5,6 +5,7 @@ include:
   - swift.rsyslog
 {% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:storage',[]) %}
   - swift.devices
+  - swift.requirements
   - swift.storage-services
 {% endif %}
 {% if salt['grains.get']('id') in salt['pillar.get']('swift:nodes:proxy',[]) %}

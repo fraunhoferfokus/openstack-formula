@@ -10,20 +10,19 @@
     - require:
       - pkg: swift-proxy-pkgs
 
-    {% for zone, devices in salt['pillar.get']('swift:devices').iteritems() %}
-      {% set port = base_port + zone * 10 %}
-      {% for dev in devices %}
+    {% for zone in salt['pillar.get']('swift:devices').keys() %}
+      {% set dev = salt['pillar.get']('swift:devices:'+zone+':dev') %}
+      {% set port = base_port + zone[1]|int * 10 %}
 
-add_{{dev.split('/')[-1]}}_to_z{{zone}}_in_{{builder.split('.')[0]}}:
+add_{{dev.split('/')[-1]}}_to_z{{zone[1]}}_in_{{builder.split('.')[0]}}:
   cmd.run:
     - cwd: /etc/swift
-    - name: swift-ring-builder {{builder}} add r{{salt['pillar.get']('swift:region')}}z{{zone}}-{{salt['pillar.get']('swift:IPs:storage_local')}}:{{ port }}/{{dev.split('/')[-1]}} 100 && echo "changed=yes comment='Added {{dev}} to zone {{zone}} in region {{salt['pillar.get']('swift:region')}} for builder {{builder}}'" || (echo "changed=no comment='Failed to add {{dev}} to zone {{zone}} in region {{salt['pillar.get']('swift:region')}} for builder {{builder}}'"; false)
+    - name: swift-ring-builder {{builder}} add r{{salt['pillar.get']('swift:region')}}z{{zone[1]}}-{{salt['pillar.get']('swift:IPs:storage_local')}}:{{ port }}/{{dev.split('/')[-1]}} 100 && echo "changed=yes comment='Added {{dev}} to zone {{zone[1]}} in region {{salt['pillar.get']('swift:region')}} for builder {{builder}}'" || (echo "changed=no comment='Failed to add {{dev}} to zone {{zone[1]}} in region {{salt['pillar.get']('swift:region')}} for builder {{builder}}'"; false)
     - stateful: True
     - require:
       - cmd: /etc/swift/{{builder}}
-    - unless: swift-ring-builder {{builder}} list_parts z{{zone}}-{{salt['pillar.get']('swift:IPs:storage_local')}}:{{ port }}/{{dev.split('/')[-1]}}
+    - unless: swift-ring-builder {{builder}} list_parts z{{zone[1]}}-{{salt['pillar.get']('swift:IPs:storage_local')}}:{{ port }}/{{dev.split('/')[-1]}}
 
-      {% endfor %}
     {% endfor %}
 
 swift-ring-builder {{builder}} rebalance:
@@ -33,10 +32,9 @@ swift-ring-builder {{builder}} rebalance:
       - cmd: /etc/swift/{{builder}}
     - watch:
       - cmd: /etc/swift/{{builder}}
-    {% for zone, devices in salt['pillar.get']('swift:devices').iteritems() %}
-      {% for dev in devices %}
-      - cmd: add_{{dev.split('/')[-1]}}_to_z{{zone}}_in_{{builder.split('.')[0]}}
-      {% endfor %}
+    {% for zone in salt['pillar.get']('swift:devices').keys() %}
+      {% set dev = salt['pillar.get']('swift:devices:'+zone+':dev') %}
+      - cmd: add_{{dev.split('/')[-1]}}_to_z{{zone[1]}}_in_{{builder.split('.')[0]}}
     {% endfor %}
   {% endfor %}
 {% endif %}
