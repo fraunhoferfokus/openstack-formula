@@ -11,7 +11,8 @@ stop on runlevel [016]
 pre-start script{% if not num %}
   if [ -f "/etc/swift/{{ type.split('-')[0] }}-server.conf" ]; then
     exec /usr/bin/swift-init {{ type }} start{% else %}
-  if [ -f "/etc/swift/{{ type.split('-')[0] }}-server/{{ num }}.conf" ]; then
+  # Just for fun, let's use "(N - 1).conf" for zone N!
+  if [ -f "/etc/swift/{{ type.split('-')[0] }}-server/{{ num - 1 }}.conf" ]; then
     exec /usr/bin/swift-init {{ type }} start -c {{ num }}{% endif %}
   else
     exit 1

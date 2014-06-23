@@ -2,7 +2,7 @@
 swift-proxy:
   service.running:
     - enable: True
-    - requires:
+    - require:
       - pkg: swift-proxy-pkgs
       - service: memcached
       - cmd: swift-proxy-cert

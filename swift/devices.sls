@@ -24,6 +24,7 @@
     - opts: 
   {% if dev.split('/')[1] != 'dev' %}
       - loop
+      - noauto {# because Ubuntu cannot reliably mount those from NFS #}
   {% endif %}
       - noatime
       - nodiratime

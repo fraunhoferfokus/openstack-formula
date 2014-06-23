@@ -31,7 +31,7 @@
     - mode: 750
 
     {% for zone in salt['pillar.get']('swift:devices',{}).keys() %}
-/etc/swift/{{ type }}-server/{{ zone[1] }}.conf:
+/etc/swift/{{ type }}-server/{{ zone[1]|int - 1 }}.conf:
   file.managed:
     - source: salt://swift/notproxy-server.jinja
     - template: jinja
@@ -43,7 +43,7 @@
     - context:
        bind_port: {{ base_port + zone[1]|int * 10 }}
        type: {{ type }}
-       mount_point: {{ salt['pillar.get']('swift:devices:'+ zone[1] +':mnt') }}
+       mount_point: {{ salt['pillar.get']('swift:devices:'+ zone +':mnt') }}
        user: {{ salt['pillar.get']('swift:user','swift') }}
        log_facility: LOG_LOCAL{{zone[1]|int + 1}}
     {% endfor %}

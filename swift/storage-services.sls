@@ -45,7 +45,7 @@ swift-{{ type }}{{ postfix }}-{{ zone[1] }}:
     - enable: True
     - require:
       - file: /etc/init/swift-{{ type }}{{ postfix }}-{{ zone[1] }}.conf
-      - file: /etc/swift/{{ type }}-server/{{ zone[1] }}.conf
+      - file: /etc/swift/{{ type }}-server/{{ zone[1]|int - 1 }}.conf
       - cmd: /etc/swift/{{ type }}.builder
       - file: /var/cache/swift
       {% endfor %}
