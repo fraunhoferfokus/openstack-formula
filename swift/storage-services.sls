@@ -37,8 +37,8 @@ rsync:
     - group: root
     - mode: 755
     - context:
-      type: {{ type }}
-      num: {{ zone[1] }}
+        type: {{ type }}{{ postfix }}
+        num: {{ zone[1] }}
 
 swift-{{ type }}{{ postfix }}-{{ zone[1] }}:
   service.running:
