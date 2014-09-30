@@ -1,0 +1,4 @@
+nova:
+  db_user: nova-user
+  db_pass: nova-pass
+    
