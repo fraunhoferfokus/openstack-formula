@@ -1,0 +1,11 @@
+{% macro comment_if_default(get, path, key='', default='', quoted=False) -%}
+{%- if get(path+key, False) %}
+  {%- if not quoted %}
+{{ key }} = {{ get(path+key) }}
+  {%- else %}
+{{ key }} = '{{ get(path+key) }}'
+  {%- endif %}
+{%- else %}
+# {{ key }} = {{ default }}
+{%- endif %}
+{%- endmacro %}
