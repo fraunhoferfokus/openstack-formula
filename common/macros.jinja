@@ -1,11 +1,23 @@
-{% macro comment_if_default(get, path, key='', default='', quoted=False) -%}
-{%- if get(path+key, False) %}
-  {%- if not quoted %}
+{% macro comment_if_default(get, path, key='', default='', quoted=False, no_space=False) -%}
+  {%- if get(path+key, False) -%}
+    {%- if not quoted and not no_space -%}
 {{ key }} = {{ get(path+key) }}
-  {%- else %}
+    {%- elif not quoted and no_space -%}
+{{ key }}={{ get(path+key) }}
+    {%- elif quoted and no_space -%}
+{{ key }}='{{ get(path+key) }}'
+    {%- else -%}
 {{ key }} = '{{ get(path+key) }}'
-  {%- endif %}
-{%- else %}
+    {%- endif -%}
+  {%- else -%}
+    {%- if not quoted and not no_space -%}
 # {{ key }} = {{ default }}
-{%- endif %}
+    {%- elif not quoted and no_space -%}
+# {{ key }}={{ default }}
+    {%- elif quoted and no_space -%}
+# {{ key }}='{{ default }}'
+    {%- else -%}
+# {{ key }} = '{{ default }}'
+    {%- endif -%}
+  {%- endif -%}
 {%- endmacro %}
