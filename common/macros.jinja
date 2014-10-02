@@ -1,23 +1,25 @@
-{% macro comment_if_default(get, path, key='', default='', quoted=False, no_space=False) -%}
-  {%- if get(path+key, False) -%}
+{% macro comment_if_default(get, pillar_key, 
+    default='', quoted=False, no_space=False) -%}
+  {% set conf_key = pillar_key.split(':')[-1] %}
+  {%- if get(pillar_key, False) -%}
     {%- if not quoted and not no_space -%}
-{{ key }} = {{ get(path+key) }}
+{{ conf_key }} = {{ get(pillar_key) }}
     {%- elif not quoted and no_space -%}
-{{ key }}={{ get(path+key) }}
+{{ conf_key }}={{ get(pillar_key) }}
     {%- elif quoted and no_space -%}
-{{ key }}='{{ get(path+key) }}'
+{{ conf_key }}='{{ get(pillar_key) }}'
     {%- else -%}
-{{ key }} = '{{ get(path+key) }}'
+{{ conf_key }} = '{{ get(pillar_key) }}'
     {%- endif -%}
   {%- else -%}
     {%- if not quoted and not no_space -%}
-# {{ key }} = {{ default }}
+# {{ conf_key }} = {{ default }}
     {%- elif not quoted and no_space -%}
-# {{ key }}={{ default }}
+# {{ conf_key }}={{ default }}
     {%- elif quoted and no_space -%}
-# {{ key }}='{{ default }}'
+# {{ conf_key }}='{{ default }}'
     {%- else -%}
-# {{ key }} = '{{ default }}'
+# {{ conf_key }} = '{{ default }}'
     {%- endif -%}
   {%- endif -%}
 {%- endmacro %}
