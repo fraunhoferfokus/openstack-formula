@@ -23,6 +23,7 @@
     {%- endif -%}
   {%- endif -%}
 {%- endmacro %}
+
 {%- macro keystone_authtoken(get, service) -%}
     {%- set ctrl_addr = get('openstack:controller_address','localhost') %}
 auth_host={{ get(service+':keystone_authtoken:auth_host', ctrl_addr) }}
@@ -42,4 +43,14 @@ admin_password='{{ get(
 auth_uri={{ get(service+':keystone_authtoken:auth_uri',
         'http://'+ctrl_addr+':'+get(
             'openstack:keystone:public_port',5000|string)) }}
+{%- endmacro %}
+
+{%- macro database_connection(get, service) -%}
+    {%- set db_type = get(service + ':database:type', 'mysql') %}
+    {%- set db_user = get(service + ':database:username', service) %}
+    {%- set db_pass = get(service + ':database:password') %}
+    {%- set ctrl_addr = get('openstack:controller_address', 'localhost') %}
+    {%- set db_host = get(service + ':database:host', ctrl_addr) %}
+    {%- set db_name = get(service + ':database:name', service) %}
+connection = {{ '{0}://{1}:{2}@{3}/{4}'.format(db_type, db_user, db_pass, db_host, db_name) }}
 {%- endmacro %}
