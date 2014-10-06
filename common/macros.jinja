@@ -40,5 +40,6 @@ admin_user={{ get(service+':keystone_authtoken:admin_user', service) }}
 admin_password='{{ get(
         service+':keystone_authtoken:admin_password') }}'
 auth_uri={{ get(service+':keystone_authtoken:auth_uri',
-        'http://'+ctrl_addr+':5000') }}
+        'http://'+ctrl_addr+':'+get(
+            'openstack:keystone:public_port',5000|string)) }}
 {%- endmacro %}
