@@ -1,0 +1,10 @@
+{% set openstack = salt['grains.filter_by']({
+    'Ubuntu-12.04': {
+        'release': 'essex'
+        'repo_name': 'deb http://ubuntu-cloud.archive.canonical.com/ubuntu '
+                        '{0}-updates/{1} main'
+    },
+    'Ubuntu-14.04': {
+        'release': 'icehouse'
+    },
+}, merge=salt['pillar.get']('openstack:lookup'), grain='osfinger') %}
