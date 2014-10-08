@@ -46,11 +46,25 @@ auth_uri={{ get(service+':keystone_authtoken:auth_uri',
 {%- endmacro %}
 
 {%- macro database_connection(get, service) -%}
-    {%- set db_type = get(service + ':database:type', 'mysql') %}
-    {%- set db_user = get(service + ':database:username', service) %}
-    {%- set db_pass = get(service + ':database:password') %}
+    {%- set db_type = get(service + ':database:type', 
+                            get(service+':common:database:type', 
+                                'mysql')
+                      ) %}
+    {%- set db_user = get(service + ':database:username', 
+                            get(service + ':common:database:username',
+                                service.split(':')[0])
+                      ) %}
+    {%- set db_pass = get(service + ':database:password',
+                            get(service + ':common:database:password')
+                      ) %}
     {%- set ctrl_addr = get('openstack:controller_address', 'localhost') %}
-    {%- set db_host = get(service + ':database:host', ctrl_addr) %}
-    {%- set db_name = get(service + ':database:name', service) %}
+    {%- set db_host = get(service + ':database:host',
+                            get(service+':common:database:host',
+                                 ctrl_addr)
+                      ) %}
+    {%- set db_name = get(service + ':database:name', 
+                                get(service + 'common:database:name',
+                                    service.split(':')[0])
+                      ) %}
 connection = {{ '{0}://{1}:{2}@{3}/{4}'.format(db_type, db_user, db_pass, db_host, db_name) }}
 {%- endmacro %}
