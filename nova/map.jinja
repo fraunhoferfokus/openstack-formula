@@ -7,5 +7,6 @@
                         'nova-scheduler', 
                         'nova-conductor', 
                         'nova-spiceproxy'],
+        'nova_conf_file': '/etc/nova/nova.conf',
     },
-}, merge=salt['pillar.get']('openstack:lookup'), grain='os') %}
+}, merge=salt['pillar.get']('nova:lookup'), grain='os') %}
