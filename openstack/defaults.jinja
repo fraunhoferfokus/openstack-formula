@@ -2,6 +2,13 @@
     {
         'auth_strategy': 'keystone',
         'db_type' : 'mysql',
+        'rabbitmq': {
+            'port': 5672,
+            'use_ssl': False,
+            'userid': 'openstack',
+            'password': 'rabbit_<6rGZti!_OMG_CHANGE_ME_NOW_!VvBtjwBQ>_pass',
+            'virtual_host': '/',
+        }
         'rpc_backend' : 'rabbit',
         'use_ipv6': False,
     } 
