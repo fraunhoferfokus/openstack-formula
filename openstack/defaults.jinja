@@ -1,0 +1,24 @@
+{% set openstack_defaults = 
+    {
+        'auth_strategy': 'keystone',
+        'db_type' : 'mysql',
+        'keystone': {
+            'auth_port': 35357,
+            'auth_protocol': 'http',
+            'host': '127.0.0.1',
+            'public_port': 5000,
+        },
+        'nova': {
+            'compute_port': 8774,
+        },
+        'rabbitmq': {
+            'port': 5672,
+            'use_ssl': False,
+            'userid': 'openstack',
+            'password': 'rabbit_<6rGZti!_OMG_CHANGE_ME_NOW_!VvBtjwBQ>_pass',
+            'virtual_host': '/',
+        },
+        'rpc_backend' : 'rabbit',
+        'use_ipv6': False,
+    } 
+%}
