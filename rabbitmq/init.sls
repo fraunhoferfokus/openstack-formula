@@ -8,7 +8,9 @@ rabbitmq-user:
   rabbitmq_user.present:
     - name: {{ salt['pillar.get']('rabbitmq:user','openstack') }}
     - password: '{{ salt['pillar.get']('rabbitmq:password') }}'
-  {% if salt['pillar.get']('openstack:rabbitmq:user') != guest %}
+
+{% if salt['pillar.get']('openstack:rabbitmq:user') != 'guest' %}
+rabbimq-guestuser:
   rabbitmq_user.absent:
     - name: guest
-  {% endif %}
+{% endif %}
