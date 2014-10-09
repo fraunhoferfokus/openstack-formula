@@ -24,33 +24,70 @@
   {%- endif -%}
 {%- endmacro %}
 
-{%- macro keystone_authtoken(get, service) -%}
+{%- macro keystone_authtoken(get, service, short=False) -%}
     {%- set ctrl_addr = get('openstack:controller_address','localhost') %}
-auth_host={{ get(service+':keystone_authtoken:auth_host', ctrl_addr) }}
-    {%- set common_auth_port = get('openstack:keystone:port', 35357) %}
-auth_port={{ get(service+':keystone_authtoken:auth_port',
-        common_auth_port) }}
-    {%- set common_auth_protocol = get('openstack:keystone:protocol', 'http') %}
-auth_protocol={{ get(service+':keystone_authtoken:auth_protocol', 
-        common_auth_protocol) }}
-    {%- set common_tenant_name = get('openstack:keystone:tenant_name', 
+    {%- set service_tenant_name = get('openstack:keystone:tenant_name', 
         'service') %}
-admin_tenant_name={{ get( service+':keystone_authtoken:admin_tenant_name',
-        common_tenant_name) }}
-admin_user={{ get(service+':keystone_authtoken:admin_user', service) }}
-admin_password='{{ get(
-        service+':keystone_authtoken:admin_password') }}'
+    {%- set keystone_protocol = get('openstack:keystone:protocol', 
+        'http') %}
+    {%- set keystone_host = get(service+':keystone_authtoken:auth_host', 
+                                get('openstack:keystone:host',
+                                    ctrl_addr)
+                            ) %}
+    {%- set keystone_auth_port = get(service+':keystone_authtoken:auth_port',
+                                    get('openstack:keystone:auth_port', 
+                                        35357)
+                                  ) %}
+    {%- set keystone_public_port = get('openstack:keystone:public_port',
+                                        5000|string) %}
+    {%- set admin_user = get(service+':keystone_authtoken:admin_user', 
+                            service) %}
+    {%- set admin_password = 
+            get(service + ':keystone_authtoken:admin_password',
+                get(service + 'common:keystone_authtoken:admin_password')
+            ) %}
+    {%- if short %}
+auth_url = {{ get('openstack:keystone:auth_url', 
+                'http://' + ctrl_addr + ':' + 
+                    keystone_public_port +  '/v2.0/') }}
+admin_tenant_name = {{ service_tenant_name }}
+admin_user = {{ admin_user }}
+admin_password = '{{ admin_password }}'
+    {%- else %}
+        {%- set keystone_admin_port = get('openstack:keystone:port', 35357) %}
+auth_host={{ keystone_host }}
+auth_port={{ keystone_auth_port }}
+auth_protocol={{ keystone_protocol }}
+admin_tenant_name={{ service_tenant_name }}
+admin_user={{ admin_user }}
+admin_password='{{ admin_password }}'
 auth_uri={{ get(service+':keystone_authtoken:auth_uri',
-        'http://'+ctrl_addr+':'+get(
-            'openstack:keystone:public_port',5000|string)) }}
+                keystone_protocol + '://' + ctrl_addr + ':' + keystone_public_port
+            ) }}
+    {%- endif %}
 {%- endmacro %}
 
 {%- macro database_connection(get, service) -%}
-    {%- set db_type = get(service + ':database:type', 'mysql') %}
-    {%- set db_user = get(service + ':database:username', service) %}
-    {%- set db_pass = get(service + ':database:password') %}
+    {%- set db_type = get(service + ':database:type', 
+                            get(service+':common:database:type', 
+                                'mysql')
+                      ) %}
+    {%- set db_user = get(service + ':database:username', 
+                            get(service + ':common:database:username',
+                                service.split(':')[0])
+                      ) %}
+    {%- set db_pass = get(service + ':database:password',
+                            get(service + ':common:database:password',
+                                'Password_for_{0}_not_set'.format(service|upper))
+                      ) %}
     {%- set ctrl_addr = get('openstack:controller_address', 'localhost') %}
-    {%- set db_host = get(service + ':database:host', ctrl_addr) %}
-    {%- set db_name = get(service + ':database:name', service) %}
+    {%- set db_host = get(service + ':database:host',
+                            get(service+':common:database:host',
+                                 ctrl_addr)
+                      ) %}
+    {%- set db_name = get(service + ':database:name', 
+                                get(service + 'common:database:name',
+                                    service.split(':')[0])
+                      ) %}
 connection = {{ '{0}://{1}:{2}@{3}/{4}'.format(db_type, db_user, db_pass, db_host, db_name) }}
 {%- endmacro %}
