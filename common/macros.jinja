@@ -62,7 +62,7 @@ admin_tenant_name={{ service_tenant_name }}
 admin_user={{ admin_user }}
 admin_password='{{ admin_password }}'
 auth_uri={{ get(service+':keystone_authtoken:auth_uri',
-                keystone_protocol + ':// ' + ctrl_addr + ':' + keystone_public_port
+                keystone_protocol + '://' + ctrl_addr + ':' + keystone_public_port
             ) }}
     {%- endif %}
 {%- endmacro %}
