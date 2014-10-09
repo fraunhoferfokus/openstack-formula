@@ -9,3 +9,5 @@ nova-controller-packages:
       - mode: 640
       - source: salt://nova/files/nova.conf
       - template: jinja
+
+{% if salt['pillar.get']('nova:
