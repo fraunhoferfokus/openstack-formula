@@ -1,14 +1,15 @@
 {% set neutron = salt['grains.filter_by']({
     'Ubuntu': {
-        'server_packages': [
-                'neutron-server', 
-                'neutron-plugin-ml2', 
-                ],
-        'neutron_agents': [
+        'agents_packages': [
                 'neutron-plugin-openvswitch-agent', 
                 'neutron-dhcp-agent', 
                 'neutron-metadata-agent',
                 ],
+        'conf_dir': '/etc/neutron',
         'neutron_conf_file': '/etc/neutron/neutron.conf',
+        'server_packages': [
+                'neutron-server', 
+                'neutron-plugin-ml2', 
+                ],
     },
 }, merge=salt['pillar.get']('neutron:lookup'), grain='os') %}
