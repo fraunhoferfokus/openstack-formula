@@ -1,4 +1,5 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
+{% from 'nova/defaults.jinja' import nova_defaults %}
 {% from 'nova/map.jinja' import nova with context %}
 {% if salt['pillar.get']('nova:common:database:type', 
     salt['pillar.get']('openstack:db_type', 
@@ -10,20 +11,27 @@
 
 {% if salt['pillar.get']('nova:common:database:type', 
     salt['pillar.get']('openstack:db_type', 
-        openstack_defaults.db_type)) != 'mysql' %}
-
+        openstack_defaults.db_type)) == 'mysql' %}
     {% set db_user = salt['pillar.get'](
-                    'keystone:database:username',
+                    'nova:database:username',
                     salt['pillar.get'](
-                        'keystone:common:database:username',
-                        keystone_defaults.db_user)
+                        'nova:common:database:username',
+                        nova_defaults.db_user)
                ) %}
     {% set db_pass = salt['pillar.get'](
-                    'keystone:database:password',
+                    'nova:database:password',
                     salt['pillar.get'](
-                        'keystone:common:database:password',
-                        keystone_defaults.db_pass)
+                        'nova:common:database:password',
+                        nova_defaults.db_pass)
                ) %}
+    {% set db_host = salt['pillar.get'](
+                        'nova:common:database:host', 
+                        salt['pillar.get'](
+                            'opestack:database:host',
+                            salt['pillar.get'](
+                                'openstack:controller_address')
+                        )
+                     ) %}
 
 nova-db:
     mysql_database.present:
@@ -32,13 +40,13 @@ nova-db:
 nova-dbuser:
     mysql_user.present:
         - name: {{ db_user }}
-        - password: {{ db_pass }}
+        - password: '{{ db_pass }}'
+        - host: {{ db_host }}
 
 nova-grants:
     mysql_grants.present:
     - grant: all privileges
     - database: {{ nova_defaults.db_name }}.*
     - user: {{ db_user }}
-    - host: {{ nova_defaults.db_host }}
-
+    - host: {{ db_host }}
 {% endif %}
