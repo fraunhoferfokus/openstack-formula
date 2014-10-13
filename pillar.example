@@ -24,3 +24,72 @@ openstack:
         #durable_queues: False
     paste:
         #flavor: keystone
+
+glance:
+    common:
+        #known_stores: glance.store.filesystem.Store, glance.store.http.Store
+        #debug: False
+        #verbose: False
+        #bind_host: pillar[openstack:controller_address]
+        #registry_host: pillar[openstack:controller_address]
+        #registry_port: 9x9x
+        #file_store_datadir: '/var/lib/glance/images/'
+        #scrubber_datadir: '/var/lib/glance/scrubber'
+        database:
+            #username: glance
+            password: glance_pass
+        keystone:
+            admin_password: service_pass
+            #auth_uri: http://controller:5000
+            #auth_port: 35357
+            #auth_protocol: http
+            #admin_tenant_name: service
+            #admin_user = glance
+         paste_deploy:
+            #flavor: keystone
+    api:
+        DEFAULT:
+            #debug: pillar[glance:common:DEFAULT:debug], False
+            #verbose: False
+            #default_store: file
+            #known_stores: 'glance.store.filesystem.Store, glance.store.http.Store'
+            #filesystem_store_datadir: /var/lib/glance/images/
+            registry_host: pillar[glance:common:registry_host], pillar[openstack:controller_address], localhost
+            #rabbit_host: pillar[openstack:rabbitmq:host], 
+            #        pillar[openstack:controller_address]
+            #image_cache_dir: /var/lib/glance/image-cache/
+    registry:
+
+neutron:
+    common:
+        DEFAULT:
+            #debug: False
+            #verbose: False
+            admin_password: service_pass
+            #admin_tenant_name: service
+            #admin_user = keystone
+            #bind_host: 0.0.0.0
+            #core_plugin: ml2
+            #allow_overlapping_ips: False
+            #notify_nova_on_port_status_changes: True
+            #notify_nova_on_port_data_changes: True
+        database:
+            password:
+    server:
+        DEFAULT:
+            #bind_port: 9696
+    dhcp_agent:
+        ovs_integration_bridge: br-int
+
+nova:
+    common:
+        DEFAULT:
+            #my_ip: pillar[openstack:controller_address], localhost
+            #rpc_backend: rabbit
+            #rabbit_host: pillar[controller_address], localhost
+            #debug: False
+            #verbose: False
+            #nova_url
+        database:
+            #type: openstack_defaults = mysql
+            password:
