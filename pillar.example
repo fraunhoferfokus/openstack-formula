@@ -1,4 +1,26 @@
-nova:
-  db_user: nova-user
-  db_pass: nova-pass
-    
+openstack:
+    #release: icehouse
+    controller_address: 
+    #auth_strategy: openstack_defaults.auth_strategy = keystone
+    #rpc_backend: openstack_defaults.rpc_backend = rabbit
+    #use_ipv6: False
+    database:
+        #host: pillar[openstack:controller_address]
+        #type: openstack_defaults.db_type = mysql
+    nova:
+        #compute_port: 8774
+    keystone:
+        #host: pillar[openstack:controller_address]
+        public_port: 5000
+        #uri: 'http://' + pillar[openstack:controller_address] + ':' + pillar[openstack:keystone:public_port]
+        #auth_port: 35357
+        #auth_protocol: http
+    rabbitmq:
+        #host: pillar[openstack:controller_address], localhost
+        #port: 5672
+        #userid: openstack
+        password: rabbitmq_pass
+        #use_ssl: False
+        #durable_queues: False
+    paste:
+        #flavor: keystone
