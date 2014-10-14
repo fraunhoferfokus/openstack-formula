@@ -22,17 +22,17 @@ keystone:
 {% set db_user = salt['pillar.get'](
                     'keystone:database:username', 
                     salt['pillar.get'](
-                        'keystone:common:database:username',
+                        'keystone:database:username',
                         keystone_defaults.db_user)
                ) %}
 {% set db_pass = salt['pillar.get'](
                     'keystone:database:password', 
                     salt['pillar.get'](
-                        'keystone:common:database:password',
+                        'keystone:database:password',
                         keystone_defaults.db_pass)
                ) %}
 {% set db_host = salt['pillar.get'](
-                    'keystone:common:database:host', 
+                    'keystone:database:host', 
                     salt['pillar.get'](
                         'openstack:database:host',
                         salt['pillar.get'](
