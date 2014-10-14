@@ -25,6 +25,14 @@ openstack:
     paste:
         #flavor: keystone
 
+keystone:
+    database:
+        password:
+        #host: 
+        # - pillar[openstack:database:host] 
+        # - pillar[openstack:controller_address]
+        # - keystone_defaults.db_host
+
 glance:
     common:
         #known_stores: glance.store.filesystem.Store, glance.store.http.Store
