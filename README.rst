@@ -27,6 +27,8 @@ Minimal common Pillar::
         controller_address: controller.example.com
         rabbitmq:
             password: 'blVobc_common_pX8_rabbitmq_Trhtj_password_UW1guAQ'
+        neutron:
+            shared_secret: 'I took my Shared Secret from the documentation'
 
 Available states
 ================
