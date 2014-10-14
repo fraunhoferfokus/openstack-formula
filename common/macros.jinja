@@ -83,7 +83,9 @@ auth_uri={{ get(service+':keystone_authtoken:auth_uri',
     {%- set ctrl_addr = get('openstack:controller_address', 'localhost') %}
     {%- set db_host = get(service + ':database:host',
                             get(service+':common:database:host',
-                                 ctrl_addr)
+                                get('openstack:database:host',
+                                    ctrl_addr)
+                            )
                       ) %}
     {%- set db_name = get(service + ':database:name', 
                                 get(service + 'common:database:name',
