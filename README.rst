@@ -52,6 +52,10 @@ Install and configure OpenStack's Keystone and it's database.
 
 Minimal data for Pillar::
 
+    # This one is for the 'keystone' salt-module, but also used
+    # in the keystone-related states (like creating tenants):
+    keystone.token: 'eejTij<_keystone_admin_token_>xkigoj3Og1'
+
     keystone:
       database: 
         password: 'sUlPalrGnWTnsg_keystone_db_pass_lTNA2Zse7XkGlA'
