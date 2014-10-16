@@ -30,6 +30,28 @@ Minimal common Pillar::
         neutron:
             shared_secret: 'I took my Shared Secret from the documentation'
 
+Pillar-Data for underlying Formulas
+===================================
+
+For the state `mysql.server` from the mysql-formula::
+
+    mysql.pass: 'I got my mysql-password from the README'
+    mysql:
+        server:
+            mysqld:
+                bind-address: 0.0.0.0
+                character-set-server: utf8
+                collation-server: utf8_general_ci
+                default-storage-engine: innodb
+                init-connect: 'SET NAMES utf8'
+                innodb_file_per_table: True
+            # You obviously need to chose s/t else:
+            root_password: 'I got my mysql-password from the README'
+
+.. note:: If you've already installed MySQL or ran the state `mysql.server`
+        before you set the pillar `mysql:server:root_password` you may
+        have to reset the root-password for MySQL yourself.
+
 Available states
 ================
 
@@ -48,6 +70,10 @@ Install and configure rabbitmq for use with OpenStack.
 
 ``keystone``
 ------------
+
+.. note:: For now you should manually run the states `mysql.server`
+    and `mysql.python` befor you try to run the `keystone`-state.
+
 Install and configure OpenStack's Keystone and it's database.
 
 Minimal data for Pillar::
