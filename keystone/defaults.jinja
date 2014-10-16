@@ -1,4 +1,6 @@
 {% set keystone_defaults = {
+    'admin_password': 'Password for the Keystone user "admin" not set.',
+    'admin_email': 'admin@example.com',
     'admin_token': 'You forgot to set pillar[keystone.token], stuff will break.',
     'db_host': 'localhost',
     'db_name': 'keystone',

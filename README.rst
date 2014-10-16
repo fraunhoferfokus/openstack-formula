@@ -72,7 +72,7 @@ Install and configure rabbitmq for use with OpenStack.
 ------------
 
 .. note:: For now you should manually run the states `mysql.server`
-    and `mysql.python` befor you try to run the `keystone`-state.
+    and `mysql.python` before you try to run the `keystone`-state.
 
 Install and configure OpenStack's Keystone and it's database.
 
@@ -83,6 +83,7 @@ Minimal data for Pillar::
     keystone.token: 'eejTij<_keystone_admin_token_>xkigoj3Og1'
 
     keystone:
+      admin_password: '3frajn_<also the admin passwd for the webUI>_R9aGwW'
       database: 
         password: 'sUlPalrGnWTnsg_keystone_db_pass_lTNA2Zse7XkGlA'
 
