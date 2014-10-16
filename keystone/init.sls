@@ -80,6 +80,7 @@ keystone-grants:
 
 keystone-manage db_sync:
   cmd.run:
+    - name: 'keystone-manage db_sync; sleep 15'
     - user: keystone
     - require:
         - pkg: keystone
@@ -87,3 +88,34 @@ keystone-manage db_sync:
         - mysql_grants: keystone-grants
     - watch:
         - pkg: keystone
+    # TODO: This will change, but where to get the correct value??
+    - onlyif: test `keystone-manage db_version` -lt 44
+
+create basic tenants in Keystone:
+  keystone.tenant_present:
+    - names:
+      - admin
+      - service
+
+create basic roles in Keystone:
+  keystone.role_present:
+    - names:
+      - admin
+      - Member
+
+create admin-user in Keystone:
+  keystone.user_present:
+    - name: admin
+    - password: {{ salt['pillar.get']('keystone:admin_password',
+                    keystone_defaults.admin_password) }}
+    - email: {{ salt['pillar.get']('keystone:admin_email',
+                    keystone_defaults.admin_email) }}
+    - roles:
+      - admin:   # tenants
+        - admin  # roles
+      - service:
+        - admin
+        - Member
+    - require:
+      - keystone: create basic tenants in Keystone
+      - keystone: create basic roles in Keystone
