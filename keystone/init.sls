@@ -48,7 +48,7 @@ keystone-db:
 keystone-dbuser:
     mysql_user.present:
         - name: {{ db_user }}
-        - password: {{ db_pass }}
+        - password: '{{ db_pass }}'
         - host: {{ db_host }}
 
 keystone-grants:
