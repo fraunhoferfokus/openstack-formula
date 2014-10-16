@@ -1,6 +1,8 @@
 TODO
 ----
 
+- Add endpoints in Keystone
+
 - Figure out how to get the correct value for `keystone-manage 
   db_version` for the `keystone-manage db_sync` state.
 
