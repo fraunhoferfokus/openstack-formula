@@ -31,6 +31,8 @@ keystone:
                         'keystone:database:password',
                         keystone_defaults.db_pass)
                ) %}
+{% set db_hash = salt['pillar.get'](
+                    'keystone:database:password_hash', None) %}
 {% set db_host = salt['pillar.get'](
                     'keystone:database:host', 
                     salt['pillar.get'](
@@ -45,20 +47,28 @@ keystone-db:
     mysql_database.present:
         - name: {{ keystone_defaults.db_name }}
 
-keystone-dbuser:
-    mysql_user.present:
-        - name: {{ db_user }}
-        - password: '{{ db_pass }}'
-        - host: {{ db_host }}
+## Broken due to https://github.com/saltstack/salt/issues/16676
+## (TODO: uncomment require in keystone-grants when this is fixed)
+#keystone-dbuser:
+#    mysql_user.present:
+#        - name: {{ db_user }}
+#{% if db_hash is not none  %}    
+#        - password_hash: '{{ db_hash }}'
+#{% else %}
+#        - password: '{{ db_pass }}'
+#{% endif %}
+#        - host: '%'
+#        #- host: {{ db_host }}
 
 keystone-grants:
     mysql_grants.present:
     - grant: all privileges
     - database: {{ keystone_defaults.db_name }}.*
     - user: {{ db_user }}
-    - host: {{ db_host }}
+    - host: '%'
+    #- host:{{ db_host }}
     - require:
-        - mysql_user: keystone-dbuser
+        #- mysql_user: keystone-dbuser
         - mysql_database: keystone-db
 
 {% if salt['pillar.get'](
@@ -73,6 +83,7 @@ keystone-manage db_sync:
     - user: keystone
     - require:
         - pkg: keystone
+        #- mysql_grants: keystone-grants @controller
         - mysql_grants: keystone-grants
     - watch:
         - pkg: keystone
