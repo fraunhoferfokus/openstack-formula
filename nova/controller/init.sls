@@ -13,6 +13,20 @@ nova-controller-packages:
       - require:
         - pkg: nova-controller-packages
 
+nova-user in Keystone:
+  keystone.tenant_present:
+    - name: nova
+    - tenant: service
+    - roles:
+      - service:
+        - admin
+
+nova-service in Keystone:
+  keystone.service_present:
+    - name: nova
+    - service_type: compute
+    - description: OpenStack Compute Service
+
 include:
     - nova.controller.database
     - nova.controller.services
