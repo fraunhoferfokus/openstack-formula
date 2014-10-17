@@ -94,10 +94,12 @@ nova:
         DEFAULT:
             #my_ip: pillar[openstack:controller_address], localhost
             #rpc_backend: rabbit
-            #rabbit_host: pillar[controller_address], localhost
+            #rabbit_host: pillar[openstack:controller_address], localhost
             #debug: False
             #verbose: False
             #nova_url
+            #metadata_listen: pillar[openstack:controller_address], 0.0.0.0
+            #metadata_listen: pillar[openstack:controller_address], 127.0.0.1
         database:
             #type: openstack_defaults = mysql
             password:
