@@ -4,6 +4,7 @@ nova-api:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
 
@@ -11,6 +12,7 @@ nova-cert:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
 
@@ -18,6 +20,7 @@ nova-conductor:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
 
@@ -25,6 +28,7 @@ nova-consoleauth:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
 
@@ -32,6 +36,7 @@ nova-novncproxy:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
 
@@ -39,6 +44,7 @@ nova-scheduler:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
 
@@ -46,5 +52,6 @@ nova-spiceproxy:
     service.running:
         - watch:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
