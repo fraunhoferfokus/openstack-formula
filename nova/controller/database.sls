@@ -41,12 +41,19 @@ nova-dbuser:
     mysql_user.present:
         - name: {{ db_user }}
         - password: '{{ db_pass }}'
-        - host: {{ db_host }}
+        #- host: {{ db_host }}
+        - host: '%'
+        - require: 
+            - mysql_database: nova-db
 
 nova-grants:
     mysql_grants.present:
     - grant: all privileges
     - database: {{ nova_defaults.db_name }}.*
     - user: {{ db_user }}
-    - host: {{ db_host }}
+    #- host: {{ db_host }}
+    - host: '%'
+    - require:
+        - mysql_database: nova-db
+        - mysql_user: nova-dbuser
 {% endif %}
