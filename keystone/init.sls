@@ -6,7 +6,7 @@ keystone:
         - require:
             - pkg: keystone
             - file: /etc/keystone/keystone.conf 
-            - mysql_database: keystone-db
+            - cmd: keystone-manage db_sync
         - watch:
             - pkg: keystone
             - file: /etc/keystone/keystone.conf 
@@ -78,6 +78,10 @@ keystone-grants:
     file.absent
 {% endif %}
 
+{# TODO: Turn this into a macro #}
+{% set db_version = salt['mysql.query'](
+    'keystone', 
+    'SELECT version FROM migrate_version;')['results'][0][0] %}
 keystone-manage db_sync:
   cmd.run:
     - name: 'keystone-manage db_sync; sleep 15'
@@ -88,8 +92,7 @@ keystone-manage db_sync:
         - mysql_grants: keystone-grants
     - watch:
         - pkg: keystone
-    # TODO: This will change, but where to get the correct value??
-    - onlyif: test `keystone-manage db_version` -lt 44
+    - onlyif: test `keystone-manage db_version` -gt {{ db_version }}
 
 create basic tenants in Keystone:
   keystone.tenant_present:

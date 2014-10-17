@@ -56,4 +56,19 @@ nova-grants:
     - require:
         - mysql_database: nova-db
         - mysql_user: nova-dbuser
+
+{# TODO: Turn this into a macro #}
+{% set db_version = salt['mysql.query'](
+    'nova', 
+    'SELECT version FROM migrate_version;')['results'][0][0] %}
+nova-manage db sync:
+  cmd.run:
+    - name: 'nova-manage db sync; sleep 15'
+    - user: nova
+    - require:
+        - pkg: nova-api
+        - mysql_grants: nova-grants
+    - watch:
+        - pkg: nova-api
+    - onlyif: test `nova-manage db version` -gt {{ db_version }}
 {% endif %}
