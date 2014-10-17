@@ -1,12 +1,16 @@
 {% set nova = salt['grains.filter_by']({
     'Ubuntu': {
-        'controller_packages': ['python-novaclient', 
+        'controller_packages': [
                         'nova-api', 
                         'nova-cert', 
-                        'nova-consoleauth', 
-                        'nova-scheduler', 
                         'nova-conductor', 
-                        'nova-spiceproxy'],
+                        'nova-consoleauth', 
+                        'nova-novncproxy', 
+                        'nova-scheduler', 
+                        'nova-spiceproxy',
+                        'novnc',
+                        'python-novaclient',
+        ],
         'nova_conf_file': '/etc/nova/nova.conf',
     },
 }, merge=salt['pillar.get']('nova:lookup'), grain='os') %}
