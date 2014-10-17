@@ -22,13 +22,13 @@ keystone:
 {% set db_user = salt['pillar.get'](
                     'keystone:database:username', 
                     salt['pillar.get'](
-                        'keystone:database:username',
+                        'keystone:common:database:username',
                         keystone_defaults.db_user)
                ) %}
 {% set db_pass = salt['pillar.get'](
                     'keystone:database:password', 
                     salt['pillar.get'](
-                        'keystone:database:password',
+                        'keystone:common:database:password',
                         keystone_defaults.db_pass)
                ) %}
 {% set db_hash = salt['pillar.get'](
