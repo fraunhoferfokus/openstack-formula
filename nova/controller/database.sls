@@ -57,18 +57,16 @@ nova-grants:
         - mysql_database: nova-db
         - mysql_user: nova-dbuser
 
-{# TODO: Turn this into a macro #}
-{% set db_version = salt['mysql.query'](
-    'nova', 
-    'SELECT version FROM migrate_version;')['results'][0][0] %}
 nova-manage db sync:
   cmd.run:
+    # TODO: This path is Ubuntu-specific!
+    - cwd: /usr/lib/python2.7/dist-packages/nova/db/sqlalchemy/migrate_repo
     - name: 'nova-manage db sync; sleep 15'
     - user: nova
     - require:
-        - pkg: nova-api
+        - pkg: nova-common
         - mysql_grants: nova-grants
     - watch:
-        - pkg: nova-api
-    - onlyif: test `nova-manage db version` -gt {{ db_version }}
+        - pkg: nova-common
+    - onlyif: test $(nova-manage db version) -lt $(python manage.py version)
 {% endif %}
