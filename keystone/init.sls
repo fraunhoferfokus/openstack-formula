@@ -10,6 +10,7 @@ keystone:
         - watch:
             - pkg: keystone
             - file: /etc/keystone/keystone.conf 
+            - mysql_user: keystone-dbuser
             - cmd: keystone-manage db_sync
 
 /etc/keystone/keystone.conf:
@@ -49,16 +50,16 @@ keystone-db:
 
 ## Broken due to https://github.com/saltstack/salt/issues/16676
 ## (TODO: uncomment require in keystone-grants when this is fixed)
-#keystone-dbuser:
-#    mysql_user.present:
-#        - name: {{ db_user }}
-#{% if db_hash is not none  %}    
-#        - password_hash: '{{ db_hash }}'
-#{% else %}
-#        - password: '{{ db_pass }}'
-#{% endif %}
-#        - host: '%'
-#        #- host: {{ db_host }}
+keystone-dbuser:
+    mysql_user.present:
+        - name: {{ db_user }}
+{% if db_hash is not none  %}    
+        - password_hash: '{{ db_hash }}'
+{% else %}
+        - password: '{{ db_pass }}'
+{% endif %}
+        - host: '%'
+        #- host: {{ db_host }}
 
 keystone-grants:
     mysql_grants.present:
@@ -79,32 +80,42 @@ keystone-grants:
 {% endif %}
 
 {# TODO: Turn this into a macro #}
-{% set db_version = salt['mysql.query'](
-    'keystone', 
-    'SELECT version FROM migrate_version;')['results'][0][0] %}
+{% if not salt['mysql.db_tables']('keystone') %}
+   {% set db_version = 0 %}
+{% else %}
+    {% set db_version = salt['mysql.query'](
+        'keystone', 
+        'SELECT version FROM migrate_version;')['results'][0][0] %}
+{% endif %}
 keystone-manage db_sync:
   cmd.run:
     - name: 'keystone-manage db_sync; sleep 15'
     - user: keystone
+    # TODO: This path shouldn't be Ubuntu-specific!
+    - cwd:  /usr/lib/python2.7/dist-packages/keystone/common/sql/migrate_repo/
     - require:
         - pkg: keystone
         #- mysql_grants: keystone-grants @controller
         - mysql_grants: keystone-grants
     - watch:
         - pkg: keystone
-    - onlyif: test `keystone-manage db_version` -gt {{ db_version }}
+    - onlyif: test $(keystone-manage db_version) -lt $( python manage.py version . )
 
 create basic tenants in Keystone:
   keystone.tenant_present:
     - names:
       - admin
       - service
+    - require:
+      - cmd: keystone-manage db_sync
 
 create basic roles in Keystone:
   keystone.role_present:
     - names:
       - admin
       - Member
+    - require:
+      - cmd: keystone-manage db_sync
 
 create admin-user in Keystone:
   keystone.user_present:
