@@ -7,7 +7,7 @@ TODO
   w/o making the dependent services fail for the next execution b/c
   the DB doesn't work.
 
-- create service accounts in keystone
+- create service accounts in keystone (missing: glance, neutron?)
 
 - add OVS-bits to neutron.server
 
