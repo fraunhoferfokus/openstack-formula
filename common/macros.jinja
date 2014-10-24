@@ -25,7 +25,7 @@
 {%- endmacro %}
 
 {%- macro keystone_authtoken(get, service, short=False) -%}
-    {%- set ctrl_addr = get('openstack:controller_address','localhost') %}
+    {%- set ctrl_addr = get('openstack:controller:address_int','localhost') %}
     {%- set service_tenant_name = get('openstack:keystone:tenant_name', 
         'service') %}
     {%- set keystone_protocol = get('openstack:keystone:protocol', 
@@ -80,7 +80,7 @@ auth_uri={{ get(service+':keystone_authtoken:auth_uri',
                             get(service + ':common:database:password',
                                 'Password_for_{0}_not_set'.format(service|upper))
                       ) %}
-    {%- set ctrl_addr = get('openstack:controller_address', 'localhost') %}
+    {%- set ctrl_addr = get('openstack:controller:address_int', 'localhost') %}
     {%- set db_host = get(service + ':database:host',
                             get(service+':common:database:host',
                                 get('openstack:database:host',

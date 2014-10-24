@@ -1,22 +1,24 @@
 openstack:
     #release: icehouse
-    controller_address: 
+    controller:
+        address_int: # fallback in most places: 127.0.0.1
+        address_ext: # fallback in most places: 0.0.0.0
     #auth_strategy: openstack_defaults.auth_strategy = keystone
     #rpc_backend: openstack_defaults.rpc_backend = rabbit
     #use_ipv6: False
     database:
-        #host: pillar[openstack:controller_address]
+        #host: pillar[openstack:controller:address_int]
         #type: openstack_defaults.db_type = mysql
     nova:
         #compute_port: 8774
     keystone:
-        #host: pillar[openstack:controller_address]
+        #host: pillar[openstack:controller:address_int]
         public_port: 5000
-        #uri: 'http://' + pillar[openstack:controller_address] + ':' + pillar[openstack:keystone:public_port]
+        #uri: 'http://' + pillar[openstack:controller:address_ext] + ':' + pillar[openstack:keystone:public_port]
         #auth_port: 35357
         #auth_protocol: http
     rabbitmq:
-        #host: pillar[openstack:controller_address], localhost
+        #host: pillar[openstack:controller:address_int], localhost
         #port: 5672
         #userid: openstack
         password: rabbitmq_pass
@@ -28,18 +30,20 @@ openstack:
 keystone:
     database:
         password:
-        #host: 
+        #host: falling back to
         # - pillar[openstack:database:host] 
-        # - pillar[openstack:controller_address]
+        # - pillar[openstack:controller:address_int]
         # - keystone_defaults.db_host
 
 glance:
     common:
-        #known_stores: glance.store.filesystem.Store, glance.store.http.Store
+        #known_stores: falling back to
+        #  - glance.store.filesystem.Store
+        #  - glance.store.http.Store
         #debug: False
         #verbose: False
-        #bind_host: pillar[openstack:controller_address]
-        #registry_host: pillar[openstack:controller_address]
+        #bind_host: pillar[openstack:controller:address_int]
+        #registry_host: pillar[openstack:controller:address_int]
         #registry_port: 9x9x
         #file_store_datadir: '/var/lib/glance/images/'
         #scrubber_datadir: '/var/lib/glance/scrubber'
@@ -62,9 +66,13 @@ glance:
             #default_store: file
             #known_stores: 'glance.store.filesystem.Store, glance.store.http.Store'
             #filesystem_store_datadir: /var/lib/glance/images/
-            registry_host: pillar[glance:common:registry_host], pillar[openstack:controller_address], localhost
-            #rabbit_host: pillar[openstack:rabbitmq:host], 
-            #        pillar[openstack:controller_address]
+            #registry_host: falling back to
+            #    - pillar[glance:common:registry_host]
+            #    - pillar[openstack:controller:address_int]
+            #    - localhost
+            #rabbit_host: falling back to
+            #    - pillar[openstack:rabbitmq:host]
+            #    - pillar[openstack:controller:address_int]
             #image_cache_dir: /var/lib/glance/image-cache/
     registry:
 
@@ -92,14 +100,14 @@ neutron:
 nova:
     common:
         DEFAULT:
-            #my_ip: pillar[openstack:controller_address], localhost
+            #my_ip: pillar[openstack:controller:address_int], localhost
             #rpc_backend: rabbit
-            #rabbit_host: pillar[openstack:controller_address], localhost
+            #rabbit_host: pillar[openstack:controller:address_int], localhost
             #debug: False
             #verbose: False
             #nova_url
-            #metadata_listen: pillar[openstack:controller_address], 0.0.0.0
-            #metadata_listen: pillar[openstack:controller_address], 127.0.0.1
+            #metadata_listen: pillar[openstack:controller:address_int], 0.0.0.0
+            #metadata_host: pillar[openstack:controller:address_int], 127.0.0.1
         database:
             #type: openstack_defaults = mysql
             password:
