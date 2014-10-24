@@ -64,9 +64,9 @@ nova-manage db sync:
     - name: 'nova-manage db sync; sleep 15'
     - user: nova
     - require:
-        - pkg: nova-common
+        - pkg: nova-controller-packages
         - mysql_grants: nova-grants
     - watch:
-        - pkg: nova-common
+        - pkg: nova-controller-packages
     - onlyif: test $(nova-manage db version) -lt $(python manage.py version)
 {% endif %}
