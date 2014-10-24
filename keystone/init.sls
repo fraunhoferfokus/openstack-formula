@@ -39,7 +39,7 @@ keystone:
                     salt['pillar.get'](
                         'openstack:database:host',
                         salt['pillar.get'](
-                            'openstack:controller_address',
+                            'openstack:controller:address_int',
                             keystone_defaults.db_host)
                     )
                  ) %}

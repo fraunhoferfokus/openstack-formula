@@ -29,7 +29,7 @@
                         salt['pillar.get'](
                             'opestack:database:host',
                             salt['pillar.get'](
-                                'openstack:controller_address')
+                                'openstack:controller:address_int')
                         )
                      ) %}
 
