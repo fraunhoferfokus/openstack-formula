@@ -1,0 +1,16 @@
+{% set glance = salt['grains.filter_by']({
+    'Ubuntu': {
+        'controller_packages': [
+                        'glance',
+                        'python-mysqldb',
+        ],
+        'api_conf_file': '/etc/glance/glance-api.conf',
+        'api_paste_ini': '/etc/glance/glance-api-paste.ini',
+        'cache_conf_file': '/etc/glance/glance-cache.conf',
+        'policy_json_file': '/etc/glance/policy.json',
+        'registry_conf_file ': '/etc/glance/glance-registry.conf',
+        'registry_paste_ini': '/etc/glance/glance-registry-paste.ini',
+        'schema_image_json_file': '/etc/glance/schema-image.json',
+        'scrubber_conf_file': '/etc/glance/glance-scrubber.conf',
+    },
+}, merge=salt['pillar.get']('glance:lookup'), grain='os') %}
