@@ -11,7 +11,7 @@ openstack:
         #compute_port: 8774
     keystone:
         #host: pillar[openstack:controller_address]
-        public_port: 5000
+        #public_port: 5000
         #uri: 'http://' + pillar[openstack:controller_address] + ':' + pillar[openstack:keystone:public_port]
         #auth_port: 35357
         #auth_protocol: http
