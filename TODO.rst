@@ -1,17 +1,17 @@
 TODO
 ----
 
-- Add endpoints in Keystone
+- Add endpoints in Keystone (missing: glance, neutron)
 
 - Figure out how to run `{keystone,nova,...}-manage db_sync` states
   w/o making the dependent services fail for the next execution b/c
   the DB doesn't work.
 
-- Uncomment `keystone-dbuser` and its appearance in `keystone-grants`' 
-  `require`-list after https://github.com/saltstack/salt/issues/16676
-  is fixed
-
 - create service accounts in keystone
 
 - add OVS-bits to neutron.server
 
+- write a state for the Orchestrate-Runner_
+
+.. _Orchestrate-Runner:
+    http://docs.saltstack.com/en/latest/topics/tutorials/states_pt5.html#orchestrate-runner
