@@ -1,0 +1,41 @@
+{% from 'keystone/defaults.jinja' import keystone_defaults -%}
+# COMMON OPENSTACK ENVS
+export SERVICE_TOKEN="{{ salt['pillar.get']('keystone.token', 
+                            keystone_defaults.admin_token) }}"
+export OS_USERNAME=admin
+export OS_PASSWORD="{{ salt['pillar.get']('keystone:admin_password',
+                            keystone_defaults.admin_password) }}"
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL="{{ 'http://{0}:{1}/v2.0/'.format(
+                                salt['pillar.get'](
+                                    'openstack:keystone:host',
+                                    salt['pillar.get'](
+                                        'openstack:controller:address_int',
+                                        '127.0.0.1')
+                                ),
+                                salt['pillar.get'](
+                                    'openstack:keystone:auth_port', 
+                                    5000) 
+                         )}}"
+export SERVICE_ENDPOINT="{{ 'http://{0}:{1}/v2.0/'.format(
+                                salt['pillar.get'](
+                                    'openstack:keystone:host',
+                                    salt['pillar.get'](
+                                        'openstack:controller:address_ext',
+                                        '127.0.0.1')
+                                ),
+                                salt['pillar.get'](
+                                    'openstack:keystone:public_port', 
+                                    5000) 
+                         )}}"
+export OS_AUTH_STRATEGY=keystone
+export OS_NO_CACHE=1
+
+# LEGACY NOVA ENVS
+export NOVA_USERNAME=${OS_USERNAME}
+export NOVA_PROJECT_ID=${OS_TENANT_NAME}
+export NOVA_PASSWORD="${OS_PASSWORD}"
+export NOVA_API_KEY="${OS_PASSWORD}"
+export NOVA_URL="${OS_AUTH_URL}"
+export NOVA_VERSION=1.1
+export NOVA_REGION_NAME={{ salt['pillar.get']('openstack:region','RegionOne') }}
