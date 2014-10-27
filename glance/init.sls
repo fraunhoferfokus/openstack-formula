@@ -6,14 +6,71 @@ glance-packages:
             - glance
             - python-mysqldb
 
-glance-api:
-    service.running:
-        - watch:
-            - file: {{ glance.api_conf_file }}
-            - file: {{ glance.api_paste_ini }}
-        - require: 
-            - file: {{ glance.api_conf_file }}
-            - file: {{ glance.api_paste_ini }}
+glance-user in Keystone:
+  keystone.tenant_present:
+    - name: glance
+    - tenant: service
+    - roles:
+      - service:
+        - admin
+
+glance-service in Keystone:
+  keystone.service_present:
+    - name: glance
+    - service_type: image
+    - description: OpenStack Image Service
+
+glance-endpoint in Keystone:
+  keystone.endpoint_present:
+    - name: glance
+    - publicurl: {{ 
+        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+            salt['pillar.get'](
+                'glance:api:bind_host',
+                salt['pillar.get'](
+                    'glance:common:bind_host',
+                    salt['pillar.get']('openstack:controller:address_ext',
+                        '127.0.0.1')
+                )
+            ),
+            salt['pillar.get'](
+                'glance:common:api_port',
+                salt['pillar.get'](
+                    'openstack:glance:api_port', '9292')
+            )
+        ) }}
+    - internalurl: {{ 
+        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+            salt['pillar.get'](
+                'glance:common:bind_host',
+                salt['pillar.get']('openstack:controller:address_int',
+                    '127.0.0.1')
+            ),
+            salt['pillar.get'](
+                'glance:common:api_port',
+                salt['pillar.get'](
+                    'openstack:glance:api_port', '9292')
+            )
+        ) }}
+    - adminurl: {{ 
+        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+            salt['pillar.get'](
+                'glance:common:bind_host',
+                salt['pillar.get']('openstack:controller:address_int',
+                    '127.0.0.1')
+            ),
+            salt['pillar.get'](
+                'glance:common:api_port',
+                salt['pillar.get'](
+                    'openstack:glance:api_port', '9292')
+            )
+        ) }}
+{#  #TODO:
+    #- region #}
+    - require:
+        - keystone: glance-service in Keystone
 
 include:
     - glance.config
+    - glance.database
+    - glance.services
