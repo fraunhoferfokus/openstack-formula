@@ -36,15 +36,17 @@
                             ) %}
     {%- set keystone_auth_port = get(service+':keystone_authtoken:auth_port',
                                     get('openstack:keystone:auth_port', 
-                                        35357)
+                                        35357|string)
                                   ) %}
     {%- set keystone_public_port = get('openstack:keystone:public_port',
                                         5000|string) %}
     {%- set admin_user = get(service+':keystone_authtoken:admin_user', 
-                            service) %}
+                             get(service+':common:keystone_authtoken:admin_user',
+                                 service) 
+                         )%}
     {%- set admin_password = 
             get(service + ':keystone_authtoken:admin_password',
-                get(service + 'common:keystone_authtoken:admin_password')
+                get(service + ':common:keystone_authtoken:admin_password')
             ) %}
     {%- if short %}
 auth_url = {{ get('openstack:keystone:auth_url', 
@@ -88,7 +90,7 @@ auth_uri={{ get(service+':keystone_authtoken:auth_uri',
                             )
                       ) %}
     {%- set db_name = get(service + ':database:name', 
-                                get(service + 'common:database:name',
+                                get(service + ':common:database:name',
                                     service.split(':')[0])
                       ) %}
 connection = {{ '{0}://{1}:{2}@{3}/{4}'.format(db_type, db_user, db_pass, db_host, db_name) }}
