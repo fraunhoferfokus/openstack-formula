@@ -1,5 +1,7 @@
 openstack:
     #release: icehouse
+    # This one is a TODO for most services' config:
+    #region: RegionOne
     controller:
         address_int: # fallback in most places: 127.0.0.1
         address_ext: # fallback in most places: 0.0.0.0
@@ -9,6 +11,9 @@ openstack:
     database:
         #host: pillar[openstack:controller:address_int]
         #type: openstack_defaults.db_type = mysql
+    glance:
+        #api_port: 9292
+        #registry_port: 9191
     nova:
         #compute_port: 8774
     keystone:
@@ -42,25 +47,30 @@ glance:
         #  - glance.store.http.Store
         #debug: False
         #verbose: False
+        #api_port: 9292
         #bind_host: pillar[openstack:controller:address_int]
         #registry_host: pillar[openstack:controller:address_int]
-        #registry_port: 9x9x
+        #registry_port: 9191
         #file_store_datadir: '/var/lib/glance/images/'
         #scrubber_datadir: '/var/lib/glance/scrubber'
         database:
             #username: glance
             password: glance_pass
-        keystone:
-            admin_password: service_pass
+        keystone_authtoken:
+            #admin_user = glance
+            admin_password: service_pass_glance
             #auth_uri: http://controller:5000
             #auth_port: 35357
             #auth_protocol: http
             #admin_tenant_name: service
-            #admin_user = glance
          paste_deploy:
             #flavor: keystone
     api:
         DEFAULT:
+            #bind_host: falling back to
+            # - glance:common:DEFAULT:bind_host
+            # - openstack:controller:address_ext
+            # - 0.0.0.0
             #debug: pillar[glance:common:DEFAULT:debug], False
             #verbose: False
             #default_store: file
@@ -81,9 +91,9 @@ neutron:
         DEFAULT:
             #debug: False
             #verbose: False
-            admin_password: service_pass
             #admin_tenant_name: service
-            #admin_user = keystone
+            #admin_user = neutron
+            admin_password: service_pass_neutron
             #bind_host: 0.0.0.0
             #core_plugin: ml2
             #allow_overlapping_ips: False

@@ -7,8 +7,8 @@ glance-api.conf:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
 glance-api-paste.ini:
     file.managed:
@@ -18,8 +18,8 @@ glance-api-paste.ini:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
 glance-cache.conf:
     file.managed:
@@ -29,23 +29,19 @@ glance-cache.conf:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
-{#- I guess someone curse SaltStack so it shall never be able
-    to use the string "registry_conf_file" in a state... #}
-/etc/glance/glance-registry.conf:
+glance-registry.conf:
     file.managed:
-{#
         - name: {{ glance.registry_conf_file }}
-#}
         - source: salt://glance/files/glance-registry.conf
         - template: jinja
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
 glance-registry-paste.ini:
     file.managed:
@@ -55,8 +51,8 @@ glance-registry-paste.ini:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
 glance-scrubber.conf:
     file.managed:
@@ -66,8 +62,8 @@ glance-scrubber.conf:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
 policy.json:
     file.managed:
@@ -77,8 +73,8 @@ policy.json:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
 schema-image.json:
     file.managed:
@@ -88,6 +84,6 @@ schema-image.json:
         - user: glance
         - group: glance
         - mode: 644
-		- require:
-			- pkg: glance-packages
+        - require:
+            - pkg: glance-packages
 
