@@ -5,6 +5,8 @@ openstack:
     controller:
         address_int: # fallback in most places: 127.0.0.1
         address_ext: # fallback in most places: 0.0.0.0
+    #service_email: admin@example.com, ${service}@${pillar[service_domain]}
+    #service_domain: openstack_defaults.service_domain = example.com
     #auth_strategy: openstack_defaults.auth_strategy = keystone
     #rpc_backend: openstack_defaults.rpc_backend = rabbit
     #use_ipv6: False
@@ -120,4 +122,6 @@ nova:
             #metadata_host: pillar[openstack:controller:address_int], 127.0.0.1
         database:
             #type: openstack_defaults = mysql
-            password:
+            password: <needs to be set>
+        keystone_authtoken:
+            admin_password: <needs to be set>
