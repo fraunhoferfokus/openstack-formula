@@ -59,8 +59,7 @@ nova-grants:
 
 nova-manage db sync:
   cmd.run:
-    # TODO: This path is Ubuntu-specific!
-    - cwd: /usr/lib/python2.7/dist-packages/nova/db/sqlalchemy/migrate_repo
+    - cwd: {{ nova.migrate_repo }}
     - name: 'nova-manage db sync; sleep 15'
     - user: nova
     - require:
