@@ -24,6 +24,8 @@ openstack:
         #uri: 'http://' + pillar[openstack:controller:address_ext] + ':' + pillar[openstack:keystone:public_port]
         #auth_port: 35357
         #auth_protocol: http
+    neutron:
+        #api_port: 9696
     rabbitmq:
         #host: pillar[openstack:controller:address_int], localhost
         #port: 5672
@@ -104,9 +106,9 @@ neutron:
             #notify_nova_on_port_data_changes: True
         database:
             password:
-    server:
+    api:
         DEFAULT:
-            #bind_port: 9696
+            #bind_port: pillar[openstack:neutron:api_port], 9696
     dhcp_agent:
         ovs_integration_bridge: br-int
 

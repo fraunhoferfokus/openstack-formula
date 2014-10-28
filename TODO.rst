@@ -1,15 +1,15 @@
 TODO
 ----
 
-- Add users for services in Keystone (missing: glance, neutron)
+- Add users for services in Keystone (missing: cinder, ceilometer, heat?)
 
-- Add endpoints in Keystone (missing: neutron)
+- Add endpoints in Keystone (missing: cinder, ceilometer, heat?)
+
+- Add services in Keystone (missing: cinder, ceilometer, heat?)
 
 - Figure out how to run `{keystone,nova,...}-manage db_sync` states
   w/o making the dependent services fail for the next execution b/c
   the DB doesn't work yet.
-
-- create services in keystone (missing: neutron)
 
 - add OVS-bits to neutron.server
 
