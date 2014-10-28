@@ -7,8 +7,16 @@ glance-packages:
             - python-mysqldb
 
 glance-user in Keystone:
-  keystone.tenant_present:
+  keystone.user_present:
     - name: glance
+    - email: {{ salt['pillar.get'](
+                    'openstack.service_email',
+                    'glance@' + salt['pillar.get'](
+                        'openstack:service_domain', 
+                        openstack_defaults.service_domain)
+                ) }}
+    - password: {{ salt ['pillar.get'](
+        'glance:common:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
       - service:
