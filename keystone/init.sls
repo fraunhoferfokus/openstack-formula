@@ -48,8 +48,6 @@ keystone-db:
     mysql_database.present:
         - name: {{ keystone_defaults.db_name }}
 
-## Broken due to https://github.com/saltstack/salt/issues/16676
-## (TODO: uncomment require in keystone-grants when this is fixed)
 keystone-dbuser:
     mysql_user.present:
         - name: {{ db_user }}
@@ -79,14 +77,6 @@ keystone-grants:
     file.absent
 {% endif %}
 
-{# TODO: Turn this into a macro #}
-{% if not salt['mysql.db_tables']('keystone') %}
-   {% set db_version = 0 %}
-{% else %}
-    {% set db_version = salt['mysql.query'](
-        'keystone', 
-        'SELECT version FROM migrate_version;')['results'][0][0] %}
-{% endif %}
 keystone-manage db_sync:
   cmd.run:
     - name: 'keystone-manage db_sync; sleep 15'
@@ -95,7 +85,6 @@ keystone-manage db_sync:
     - cwd:  /usr/lib/python2.7/dist-packages/keystone/common/sql/migrate_repo/
     - require:
         - pkg: keystone
-        #- mysql_grants: keystone-grants @controller
         - mysql_grants: keystone-grants
     - watch:
         - pkg: keystone
@@ -133,3 +122,49 @@ create admin-user in Keystone:
     - require:
       - keystone: create basic tenants in Keystone
       - keystone: create basic roles in Keystone
+
+keystone-service in Keystone:
+    keystone.service_present:
+        - name: keystone
+        - service_type: identity
+        - description: OpenStack Identity Service
+
+keystone-endpoint in Keystone:
+    keystone.endpoint_present:
+        - name: keystone
+        - publicurl: {{ "{0}://{1}:{2}/v2.0".format(
+                salt['pillar.get'](
+                    'openstack:keystone:auth_protocol', 
+                    'http'),
+                salt['pillar.get'](
+                    'openstack:controller:address_ext',
+                    '127.0.0.1'),
+                salt['pillar.get'](
+                    'openstack:keystone:public_port', 
+                    5000)
+                ) }}
+        - adminurl: {{ "{0}://{1}:{2}/v2.0".format(
+                salt['pillar.get'](
+                    'openstack:keystone:auth_protocol', 
+                    'http'),
+                salt['pillar.get'](
+                    'openstack:controller:address_int', 
+                    '127.0.0.1'),
+                salt['pillar.get'](
+                    'openstack:keystone:auth_port', 
+                    35357)
+                ) }}
+        - internalurl: {{ "{0}://{1}:{2}/v2.0".format(
+                salt['pillar.get'](
+                    'openstack:keystone:auth_protocol', 
+                    'http'),
+                salt['pillar.get'](
+                    'openstack:controller:address_int', 
+                    '127.0.0.1'),
+                salt['pillar.get'](
+                    'openstack:keystone:public_port', 
+                    5000)
+                ) }}
+        - require:
+            - cmd: keystone-manage db_sync
+            - keystone: keystone-service in Keystone
