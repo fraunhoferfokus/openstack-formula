@@ -14,7 +14,7 @@ export OS_AUTH_URL="{{ 'http://{0}:{1}/v2.0/'.format(
                                         '127.0.0.1')
                                 ),
                                 salt['pillar.get'](
-                                    'openstack:keystone:auth_port', 
+                                    'openstack:keystone:public_port', 
                                     5000) 
                          )}}"
 export SERVICE_ENDPOINT="{{ 'http://{0}:{1}/v2.0/'.format(
@@ -25,8 +25,8 @@ export SERVICE_ENDPOINT="{{ 'http://{0}:{1}/v2.0/'.format(
                                         '127.0.0.1')
                                 ),
                                 salt['pillar.get'](
-                                    'openstack:keystone:public_port', 
-                                    5000) 
+                                    'openstack:keystone:auth_port', 
+                                    35357) 
                          )}}"
 export OS_AUTH_STRATEGY=keystone
 export OS_NO_CACHE=1
