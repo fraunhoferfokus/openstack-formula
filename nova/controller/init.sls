@@ -18,7 +18,7 @@ nova-user in Keystone:
     - name: nova
     - email: {{ salt['pillar.get'](
                     'openstack.service_email',
-                    'nova' + salt['pillar.get'](
+                    'nova@' + salt['pillar.get'](
                         'openstack:service_domain', 
                         openstack_defaults.service_domain)
                 ) }}
