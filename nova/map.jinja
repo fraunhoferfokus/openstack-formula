@@ -11,6 +11,9 @@
                         'novnc',
                         'python-novaclient',
         ],
+        'migrate_repo': 
+            '/usr/lib/python2.7/dist-packages/' + 
+                'nova/db/sqlalchemy/migrate_repo',
         'nova_conf_file': '/etc/nova/nova.conf',
     },
 }, merge=salt['pillar.get']('nova:lookup'), grain='os') %}
