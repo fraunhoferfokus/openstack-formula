@@ -17,8 +17,8 @@ local_settings.py:
         - name: {{ horizon.local_settings }}
         - source: salt://horizon/files/local_settings.py
         - template: jinja
-        - user: glance
-        - group: glance
+        - user: horizon
+        - group: horizon
         - mode: 644
         - require:
             - pkg: horizon-packages
