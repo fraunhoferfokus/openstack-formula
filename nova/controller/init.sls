@@ -14,18 +14,30 @@ nova-controller-packages:
         - pkg: nova-controller-packages
 
 nova-user in Keystone:
-  keystone.tenant_present:
+  keystone.user_present:
     - name: nova
+    - email: {{ salt['pillar.get'](
+                    'openstack.service_email',
+                    'nova' + salt['pillar.get'](
+                        'openstack:service_domain', 
+                        openstack_defaults.service_domain)
+                ) }}
+    - password: {{ salt ['pillar.get'](
+        'nova:common:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
       - service:
         - admin
+    - require:
+        - cmd: nova-manage db sync
 
 nova-service in Keystone:
   keystone.service_present:
     - name: nova
     - service_type: compute
     - description: OpenStack Compute Service
+    - require: 
+        - keystone: nova-user in Keystone
 
 nova-endpoint in Keystone:
   keystone.endpoint_present:
