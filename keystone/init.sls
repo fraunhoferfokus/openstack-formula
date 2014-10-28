@@ -103,6 +103,9 @@ create basic roles in Keystone:
     - names:
       - admin
       - Member
+      # Why do we need the following two??
+      - KeystoneAdmin
+      - KeystoneServiceAdmin
     - require:
       - cmd: keystone-manage db_sync
 
@@ -116,6 +119,8 @@ create admin-user in Keystone:
     - roles:
       - admin:   # tenants
         - admin  # roles
+        - KeystoneAdmin
+        - KeystoneServiceAdmin
       - service:
         - admin
         - Member
