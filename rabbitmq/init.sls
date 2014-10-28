@@ -1,3 +1,4 @@
+{%- from 'openstack/defaults.jinja' import openstack_defaults %}
 rabbitmq-server:
   pkg:
     - installed
@@ -7,7 +8,11 @@ rabbitmq-server:
 rabbitmq-user:
   rabbitmq_user.present:
     - name: {{ salt['pillar.get']('rabbitmq:user','openstack') }}
-    - password: '{{ salt['pillar.get']('rabbitmq:password') }}'
+    - password: '{{ salt['pillar.get']('rabbitmq:password',
+                        salt['pillar.get'](
+                            'openstack:rabbitmq:password',
+                            openstack_defaults.rabbitmq.password)
+                    ) }}'
 
 {% if salt['pillar.get']('openstack:rabbitmq:user') != 'guest' %}
 rabbimq-guestuser:
