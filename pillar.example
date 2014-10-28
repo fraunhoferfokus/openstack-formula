@@ -28,7 +28,8 @@ openstack:
         #host: pillar[openstack:controller:address_int], localhost
         #port: 5672
         #userid: openstack
-        password: rabbitmq_pass
+        password: rabbitmq_pass # Fun Fact: having a '$' in here causes 
+                                # stacktraces in neutron-server
         #use_ssl: False
         #durable_queues: False
     paste:
