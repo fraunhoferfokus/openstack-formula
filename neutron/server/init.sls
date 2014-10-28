@@ -10,6 +10,15 @@ neutron-server:
             - file: ml2_conf.ini
             - file: dhcp_agent.ini
             - file: metadata_agent.ini
+            - mysql_grants: neutron-grants
+            #- cmd: neutron-db-manage upgrade
+        - watch: 
+            - pkg: neutron-server
+            - file: neutron.conf
+            - file: ml2_conf.ini
+            - file: dhcp_agent.ini
+            - file: metadata_agent.ini
+            #- cmd: neutron-db-manage upgrade
 
 neutron.conf:
     file.managed:
@@ -50,3 +59,7 @@ metadata_agent.ini:
         - template: jinja
         - require:
             - pkg: neutron-server
+
+include:
+  - neutron.server.database
+  - neutron.server.keystone
