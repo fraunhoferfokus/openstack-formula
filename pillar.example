@@ -1,7 +1,7 @@
 openstack:
     #release: icehouse
     # This one is a TODO for most services' config:
-    #region: RegionOne
+    #region: openstack_defaults.region_name = RegionOne
     controller:
         address_int: # fallback in most places: 127.0.0.1
         address_ext: # fallback in most places: 0.0.0.0
