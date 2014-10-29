@@ -102,7 +102,7 @@ glance:
             # - 9191
 
 neutron:
-    common:
+    server:
         DEFAULT:
             #debug: False
             #verbose: False
@@ -110,31 +110,33 @@ neutron:
             #admin_user = neutron
             admin_password: service_pass_neutron
             #bind_host: 0.0.0.0
+            #bind_port: pillar[openstack:neutron:api_port], 9696
             #core_plugin: ml2
             #allow_overlapping_ips: False
             #notify_nova_on_port_status_changes: True
             #notify_nova_on_port_data_changes: True
+            #nova_admin_password:
+            #nova_admin_user: nova
         database:
             password:
-    api:
-        DEFAULT:
-            #bind_port: pillar[openstack:neutron:api_port], 9696
     dhcp_agent:
         ovs_integration_bridge: br-int
 
 nova:
-    common:
-        DEFAULT:
-            #my_ip: pillar[openstack:controller:address_int], localhost
-            #rpc_backend: rabbit
-            #rabbit_host: pillar[openstack:controller:address_int], localhost
-            #debug: False
-            #verbose: False
-            #nova_url
-            #metadata_listen: pillar[openstack:controller:address_int], 0.0.0.0
-            #metadata_host: pillar[openstack:controller:address_int], 127.0.0.1
-        database:
-            #type: openstack_defaults = mysql
-            password: <needs to be set>
-        keystone_authtoken:
-            admin_password: <needs to be set>
+   DEFAULT:
+       #my_ip: pillar[openstack:controller:address_int], localhost
+       #rpc_backend: rabbit
+       #rabbit_host: pillar[openstack:controller:address_int], localhost
+       #debug: False
+       #verbose: False
+       #nova_url
+       #metadata_listen: pillar[openstack:controller:address_int], 0.0.0.0
+       #metadata_host: pillar[openstack:controller:address_int], 127.0.0.1
+       #auth_strategy: falls back to
+       # - pillar[openstack:auth_strategy]
+       # - openstack_defaults.auth_strategy = 'keystone'
+   database:
+       #type: openstack_defaults = mysql
+       password: <needs to be set>
+   keystone_authtoken:
+       admin_password: <needs to be set>
