@@ -32,7 +32,7 @@ glance-endpoint in Keystone:
   keystone.endpoint_present:
     - name: glance
     - publicurl: {{ 
-        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+        "http://{0}:{1}/v2".format( 
             salt['pillar.get'](
                 'glance:api:bind_host',
                 salt['pillar.get'](
@@ -48,7 +48,7 @@ glance-endpoint in Keystone:
             )
         ) }}
     - internalurl: {{ 
-        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+        "http://{0}:{1}/v2".format( 
             salt['pillar.get'](
                 'glance:common:bind_host',
                 salt['pillar.get']('openstack:controller:address_int',
@@ -61,7 +61,7 @@ glance-endpoint in Keystone:
             )
         ) }}
     - adminurl: {{ 
-        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+        "http://{0}:{1}/v2".format( 
             salt['pillar.get'](
                 'glance:common:bind_host',
                 salt['pillar.get']('openstack:controller:address_int',
