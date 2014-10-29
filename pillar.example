@@ -115,8 +115,13 @@ neutron:
             #allow_overlapping_ips: False
             #notify_nova_on_port_status_changes: True
             #notify_nova_on_port_data_changes: True
-            #nova_admin_password:
-            #nova_admin_user: nova
+            #nova_admin_password: falls back to
+            #   - pillar[nova:keystone_authtoken:admin_password]
+            #     (which shouldn't be availabe if you separated
+            #     controller and network-host)
+            #nova_admin_user: falls back to
+            #   - pillar[nova:keystone_authtoken:admin_user]
+            #   - 'nova'
         database:
             password:
     dhcp_agent:
@@ -129,6 +134,13 @@ nova:
        #rabbit_host: pillar[openstack:controller:address_int], localhost
        #debug: False
        #verbose: False
+       #neutron_admin_username: falls back to
+       #    - pillar[neutron:common:keystone_authtoken:admin_user]
+       #    - 'neutron'
+       #neutron_admin_password: falls back to
+       #    - pillar[neutron:common:keystone_authtoken:admin_password]
+       #      (which shouldn't be available if you've got a separate
+       #      network host...)
        #nova_url
        #metadata_listen: pillar[openstack:controller:address_int], 0.0.0.0
        #metadata_host: pillar[openstack:controller:address_int], 127.0.0.1
