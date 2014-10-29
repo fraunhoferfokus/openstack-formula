@@ -34,7 +34,7 @@ neutron-endpoint in Keystone:
                     '127.0.0.1')
             ),
             salt['pillar.get'](
-                'neutron:api:DEFAULT:bind_port',
+                'neutron:server:DEFAULT:bind_port',
                 salt['pillar.get'](
                     'openstack:neutron:api_port', '9696')
             )
@@ -47,7 +47,7 @@ neutron-endpoint in Keystone:
                     '127.0.0.1')
             ),
             salt['pillar.get'](
-                'neutron:api:DEFAULT:bind_port',
+                'neutron:server:DEFAULT:bind_port',
                 salt['pillar.get'](
                     'openstack:neutron:api_port', '9696')
             )
@@ -60,7 +60,7 @@ neutron-endpoint in Keystone:
                     '127.0.0.1')
             ),
             salt['pillar.get'](
-                'neutron:api:DEFAULT:bind_port',
+                'neutron:server:DEFAULT:bind_port',
                 salt['pillar.get'](
                     'openstack:neutron:api_port', '9696')
             )
