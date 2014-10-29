@@ -1,0 +1,6 @@
+{% set horizon = salt['grains.filter_by']({
+    'Ubuntu': {
+        'local_settings': '/etc/openstack-dashboard/local_settings.py',
+        'memcached_conf': '/etc/memcached.conf'
+    },
+}, merge=salt['pillar.get']('horizon:lookup'), grain='os') %}
