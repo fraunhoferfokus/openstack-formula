@@ -54,8 +54,9 @@ glance:
         #verbose: False
         #api_port: 9292
         #bind_host: pillar[openstack:controller:address_int]
-        #registry_host: pillar[openstack:controller:address_int]
-        #registry_port: 9191
+        #registry_port: falling back to
+        #   - openstack:glance:registry_port
+        #   - 9191
         #file_store_datadir: '/var/lib/glance/images/'
         #scrubber_datadir: '/var/lib/glance/scrubber'
         database:
@@ -82,14 +83,23 @@ glance:
             #known_stores: 'glance.store.filesystem.Store, glance.store.http.Store'
             #filesystem_store_datadir: /var/lib/glance/images/
             #registry_host: falling back to
-            #    - pillar[glance:common:registry_host]
-            #    - pillar[openstack:controller:address_int]
-            #    - localhost
+            #   - pillar['glance:registry:DEFAULT:bind_host']
+            #   - pillar['glance:common:DEFAULT:bind_host']
+            #   - pillar[openstack:controller:address_ext]
+            #   - localhost
             #rabbit_host: falling back to
             #    - pillar[openstack:rabbitmq:host]
             #    - pillar[openstack:controller:address_int]
             #image_cache_dir: /var/lib/glance/image-cache/
     registry:
+        DEFAULT:
+            #bind_host: falling back to
+            #   - pillar['glance:common:DEFAULT:bind_host']
+            #   - pillar[openstack:controller:address_ext]
+            #   - 0.0.0.0
+            #bind_port: falling back to
+            # - pillar[openstack:glance:registry_port]
+            # - 9191
 
 neutron:
     common:
