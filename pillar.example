@@ -102,13 +102,16 @@ glance:
             # - 9191
 
 neutron:
+    common:
+        keystone_authtoken:
+            #admin_tenant_name: service
+            #admin_user = neutron
+            admin_password: service_pass_neutron
+            
     server:
         DEFAULT:
             #debug: False
             #verbose: False
-            #admin_tenant_name: service
-            #admin_user = neutron
-            admin_password: service_pass_neutron
             #bind_host: 0.0.0.0
             #bind_port: pillar[openstack:neutron:api_port], 9696
             #core_plugin: ml2
