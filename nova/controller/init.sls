@@ -23,7 +23,7 @@ nova-user in Keystone:
                         openstack_defaults.service_domain)
                 ) }}
     - password: {{ salt ['pillar.get'](
-        'nova:common:keystone_authtoken:admin_password') }}
+        'nova:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
       - service:
