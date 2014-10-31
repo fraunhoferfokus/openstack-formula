@@ -10,7 +10,7 @@ neutron-user in Keystone:
                         openstack_defaults.service_domain)
                 ) }}
     - password: {{ salt ['pillar.get'](
-        'neutron:keystone_authtoken:admin_password',
+        'neutron:common:keystone_authtoken:admin_password',
         neutron_defaults.keystone_password) }}
     - tenant: service
     - roles:
