@@ -1,3 +1,4 @@
+{%- from 'horizon/defaults.jinja' import horizon_defaults -%}
 import os
 
 from django.utils.translation import ugettext_lazy as _
@@ -78,7 +79,10 @@ HORIZON_CONFIG = {
 # Turn off browser autocompletion for the login form if so desired.
 # HORIZON_CONFIG["password_autocomplete"] = "off"
 
-LOCAL_PATH = os.path.dirname(os.path.abspath(__file__))
+#LOCAL_PATH = os.path.dirname(os.path.abspath(__file__))
+LOCAL_PATH = '{{ salt['pillar.get'](
+                    'horizon:lock_dir', 
+                    horizon_defaults.lock_dir) }}'
 
 # Set custom secret key:
 # You can either set it to a specific value or you can let horizion generate a
