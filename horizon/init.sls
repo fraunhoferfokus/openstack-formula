@@ -14,9 +14,12 @@ horizon-lockdir:
         - name: {{ salt['pillar.get'](
                     'horizon:lock_dir',
                     horizon_defaults.lock_dir) }}
+    {#
+        # not needed for '/var/run':
         - user: horizon
         - group: horizon
         - mode: 755
+    #}
 
 local_settings.py:
     file.managed:
