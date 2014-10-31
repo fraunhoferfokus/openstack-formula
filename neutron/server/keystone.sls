@@ -27,7 +27,7 @@ neutron-endpoint in Keystone:
   keystone.endpoint_present:
     - name: neutron
     - publicurl: {{
-        "http://{0}:{1}/v2/$(tenant_id)s".format(
+        "http://{0}:{1}".format(
             salt['pillar.get'](
                 'neutron:common:DEFAULT:bind_host',
                 salt['pillar.get']('openstack:controller:address_ext',
@@ -40,7 +40,7 @@ neutron-endpoint in Keystone:
             )
         ) }}
     - internalurl: {{
-        "http://{0}:{1}/v2/$(tenant_id)s".format(
+        "http://{0}:{1}".format(
             salt['pillar.get'](
                 'neutron:common:DEFAULT:bind_host',
                 salt['pillar.get']('openstack:controller:address_int',
@@ -53,7 +53,7 @@ neutron-endpoint in Keystone:
             )
         ) }}
     - adminurl: {{
-        "http://{0}:{1}/v2/$(tenant_id)s".format(
+        "http://{0}:{1}".format(
             salt['pillar.get'](
                 'neutron:common:DEFAULT:bind_host',
                 salt['pillar.get']('openstack:controller:address_int',
