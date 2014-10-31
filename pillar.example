@@ -101,6 +101,9 @@ glance:
             # - pillar[openstack:glance:registry_port]
             # - 9191
 
+horizon:
+    #lock_dir: horizon_defaults.lock_dir = /var/run/horizon
+
 neutron:
     common:
         keystone_authtoken:

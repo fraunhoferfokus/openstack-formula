@@ -1,16 +1,22 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
+{% from 'horizon/defaults.jinja' import horizon_defaults with context %}
 {% from 'horizon/map.jinja' import horizon with context %}
 
 horizon-packages:
     pkg.installed:
-        - pkgs:
-            - apache2
-            - memcached
-            - libapache2-mod-wsgi
-            - openstack-dashboard
+        - pkgs: {{ horizon.packages }}
 
 openstack-dashboard-ubuntu-theme:
     pkg.purged
+
+horizon-lockdir:
+    file.directory:
+        - name: {{ salt['pillar.get'](
+                    'horizon:lock_dir',
+                    horizon_defaults.lock_dir) }}
+        - user: horizon
+        - group: horizon
+        - mode: 755
 
 local_settings.py:
     file.managed:
@@ -22,6 +28,7 @@ local_settings.py:
         - mode: 644
         - require:
             - pkg: horizon-packages
+            - file: horizon-lockdir
 
 apache2:
     service.running:
