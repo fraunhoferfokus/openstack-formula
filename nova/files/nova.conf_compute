@@ -1,0 +1,183 @@
+[DEFAULT]
+{%- from 'openstack/defaults.jinja' import openstack_defaults %}
+{%- from 'nova/defaults.jinja' import nova_defaults %}
+{%- from 'common/macros.jinja' import keystone_authtoken %}
+{%- from 'common/macros.jinja' import database_connection %}
+{%- set get = salt['pillar.get'] %}
+{%- set service = 'nova' %}
+{# TODO: should get rid of this one: #}
+{%- set ctrl_or_localhost = get('openstack:controller:address_int',
+                        '127.0.0.1') %}
+
+use_ipv6 = {{ salt['pillar.get']('openstack:use_ipv6', 'False') }}
+my_ip = {{ salt['pillar.get']('nova:DEFAULT:my_ip',
+                salt['pillar.get']('openstack:controller:address_int',
+                    'localhost')
+        ) }}
+
+rpc_backend = {{ salt['pillar.get']('nova:DEFAULT:rpc_backend',
+                    salt['pillar.get']('openstack:rpc_backend',
+                        openstack_defaults.rpc_backend)
+                 ) }}
+rabbit_host = {{ salt['pillar.get']('nova:DEFAULT:rabbit_host',
+                    get('openstack:rabbitmq:host',
+                        salt['pillar.get'](
+                            'openstack:controller:address_int',
+                            'localhost')
+                    )
+                 ) }}
+rabbit_userid={{ get('glance:api:DEFAULT:rabbit_userid',
+                    get('glance:common:DEFAULT:rabbit_userid',
+                        get('openstack:rabbitmq:userid',
+                            openstack_defaults.rabbitmq.userid)
+                    )
+                 ) }}
+rabbit_password='{{ get('glance:api:DEFAULT:rabbit_password',
+                        get('glance:common:DEFAULT:rabbit_password',
+                            get('openstack:rabbitmq:password',
+                                openstack_defaults.rabbitmq.password)
+                        )
+                    ) }}'
+rabbit_virtual_host={{ get('glance:api:DEFAULT:rabbit_virtual_host',
+                            get('glance:common:DEFAULT:rabbit_virtual_host',
+                                get('openstack:rabbitmq:virtual_host',
+                                    openstack_defaults.rabbitmq.virtual_host)
+                            )
+                       ) }}
+
+verbose = {{ salt['pillar.get']('nova:DEFAULT:verbose', False) }}
+debug = {{ salt['pillar.get']('nova:DEFAULT:debug', False) }}
+logdir = /var/log/nova
+state_path = /var/lib/nova
+lock_path = /run/lock/nova
+
+#s3_host = controller.yourdomain.com
+#ec2_host = controller.yourdomain.com
+#ec2_dmz_host = controller.yourdomain.com
+#cc_host = controller.yourdomain.com
+
+#ec2_url = http://controller.yourdomain.com:8773/services/Cloud
+nova_url = {{ get('neutron:DEFAULT:nova_url', 'http://' +
+                get('openstack:controller:address_int', 
+                    '127.0.0.1') + ':' +
+                get('openstack:nova:compute_port',
+                    openstack_defaults.nova.compute_port|string +
+                        '/v1.1/')
+               ) }}
+
+api_paste_config = /etc/nova/api-paste.ini
+
+root_helper = sudo nova-rootwrap /etc/nova/rootwrap.conf
+
+resume_guests_state_on_host_boot = True
+
+# Scheduler
+# scheduler_driver = nova.scheduler.simple.SimpleScheduler
+compute_scheduler_driver = nova.scheduler.filter_scheduler.FilterScheduler
+
+# Metadata stuff
+metadata_host = {{ salt['pillar.get'](
+                        'nova:DEFAULT:metadata_listen',
+                        salt['pillar.get'](
+                            'openstack:controller:address_int',
+                            '127.0.0.1')
+                     ) }}
+service_neutron_metadata_proxy = True
+neutron_metadata_proxy_shared_secret = '{{
+    get('openstack:neutron:shared_secret',
+        openstack_defaults.neutron.shared_secret) }}'
+
+# Instance Disk Backend
+libvirt_images_type = lvm
+libvirt_images_volume_group = nova-local
+libvirt_sparse_logical_volumes = false
+
+# Auth
+use_deprecated_auth = false
+auth_strategy = {{ get('nova:DEFAULT:auth_strategy',
+                        get('openstack:auth_strategy',
+                            openstack_defaults.auth_strategy)
+                   ) }}
+keystone_ec2_url = {{ 'http://{0}:{1}/v2.0/ec2tokens'.format(
+                           salt['pillar.get'](
+                               'openstack:keystone:host',
+                                    salt['pillar.get'](
+                                        'openstack:controller:address_int',
+                                        '127.0.0.1')
+                                ),
+                                salt['pillar.get'](
+                                    'openstack:keystone:public_port',
+                                    openstack_defaults.keystone.public_port)
+                      )}}
+
+# Imaging service
+image_service = nova.image.glance.GlanceImageService
+glance_api_servers = {{ '{0}:{1}'.format(
+                            salt['pillar.get'](
+                                'openstack:controller:address_int',
+                                'localhost'),
+                            get('openstack:glance:api_port', 9292)
+                        ) }}
+
+# VNC configuration - Dual-Stacked - DISABLED, go for SPICE instead!
+vnc_enabled = False
+novnc_enabled = False
+# novncproxy_base_url = http://controller.yourdomain.com:6080/vnc_auto.html
+# vncserver_listen = ::
+# vncserver_proxyclient_address = compute-1.yourdomain.com
+
+# NETWORK - Neutron
+network_api_class = nova.network.neutronv2.api.API
+{#- TODO #}
+neutron_url = http://{{ ctrl_or_localhost }}:9696/
+neutron_auth_strategy = {{ get('nova:DEFAULT:neutron_auth_strategy',
+                                get('openstack:auth_strategy',
+                                    openstack_defaults.auth_strategy)
+                           ) }}
+neutron_admin_tenant_name = {%- 
+    set tenant_name = get('nova:DEFAULT:neutron_admin_tenant_name',
+        get('neutron:common:keystone_authtoken:admin_tenant_name',
+            get('openstack:keystone:admin_tenant_name',
+                 openstack_defaults.keystone.admin_tenant_name)
+        )
+    ) %}
+neutron_admin_username = '{{ get('nova:DEFAULT:neutron_admin_username',
+                                get('neutron:common:keystone_authtoken:admin_user',
+                                    'neutron')
+                            ) }}'
+neutron_admin_password = '{{ get('nova:DEFAULT:neutron_admin_password',
+                                get('neutron:common:keystone_authtoken:admin_password',
+                                    nova_defaults.neutron_admin_password)
+                            ) }}'
+neutron_admin_auth_url = http://{{ ctrl_or_localhost }}:35357/v2.0/
+{#- TODO #}
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+{#- TODO #}
+firewall_driver = nova.virt.firewall.NoopFirewallDriver
+{#- TODO #}
+security_group_api = neutron
+
+# firewall_driver = nova.virt.libvirt.firewall.IptablesFirewallDriver
+
+{#- TODO #}
+libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtGenericVIFDriver
+# libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver
+# libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtOpenVswitchVirtualPortDriver
+
+# Cinder #
+volume_api_class = nova.volume.cinder.API
+osapi_volume_listen_port = 5900
+
+[spice]
+enabled = True
+agent_enabled = True
+html5proxy_base_url = http://{{ ctrl_or_localhost }}:6082/spice_auto.html
+keymap = en-us
+server_listen = ::
+server_proxyclient_address = compute-1.yourdomain.com
+
+[database]
+{{ database_connection(get, service) }}
+
+[keystone_authtoken]
+{{ keystone_authtoken(get, service) }}
