@@ -1,9 +1,9 @@
 TODO
 ====
 
-- Update README with info on basic Pillar-data
+- fix storage part of nova-compute's nova.conf
 
-- Add states for Horizon
+- Update README with info on basic Pillar-data
 
 - Add states for Cinder
 
