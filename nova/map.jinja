@@ -1,5 +1,17 @@
+{# needed on compute-nodes? 
+                        'linux-image-extra-`uname -r`',
+						'ubuntu-virt-server', #}
 {% set nova = salt['grains.filter_by']({
     'Ubuntu': {
+        'compute_packages': [
+						'iptables',
+						'libvirt-bin',
+						'pm-utils',
+						'nova-compute-kvm',
+						'python-guestfs',
+						'neutron-plugin-openvswitch-agent',
+						'openvswitch-switch',
+        ],
         'controller_packages': [
                         'nova-api', 
                         'nova-cert', 
