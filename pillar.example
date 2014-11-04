@@ -21,7 +21,7 @@ openstack:
     keystone:
         #admin_tenant_name: openstack_defaults.admin_tenant_name = service
         #host: pillar[openstack:controller:address_int]
-        #public_port: 5000
+        #public_port: openstack_defaults.keystone.public_port = 5000
         #uri: 'http://' + pillar[openstack:controller:address_ext] + ':' + pillar[openstack:keystone:public_port]
         #auth_port: 35357
         #auth_protocol: http
@@ -141,7 +141,9 @@ neutron:
 nova:
    DEFAULT:
        #my_ip: pillar[openstack:controller:address_int], localhost
-       #rpc_backend: rabbit
+       #rpc_backend: falls back to
+       #    - pillar[openstack:rpc_backend]
+       #    - openstack_defaults.rpc_backend = rabbit
        #rabbit_host: pillar[openstack:controller:address_int], localhost
        #debug: False
        #verbose: False
