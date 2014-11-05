@@ -1,8 +1,6 @@
 TODO
 ====
 
-- fix storage part of nova-compute's nova.conf
-
 - Update README with info on basic Pillar-data
 
 - Add states for Cinder
