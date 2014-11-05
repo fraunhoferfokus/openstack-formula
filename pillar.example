@@ -104,6 +104,7 @@ glance:
 
 horizon:
     #lock_dir: horizon_defaults.lock_dir = /var/run/horizon
+    #webroot: horizon_defaults.webroot = '/horizon'
 
 neutron:
     common:
