@@ -164,6 +164,10 @@ nova:
        #auth_strategy: falls back to
        # - pillar[openstack:auth_strategy]
        # - openstack_defaults.auth_strategy = 'keystone'
+       #state_path: nova_defaults.state_path = '/var/lib/nova'
+       #lock_path: nova_defaults.lock_path = '/run/lock/nova'
+       ## relative to state_path:
+       #instances_path: nova_defaults.instances_path = 'instances'
    database:
        #type: openstack_defaults = mysql
        password: <needs to be set>
@@ -172,3 +176,13 @@ nova:
         #admin_tenant_name: falls back to
         #   - pillar[openstack:keystone:admin_tenant_name]
         #   - openstack_defaults.admin_tenant_name = service
+   libvirt:
+        #images_type: falls back to
+        #   - pillar[nova:DEFAULT:libvirt_images_type]
+        #   - nova_defaults.images_type = 'default'
+        #images_volume_group: falls back to
+        #   - pillar[nova:DEFAULT:libvirt_images_volume_group] (deprecated)
+        #   - nova_defaults.images_volume_group = None
+        #sparse_logical_volumes: falls back to
+        #   - pillar[nova:DEFAULT:libvirt_sparse_logical_volumes] (deprecated)
+        #   - nova_defaults.libvirt_sparse_logical_volumes = False

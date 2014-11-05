@@ -48,8 +48,22 @@ rabbit_virtual_host={{ get('glance:api:DEFAULT:rabbit_virtual_host',
 verbose = {{ salt['pillar.get']('nova:DEFAULT:verbose', False) }}
 debug = {{ salt['pillar.get']('nova:DEFAULT:debug', False) }}
 logdir = /var/log/nova
-state_path = /var/lib/nova
-lock_path = /run/lock/nova
+{%- set state_path = get('nova:DEFAULT:state_path',
+                        nova_defaults.state_path) %}
+{%- set instances_path = get('nova:DEFAULT:instances_path',
+                            nova_defaults.instances_path) %}
+{%- if instances_path == nova_defaults.instances_path %}
+## instance data is stored in a subdirectory
+## of state_path called "instances" by default:
+state_path = {{ state_path }}
+{%- else %}
+state_path = {{ state_path }}
+## this one is relative to state_path, thus
+## resulting in "{{ '{0}/{1}'.format(state_path, instances_path) }}":
+instances_path = {{ instances_path }}
+{%- endif %}
+lock_path = {{ get('nova:DEFAULT:lock_path',
+                    nova_defaults.lock_path) }}
 
 #s3_host = controller.yourdomain.com
 #ec2_host = controller.yourdomain.com
@@ -87,10 +101,22 @@ neutron_metadata_proxy_shared_secret = '{{
     get('openstack:neutron:shared_secret',
         openstack_defaults.neutron.shared_secret) }}'
 
+{#- TODO: deprecated format, move to [libvirt]/... #}
 # Instance Disk Backend
-libvirt_images_type = lvm
-libvirt_images_volume_group = nova-local
-libvirt_sparse_logical_volumes = false
+libvirt_images_type = {{ get('nova:libvirt:images_type',
+                            get('nova:DEFAULT:libvirt_images_type',
+                                nova_defaults.images_type)
+                         ) }}
+libvirt_images_volume_group = {{ 
+    get('nova:libvirt:images_volume_group',
+        get('nova:DEFAULT:libvirt_images_volume_group',
+            nova_defaults.images_volume_group)
+    ) }}
+libvirt_sparse_logical_volumes = {{
+    get('nova:libvirt:sparse_logical_volumes',
+        get('nova:DEFAULT:libvirt_sparse_logical_volumes',
+            nova_defaults.libvirt_sparse_logical_volumes)
+    ) }}
 
 # Auth
 use_deprecated_auth = false
