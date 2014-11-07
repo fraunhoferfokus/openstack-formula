@@ -2,7 +2,7 @@
 {%- from 'neutron/map.jinja' import neutron with context %}
 neutron-server:
     pkg.installed:
-        - names: {{ neutron.server_packages }}
+        - names: {{ neutron.controller_packages }}
     service.running:
         - require:
             - pkg: neutron-server
@@ -61,5 +61,5 @@ metadata_agent.ini:
             - pkg: neutron-server
 
 include:
-  - neutron.server.database
-  - neutron.server.keystone
+  - neutron.controller.database
+  - neutron.controller.keystone
