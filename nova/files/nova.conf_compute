@@ -179,14 +179,18 @@ neutron_admin_auth_url = http://{{ ctrl_or_localhost }}:35357/v2.0/
 {#- TODO #}
 linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
 {#- TODO #}
+# firewall_driver = nova.virt.libvirt.firewall.IptablesFirewallDriver
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 {#- TODO #}
 security_group_api = neutron
 
-# firewall_driver = nova.virt.libvirt.firewall.IptablesFirewallDriver
-
 {#- TODO #}
-libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtGenericVIFDriver
+libvirt_vif_driver = {{ 
+    salt['pillar.get']('nova:libvirt:vif_driver',
+        salt['pillar.get']('nova:DEFAULT:libvirt_vif_driver',
+            nova_defaults.libvirt_vif_driver)
+    ) }}
+# libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtGenericVIFDriver
 # libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver
 # libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtOpenVswitchVirtualPortDriver
 
