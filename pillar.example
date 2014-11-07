@@ -138,6 +138,11 @@ neutron:
             password:
     dhcp_agent:
         ovs_integration_bridge: br-int
+    ml2:
+        ovs:
+            bridge_mappings:
+                External: br-ex
+                Intnet1: br-int
 
 nova:
    DEFAULT:
@@ -187,3 +192,7 @@ nova:
         #sparse_logical_volumes: falls back to
         #   - pillar[nova:DEFAULT:libvirt_sparse_logical_volumes] (deprecated)
         #   - nova_defaults.libvirt_sparse_logical_volumes = False
+        #vif_driver: falls back to
+        #   - pillar[nova:DEFAULT:libvirt_vif_driver]
+        #   - nova_defaults.vif_driver = 
+        #        'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver'
