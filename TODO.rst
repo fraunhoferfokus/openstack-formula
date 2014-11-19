@@ -1,6 +1,8 @@
 TODO
 ====
 
+- keep dnsmasq from breaking name-resolution on network node
+
 - Update README with info on basic Pillar-data
 
 - Add states for Cinder
@@ -20,6 +22,13 @@ TODO
 - Figure out how to run `{keystone,nova,...}-manage db_sync` states
   w/o making the dependent services fail for the next execution b/c
   the DB doesn't work yet.
+  Maybe we can use the prereq_ requisite to check if the DB schema
+  will change and stop the service(s) beforehand. But I suspect we
+  have to wrap some Salt-stuff around the differen migrations-
+  mechanisms for this to work.
+
+.. _prereq:
+    http://docs.saltstack.com/en/latest/ref/states/requisites.html#prereq
 
 - write a state-file for the Orchestrate-Runner_
 
