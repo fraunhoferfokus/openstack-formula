@@ -35,7 +35,6 @@
 
 glance-db:
     mysql_database.present:
-        {# TODO: I guess this one should be configurable by Pillar, too #}
         - name: {{ glance_defaults.db_name }}
 
 glance-dbuser:
@@ -61,12 +60,15 @@ glance-grants:
 glance-manage db_sync:
   cmd.run:
     - cwd: {{ glance.migrate_repo }}
-    - name: 'glance-manage db_sync; sleep 15'
+    - name: 'glance-manage db_sync 2> /dev/null; sleep 15'
     - user: glance
     - require:
         - pkg: glance-packages
         - mysql_grants: glance-grants
     - watch:
         - pkg: glance-packages
-    - onlyif: test $(glance-manage db_version) -lt $(python manage.py version)
+    - listen_in:
+        - service: glance-api
+        - service: glance-registry
+    - onlyif: test $(glance-manage db_version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
 {% endif %}
