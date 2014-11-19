@@ -1,24 +1,14 @@
 {% from 'keystone/defaults.jinja' import keystone_defaults %}
-keystone:
+keystone-package:
     pkg:
         - installed
-    service.running:
-        - require:
-            - pkg: keystone
-            - file: /etc/keystone/keystone.conf 
-            - cmd: keystone-manage db_sync
-        - watch:
-            - pkg: keystone
-            - file: /etc/keystone/keystone.conf 
-            - mysql_user: keystone-dbuser
-            - cmd: keystone-manage db_sync
 
 /etc/keystone/keystone.conf:
     file.managed:
         - source: salt://keystone/files/keystone.conf
         - template: jinja
         - require:
-            - pkg: keystone
+            - pkg: keystone-package
 
 {% set db_user = salt['pillar.get'](
                     'keystone:database:username', 
@@ -79,16 +69,28 @@ keystone-grants:
 
 keystone-manage db_sync:
   cmd.run:
-    - name: 'keystone-manage db_sync; sleep 15'
+    - name: 'keystone-manage db_sync 2> /dev/null; sleep 15'
     - user: keystone
     # TODO: This path shouldn't be Ubuntu-specific!
     - cwd:  /usr/lib/python2.7/dist-packages/keystone/common/sql/migrate_repo/
     - require:
-        - pkg: keystone
+        - pkg: keystone-package
         - mysql_grants: keystone-grants
     - watch:
-        - pkg: keystone
-    - onlyif: test $(keystone-manage db_version) -lt $( python manage.py version . )
+        - pkg: keystone-package
+    - onlyif: test $(keystone-manage db_version 2> /dev/null) -lt $( python manage.py version . 2> /dev/null)
+
+keystone-service:
+    service.running:
+        - require:
+            - pkg: keystone-package
+            - file: /etc/keystone/keystone.conf 
+            - cmd: keystone-manage db_sync
+        - watch:
+            - pkg: keystone-package
+            - file: /etc/keystone/keystone.conf 
+            - mysql_user: keystone-dbuser
+            - cmd: keystone-manage db_sync
 
 create basic tenants in Keystone:
   keystone.tenant_present:
@@ -96,6 +98,8 @@ create basic tenants in Keystone:
       - admin
       - service
     - require:
+      - cmd: keystone-manage db_sync
+    - listen: 
       - cmd: keystone-manage db_sync
 
 create basic roles in Keystone:
@@ -107,6 +111,8 @@ create basic roles in Keystone:
       - KeystoneAdmin
       - KeystoneServiceAdmin
     - require:
+      - cmd: keystone-manage db_sync
+    - listen: 
       - cmd: keystone-manage db_sync
 
 create admin-user in Keystone:
@@ -127,12 +133,16 @@ create admin-user in Keystone:
     - require:
       - keystone: create basic tenants in Keystone
       - keystone: create basic roles in Keystone
+    - listen: 
+      - cmd: keystone-manage db_sync
 
 keystone-service in Keystone:
     keystone.service_present:
         - name: keystone
         - service_type: identity
         - description: OpenStack Identity Service
+        - listen: 
+          - cmd: keystone-manage db_sync
 
 keystone-endpoint in Keystone:
     keystone.endpoint_present:
@@ -173,3 +183,5 @@ keystone-endpoint in Keystone:
         - require:
             - cmd: keystone-manage db_sync
             - keystone: keystone-service in Keystone
+        - listen: 
+          - cmd: keystone-manage db_sync

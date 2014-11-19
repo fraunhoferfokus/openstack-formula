@@ -35,7 +35,7 @@ local_settings.py:
 
 apache2:
     service.running:
-        - watch:
+        - listen:
             - file: {{ horizon.local_settings }}
         - require:
             - file: {{ horizon.local_settings }}
