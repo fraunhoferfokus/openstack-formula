@@ -15,14 +15,14 @@ refresh pillar:
         - name: saltutil.refresh_pillar
         - tgt: '*'
 
-### not using any saltenv, do we??
+### not using any saltenv, do we salt.function??
 ### BUG
-#refresh modules and states:
-#    salt.function:
-#        - name: saltutil.sync_all
-#        - tgt: '*'
-#        - args:
-#           - saltenv: openstack
+refresh modules and states:
+    salt.function:
+        - name: saltutil.sync_all
+        - tgt: '*'
+        - args:
+           - saltenv: openstack
 
 #restart minion:
 #    salt.function:
@@ -36,7 +36,7 @@ configure network:
     salt.state:
         - tgt: '*'
         - sls:
-            - networking.config
+            - networking
         #- require: 
         #    - salt: restart minion
 
