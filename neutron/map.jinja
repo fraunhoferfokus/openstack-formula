@@ -19,5 +19,6 @@
                 'neutron-plugin-openvswitch-agent',
         ],
         'neutron_conf_file': '/etc/neutron/neutron.conf',
+        'plugins_ml2_conf_ini': '/etc/neutron/plugins/ml2/ml2_conf.ini',
     },
 }, merge=salt['pillar.get']('neutron:lookup'), grain='os') %}
