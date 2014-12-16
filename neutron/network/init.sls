@@ -26,3 +26,13 @@ l3_agent.ini:
         - user: root
         - group: neutron
         - mode: 640
+
+# see http://docs.openstack.org/icehouse/install-guide/install/apt/content/neutron-ml2-network-node.html
+plugins/ml2_conf.ini:
+    file.managed:
+        - name: {{ neutron.plugins_ml2_conf_ini }}
+        - source: salt://neutron/files/plugins_ml2_conf.ini
+        - template: jinja
+        - user: root
+        - group: neutron
+        - mode: 640
