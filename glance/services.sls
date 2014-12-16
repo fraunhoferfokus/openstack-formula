@@ -3,18 +3,18 @@
 glance-api:
     service.running:
         - watch:
-            - file: {{ glance.api_conf_file }}
-            - file: {{ glance.api_paste_ini }}
+            - file: glance-api.conf
+            - file: glance-api-paste.ini
         - require: 
-            - file: {{ glance.api_conf_file }}
-            - file: {{ glance.api_paste_ini }}
+            - file: glance-api.conf
+            - file: glance-api-paste.ini
 
 glance-registry:
     service.running:
         - watch:
-            - file: {{ glance.registry_conf_file }}
-            - file: {{ glance.registry_paste_ini }}
+            - file: glance-registry.conf
+            - file: glance-registry-paste.ini
         - require: 
-            - file: {{ glance.registry_conf_file }}
-            - file: {{ glance.registry_paste_ini }}
+            - file: glance-registry.conf
+            - file: glance-registry-paste.ini
 

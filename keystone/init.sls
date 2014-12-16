@@ -1,7 +1,7 @@
 {% from 'keystone/defaults.jinja' import keystone_defaults %}
 keystone-package:
-    pkg:
-        - installed
+    pkg.installed:
+      - name: keystone
 
 /etc/keystone/keystone.conf:
     file.managed:
@@ -82,6 +82,7 @@ keystone-manage db_sync:
 
 keystone-service:
     service.running:
+        - name: keystone
         - require:
             - pkg: keystone-package
             - file: /etc/keystone/keystone.conf 
