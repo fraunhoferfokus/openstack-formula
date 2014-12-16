@@ -36,14 +36,14 @@ local_settings.py:
 apache2:
     service.running:
         - listen:
-            - file: {{ horizon.local_settings }}
+            - file: local_settings.py
         - require:
-            - file: {{ horizon.local_settings }}
+            - file: local_settings.py
 
 memcached:
     service.running:
         - watch:
-            - file: {{ horizon.local_settings }}
+            - file: local_settings.py
             - service: apache2
         - require:
-            - file: {{ horizon.local_settings }}
+            - file: local_settings.py
