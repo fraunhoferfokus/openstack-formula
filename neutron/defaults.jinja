@@ -2,6 +2,19 @@
     'db_name': 'neutron',
     'db_pass': '! Password for NEUTRON DATABASE is UNSET!',
     'db_user': 'neutron',
-    'keystone_password': 'z4j0xIrKAp1_<Neutron Keystone Password is UNSET>_mBkKINw3edU',
-    'nova_admin_password': '<7Y3tJxe>_nova_admin_password_for_neutron_UNSET<elqlH8hA>'
+    'interface_driver':
+        'neutron.agent.linux.interface.OVSInterfaceDriver',
+    'keystone_password': 
+        'z4j0xIrKAp1_<Keystone Password for Neutron is UNSET>_mBkKINw3edU',
+    'ml2_bridge_mappings':
+        {'External':'br-ex','Intnet1':'br-int'},
+    'ml2_tunnel_id_ranges':
+        ['1:1000'],
+    'neutron_admin_password': 
+        'neutron_<7Y3tJxe>_admin_<elqlH8hA>_password_UNSET',
+    'nova_admin_password': 
+        '<7Y3tJxe>_nova_admin_password_for_neutron_UNSET<elqlH8hA>',
+    'ovs_integration_bridge': 'br-int',
+    'ovs_vsctl_timeout': 10,
+    'use_namespaces': True,
 } %}
