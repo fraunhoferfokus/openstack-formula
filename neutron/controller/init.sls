@@ -19,7 +19,8 @@ neutron-server:
 neutron.conf:
     file.managed:
         - name: {{ neutron.conf_dir}}/neutron.conf
-        - user: neutron
+        - user: root
+        - group: neutron
         - mode: 640
         - source: salt://neutron/files/neutron.conf
         - template: jinja
@@ -43,6 +44,7 @@ neutron-l3-agent:
             - file: neutron.conf
             - file: l3_agent.ini
         - watch:
+            - file: neutron.conf
             - file: l3_agent.ini
 
 l3_agent.ini:
@@ -62,6 +64,7 @@ neutron-dhcp-agent:
             - file: neutron.conf
             - file: dhcp_agent.ini
         - watch:
+            - file: neutron.conf
             - file: dhcp_agent.ini
 
 dhcp_agent.ini:
@@ -81,12 +84,14 @@ neutron-metadata-agent:
             - file: neutron.conf
             - file: metadata_agent.ini
         - watch:
+            - file: neutron.conf
             - file: metadata_agent.ini
 
 metadata_agent.ini:
     file.managed:
         - name: {{ neutron.conf_dir}}/metadata_agent.ini
-        - user: neutron
+        - user: root
+        - group: neutron
         - mode: 640
         - source: salt://neutron/files/metadata_agent.ini
         - template: jinja
