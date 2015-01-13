@@ -8,21 +8,21 @@ Module for handling openstack neutron calls.
 :configuration: This module is not usable until the following are specified
     either in a pillar or in the minion's config file::
 
-        keystone.user: admin
-        keystone.password: verybadpass
-        keystone.tenant: admin
-        keystone.tenant_id: f80919baedab48ec8931f200c65a50df
-        keystone.auth_url: 'http://127.0.0.1:5000/v2.0/'
-
-        OR (for token based authentication)
-
-        keystone.token: 'ADMIN'
-        keystone.endpoint: 'http://127.0.0.1:35357/v2.0'
+        ## TODO: Check which of those are needed
+    
+        neutron.user: neutron
+        neutron.password: verybadpass
+        neutron.tenant: service
+        neutron.tenant_id: f80919baedab48ec8931f200c65a50df
+        neutron.auth_url: 'http://127.0.0.1:5000/v2.0/'
+        neutron.endpoint: 'http://127.0.0.1:9696'
 
     If configuration for multiple openstack accounts is required, they can be
     set up as different configuration profiles:
     For example::
 
+        ## TODO ##
+    
         openstack1:
           keystone.user: admin
           keystone.password: verybadpass
@@ -37,12 +37,12 @@ Module for handling openstack neutron calls.
           keystone.tenant_id: f80919baedab48ec8931f200c65a50df
           keystone.auth_url: 'http://127.0.0.2:5000/v2.0/'
 
-    With this configuration in place, any of the keystone functions can make use
+    With this configuration in place, any of the neutron functions can make use
     of a configuration profile by declaring it explicitly.
     For example::
 
-        salt '*' keystone.tenant_list profile=openstack1
-:configuration: This module is not usable until '''
+        salt '*' neutron.network_list profile=openstack1
+'''
 
 # Import third party libs
 HAS_NEUTRON = False
@@ -71,9 +71,9 @@ __opts__ = {}
 
 def auth(profile=None, **connection_args):
     '''
-    Set up keystone credentials
+    Set up neutron credentials
 
-    Only intended to be used within Keystone-enabled modules
+    Only intended to be used within neutron-enabled modules
     '''
 
     if profile:
@@ -118,21 +118,25 @@ def auth(profile=None, **connection_args):
     return client.Client(**kwargs)
 
 def create_network(name, admin_state_up = False):
+    # TODO: docstring
     neutron = auth()
     neutron.format = 'json'
     network = {'name': name, 'admin_state_up': admin_state_up}
     ret = {}
     neutron.create_network({'network':network})
-    networks = neutron.list_networks(name=network)
-    print networks
-    return {'Changes': networks}
+    networks = neutron.list_networks(name=name)
+    # TODO: Doesn't return anything useful
+    return networks
 
 def delete_network(network_id):
+    # TODO: docstring
     neutron = auth()
     neutron.format = 'json'
-    neutron.delete_network(network_id)
+    # TODO: Always returns None?
+    return neutron.delete_network(network_id)
 
 def list_networks(name = ''):
+    # TODO: docstring
     neutron = auth()
     neutron.format = 'json'
     if name:
