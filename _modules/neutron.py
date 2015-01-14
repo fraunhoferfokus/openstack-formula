@@ -117,16 +117,19 @@ def auth(profile=None, **connection_args):
 
     return client.Client(**kwargs)
 
-def create_network(name, admin_state_up = False):
+def create_network(name, admin_state_up = True, 
+        shared = False, tenant_id = None):
     # TODO: docstring
     neutron = auth()
     neutron.format = 'json'
-    network = {'name': name, 'admin_state_up': admin_state_up}
-    ret = {}
-    neutron.create_network({'network':network})
-    networks = neutron.list_networks(name=name)
-    # TODO: Doesn't return anything useful
-    return networks
+    network = {'name': name, 
+        'admin_state_up': admin_state_up,
+        'shared': shared }
+    if tenant_id:
+        network['tenant_id'] = tenant_id
+    #ret = {}
+    ret = neutron.create_network({'network':network})
+    return ret
 
 def delete_network(network_id):
     # TODO: docstring
@@ -135,12 +138,25 @@ def delete_network(network_id):
     # TODO: Always returns None?
     return neutron.delete_network(network_id)
 
-def list_networks(name = ''):
+def list_networks(name = None, admin_state_up = None,
+        network_id = None, shared = None, status = None,
+        subnets = None, tenant_id = None):
     # TODO: docstring
     neutron = auth()
     neutron.format = 'json'
-    if name:
-        networks = neutron.list_networks(name = name)
-    else:
-        networks = neutron.list_networks()
-    return networks
+    kwargs = {}
+    if name is not None:
+        kwargs['name'] = name
+    if admin_state_up is not None:
+        kwargs['admin_state_up'] = admin_state_up
+    if network_id:
+        kwargs['network_id'] = network_id
+    if shared:
+        kwargs['shared'] = shared
+    if status:
+        kwargs['status'] = status
+    if subnets:
+        kwargs['subnets'] = subnets
+    if tenant_id:
+        kwargs['tenant_id'] = tenant_id
+    return neutron.list_networks(**kwargs)
