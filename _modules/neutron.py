@@ -184,40 +184,40 @@ def list_subnets():
     return neutron.list_subnets()
 
 def create_subnet(network_id, cidr, name = None, tenant_id = None,
-        allocation_pools = None, gateway_ip = None, ip_version = '4',
-        subnet_id = None, enable_dhcp = None): 
-    '''
-    Create a subnet with given parameters.
-    "network_id" and "cidr" are required. The API also requires "ip_version"
-    which this function sets to 4 by default.
-    
-    Optional arguments are:
-    - tenant_id
-    - allocation_pools (format??)
-    - gateway_ip
-    - ip_version (4 or 6)
-    - subnet_id
-    - enable_dhcp
+            allocation_pools = None, gateway_ip = None, ip_version = '4',
+            subnet_id = None, enable_dhcp = None): 
+        '''
+        Create a subnet with given parameters.
+        "network_id" and "cidr" are required. The API also requires "ip_version"
+        which this function sets to 4 by default.
+        
+        Optional arguments are:
+        - tenant_id
+        - allocation_pools (format??)
+        - gateway_ip
+        - ip_version (4 or 6)
+        - subnet_id
+        - enable_dhcp
 
-    CLI example::
+        CLI example::
 
-        salt controller neutron.create_subnet \\
-          e5e85c75-c95a-4cc1-abce-cd719e7ec753 192.168.2.0/24 \\
-          'allocation_pools=[{"start": "192.168.2.20", "end": "192.168.2.30"}]'
-    '''
-    neutron = auth()
-    neutron.format = 'json'
-    kwargs = { 'network_id': network_id , 'cidr': cidr}
-    if tenant_id is not None:
-        kwargs['tenant_id'] = tenant_id
-    if isinstance(allocation_pools,str):
-        pools = []
-        for pool in allocation_pools.split(','):
-            (start, end) = pool.split(':')
-            pools += [{'start': start, 'end': end}]
-        kwargs['allocation_pools'] = pools
-    elif allocation_pools is not None:
-        kwargs['allocation_pools'] = allocation_pools
+            salt controller neutron.create_subnet \\
+              e5e85c75-c95a-4cc1-abce-cd719e7ec753 192.168.2.0/24 \\
+              allocation_pools=192.168.2.20-192.168.2.30
+        '''
+        neutron = auth()
+        neutron.format = 'json'
+        kwargs = { 'network_id': network_id , 'cidr': cidr}
+        if tenant_id is not None:
+            kwargs['tenant_id'] = tenant_id
+        if isinstance(allocation_pools,str):
+            pools = []
+            for pool in allocation_pools.split(','):
+                (start, end) = pool.split('-')
+                pools += [{'start': start, 'end': end}]
+            kwargs['allocation_pools'] = pools
+        elif allocation_pools is not None:
+            kwargs['allocation_pools'] = allocation_pools
     if gateway_ip is not None:
         kwargs['gateway_ip'] = gateway_ip
     if ip_version not in ['4', '6', 4, 6]:
