@@ -11,3 +11,17 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+Used Code:
+
+  - Basic structure for _modules/neutron.py and the function neutron.auth 
+    come from the SaltStack module for Keystone, liscensed under Apache 
+    Public License::
+        
+    https://github.com/saltstack/salt/blob/develop/salt/modules/keystone.py
+
+  - Functions neutron.create_network, neutron.list_networks, 
+    neutron.delete_network are based on the example code from
+
+    https://github.com/openstack/python-neutronclient/blob/master/doc/source/index.rst
