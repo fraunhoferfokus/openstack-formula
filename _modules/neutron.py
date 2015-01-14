@@ -117,16 +117,33 @@ def auth(profile=None, **connection_args):
 
     return client.Client(**kwargs)
 
-def create_network(name, admin_state_up = True, 
-        shared = False, tenant_id = None):
-    # TODO: docstring
+def create_network(name, admin_state_up = True, shared = False, 
+        tenant_id = None, physical_network = None, 
+        network_type = None, segmentation_id = None):
+    '''
+    Create a network with given name.
+
+    Additional valid parameters:
+    - admin_state_up (default: True)
+    - shared (default: False) 
+    - tenant_id (only by admin users) 
+    - physical_network 
+    - network_type (like flat, vlan, vxlan, and gre)
+    - segmentation_id (VLAN ID, GRE Key)
+    '''
     neutron = auth()
     neutron.format = 'json'
     network = {'name': name, 
         'admin_state_up': admin_state_up,
         'shared': shared }
-    if tenant_id:
+    if tenant_id is not None:
         network['tenant_id'] = tenant_id
+    if physical_network is not None:
+        network['provider:physical_network'] = physical_network
+    if network_type is not None:
+        network['provider:network_type'] = network_type
+    if segmentation_id is not None:
+        network['provider:segmentation_id'] = segmentation_id
     #ret = {}
     ret = neutron.create_network({'network':network})
     return ret
