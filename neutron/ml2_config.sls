@@ -6,5 +6,8 @@ ml2_conf.ini:
         - mode: 640
         - source: salt://neutron/files/ml2_conf.ini
         - template: jinja
-        #- require:
-        #    - pkg: neutron-server
+        - require:
+            - pkg: neutron-common
+
+neutron-common:
+    pkg.installed
