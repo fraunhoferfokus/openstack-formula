@@ -185,7 +185,7 @@ def network_list(name = None, admin_state_up = None,
         kwargs['status'] = status
     if tenant_id:
         kwargs['tenant_id'] = tenant_id
-    return neutron.list_networks(**kwargs)
+    return neutron.list_networks(**kwargs)['networks']
 
 def network_show(network_id):
     '''
