@@ -7,6 +7,7 @@ nova-api:
             - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
 
 nova-cert:
     service.running:
@@ -23,6 +24,7 @@ nova-conductor:
             - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
 
 nova-consoleauth:
     service.running:
@@ -31,6 +33,7 @@ nova-consoleauth:
             - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
+            - cmd: nova-manage db sync
 
 nova-novncproxy:
     service.running:
