@@ -1,6 +1,15 @@
 TODO
 ====
 
+- **UPDATE README & TODO**
+
+- don't allow networks of same name in the same tenant
+
+- implement neutron.network_modify and adjusting existing
+  networks with neutron_network.managed
+
+- implement neutron.subnet_modify and neutron_subnet.managed
+
 - keep dnsmasq from breaking name-resolution on network node
 
 - Update README with info on basic Pillar-data
@@ -16,8 +25,6 @@ TODO
 - Add endpoints in Keystone (missing: cinder, ceilometer, heat?)
 
 - Add services in Keystone (missing: cinder, ceilometer, heat?)
-
-- add OVS-bits to neutron.server
 
 - Figure out how to run `{keystone,nova,...}-manage db_sync` states
   w/o making the dependent services fail for the next execution b/c
