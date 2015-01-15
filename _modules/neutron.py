@@ -116,7 +116,7 @@ def auth(profile=None, **connection_args):
 
     return client.Client(**kwargs)
 
-def create_network(name, admin_state_up = True, shared = False, 
+def network_create(name, admin_state_up = True, shared = False, 
         tenant_id = None, physical_network = None, 
         network_type = None, segmentation_id = None):
     '''
@@ -147,17 +147,29 @@ def create_network(name, admin_state_up = True, shared = False,
     ret = neutron.create_network({'network':network})
     return ret
 
-def delete_network(network_id):
-    # TODO: docstring
+def network_delete(network_id):
+    '''
+    Delete network of given ID.
+    '''
     neutron = auth()
     neutron.format = 'json'
     # TODO: Always returns None?
     return neutron.delete_network(network_id)
 
-def list_networks(name = None, admin_state_up = None,
+def network_list(name = None, admin_state_up = None,
         network_id = None, shared = None, status = None,
-        subnets = None, tenant_id = None):
-    # TODO: docstring
+        tenant_id = None):
+    '''
+    List networks.
+
+    Optional parameters to filter by:
+    - name
+    - admin_state_up (bool)
+    - network_id
+    - shared (bool, might be silently dropped on Icehouse)
+    - status (like "ACTIVE")
+    - tenant_id
+    '''
     neutron = auth()
     neutron.format = 'json'
     kwargs = {}
@@ -166,18 +178,16 @@ def list_networks(name = None, admin_state_up = None,
     if admin_state_up is not None:
         kwargs['admin_state_up'] = admin_state_up
     if network_id:
-        kwargs['id'] = network_id
+        kwargs['network_id'] = network_id
     if shared:
         kwargs['shared'] = shared
     if status:
         kwargs['status'] = status
-    if subnets:
-        kwargs['subnets'] = subnets
     if tenant_id:
         kwargs['tenant_id'] = tenant_id
     return neutron.list_networks(**kwargs)
 
-def show_network(network_id):
+def network_show(network_id):
     '''
     Show details for network with given ID.
     '''
@@ -189,12 +199,17 @@ def show_network(network_id):
         return False    
     return response['network']
 
-def list_subnets():
+def subnet_show():
+    '''
+    List all subnets.
+
+    No filtering/column selection yet.
+    '''
     neutron = auth()
     neutron.format = 'json'
     return neutron.list_subnets()
 
-def create_subnet(network_id, cidr, name = None, tenant_id = None,
+def subnet_create(network_id, cidr, name = None, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
             subnet_id = None, enable_dhcp = None): 
     '''
@@ -241,14 +256,19 @@ def create_subnet(network_id, cidr, name = None, tenant_id = None,
         kwargs['enable_dhcp'] = enable_dhcp
     return neutron.create_subnet({'subnet': kwargs})
 
-def delete_subnet(subnet_id):
-    # TODO: docstring
+def subnet_delete(subnet_id):
+    '''
+    Delete subnet of given ID.
+    '''
     neutron = auth()
     neutron.format = 'json'
     # TODO: Always returns None?
     return neutron.delete_subnet(subnet_id)
 
 def subnet_show(subnet_id):
+    '''
+    Show details for given subnet.
+    '''
     neutron = auth()
     neutron.format = 'json'
     try:
