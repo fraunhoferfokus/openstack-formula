@@ -49,9 +49,8 @@ HAS_NEUTRON = False
 try:
     from neutronclient.v2_0 import client # as neutron_client
     from neutronclient.neutron.v2_0 import agent
-    import neutronclient.common.exceptions
+    import neutronclient.common.exceptions as neutron_exceptions
     HAS_NEUTRON = True
-    import salt.modules.keystone.auth as auth
     import logging
     logging.basicConfig(level=logging.DEBUG)
 except ImportError:
@@ -178,6 +177,18 @@ def list_networks(name = None, admin_state_up = None,
         kwargs['tenant_id'] = tenant_id
     return neutron.list_networks(**kwargs)
 
+def show_network(network_id):
+    '''
+    Show details for network with given ID.
+    '''
+    neutron = auth()
+    neutron.format = 'json'
+    try:
+        response = neutron.show_network(network_id)
+    except neutron_exceptions.NetworkNotFoundClient:
+        return False    
+    return response['network']
+
 def list_subnets():
     neutron = auth()
     neutron.format = 'json'
@@ -230,9 +241,18 @@ def create_subnet(network_id, cidr, name = None, tenant_id = None,
         kwargs['enable_dhcp'] = enable_dhcp
     return neutron.create_subnet({'subnet': kwargs})
 
-def delete_subnet(network_id):
+def delete_subnet(subnet_id):
     # TODO: docstring
     neutron = auth()
     neutron.format = 'json'
     # TODO: Always returns None?
-    return neutron.delete_subnet(network_id)
+    return neutron.delete_subnet(subnet_id)
+
+def subnet_show(subnet_id):
+    neutron = auth()
+    neutron.format = 'json'
+    try:
+        response = neutron.show_subnet(subnet_id)
+    except neutron_exceptions.NeutronClientException:
+        return False    
+    return response['subnet']
