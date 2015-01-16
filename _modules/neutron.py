@@ -199,6 +199,59 @@ def network_show(network_id):
         return False    
     return response['network']
 
+def network_update(name = None, network_id = None, 
+        admin_state_up = None, shared = None, 
+        tenant_id = None, physical_network = None, 
+        network_type = None, segmentation_id = None):
+    '''
+    Update an existing network with given parameters.
+
+    If there's more than one network with given name
+    and tenant_id you have to specify the network_id.
+    '''
+    if name is None and network_id is None:
+        raise SaltInvocationError, 'You have to specify'\
+            'at least one of "name" or "network_id".'
+    net_filters = {}
+    if name is not None:
+        net_filters['name'] = name
+    if network_id is not None:
+        net_filters['network_id'] = network_id
+    if tenant_id is not None:
+        net_filters['tenant_id'] = tenant_id
+    net_list = network_list(**net_filters)
+    if len(net_list) > 1:
+        pp = pprint.PrettyPrinter(indent=4)
+        raise SaltInvocationError, 'More than one network with those '\
+            'options found:\n{}'.format(pp.pformat(net_filters))
+    elif len(net_list) == 0:
+        pp = pprint.PrettyPrinter(indent=4)
+        raise SaltInvocationError, 'No network with those '\
+            'options found:\n{}'.format(pp.pformat(net_filters))
+    else:
+        param_list = {}
+        if name is not None:
+            param_list['name'] = name
+        if network_id is not None:
+            param_list['network_id'] = network_id
+        if tenant_id is not None:
+            param_list['tenant_id'] = tenant_id
+        if admin_state_up is not None:
+            param_list['shared'] = shared 
+        if tenant_id is not None:
+            param_list['tenant_id'] = tenant_id
+        if physical_network is not None:
+            param_list['provider:physical_network'] = physical_network
+        if network_type is not None:
+            param_list['provider:network_type'] = network_type
+        if segmentation_id is not None:
+            param_list['provider:segmentation_id'] = segmentation_id
+        neutron = _auth()
+        neutron.format = 'json'
+        return neutron.update_network(**param_list)
+
+
+# TODO: Should be _list!!!
 def subnet_show():
     '''
     List all subnets.
