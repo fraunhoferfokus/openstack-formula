@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Managing OpenStack Neutron
-==========================
+Managing networks in OpenStack Neutron
+======================================
 '''
 # Import python libs
 import logging
@@ -28,13 +28,14 @@ def managed(name, admin_state_up = None, network_id = None,
         list_filters['admin_state_up'] = admin_state_up
     if network_id is not None:
         list_filters['network_id'] = network_id
-    if shared is not None:
-        list_filters['shared'] = shared
     if tenant_id is not None:
         list_filters['tenant_id'] = tenant_id
     net_list = __salt__['neutron.network_list'](**list_filters)
-    log.info(net_list)
+    log.debug(net_list)
     net_params = list_filters.copy()
+    # filtering by those didn't work for me
+    if shared is not None:
+        net_params['shared'] = shared
     if physical_network is not None:
         net_params['provider:physical_network'] = physical_network
     if network_type is not None:
