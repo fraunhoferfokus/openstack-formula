@@ -3,10 +3,10 @@ TODO
 
 - **UPDATE README & TODO**
 
-- don't allow networks of same name in the same tenant
+- implement adjusting existing networks int neutron_network.managed
+  with neutron.network_update
 
-- implement neutron.network_modify and adjusting existing
-  networks with neutron_network.managed
+- don't allow networks of same name in the same tenant
 
 - implement neutron.subnet_modify and neutron_subnet.managed
 
