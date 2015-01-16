@@ -43,6 +43,8 @@ Module for handling openstack neutron calls.
 
         salt '*' neutron.network_list profile=openstack1
 '''
+# Import salt libs
+from salt.exceptions import SaltInvocationError
 
 # Import third party libs
 HAS_NEUTRON = False
@@ -51,8 +53,10 @@ try:
     from neutronclient.neutron.v2_0 import agent
     import neutronclient.common.exceptions as neutron_exceptions
     HAS_NEUTRON = True
+    import pprint
     import logging
     logging.basicConfig(level=logging.DEBUG)
+    log = logging.getLogger(__name__)
 except ImportError:
     pass
 
@@ -178,7 +182,7 @@ def network_list(name = None, admin_state_up = None,
     if admin_state_up is not None:
         kwargs['admin_state_up'] = admin_state_up
     if network_id:
-        kwargs['network_id'] = network_id
+        kwargs['id'] = network_id
     if shared:
         kwargs['shared'] = shared
     if status:
@@ -199,43 +203,46 @@ def network_show(network_id):
         return False    
     return response['network']
 
-def network_update(name = None, network_id = None, 
-        admin_state_up = None, shared = None, 
-        tenant_id = None, physical_network = None, 
-        network_type = None, segmentation_id = None):
+def network_update(name = None, network_id = None, new_name = None,
+        admin_state_up = None, shared = None, tenant_id = None, 
+        physical_network = None, network_type = None, 
+        segmentation_id = None):
     '''
     Update an existing network with given parameters.
 
     If there's more than one network with given name
     and tenant_id you have to specify the network_id.
+
+    You can't change a network's ID and Neutron will refuse
+    to update some other settings as well - or just ignore
+    this part of your request.
     '''
     if name is None and network_id is None:
         raise SaltInvocationError, 'You have to specify'\
             'at least one of "name" or "network_id".'
+    pp = pprint.PrettyPrinter(indent=4)
     net_filters = {}
-    if name is not None:
-        net_filters['name'] = name
     if network_id is not None:
         net_filters['network_id'] = network_id
+    elif name is not None:
+        net_filters['name'] = name
     if tenant_id is not None:
         net_filters['tenant_id'] = tenant_id
+    log.debug('options for network_list():\n{0}'.format(
+        pp.pformat(net_filters)))
     net_list = network_list(**net_filters)
     if len(net_list) > 1:
-        pp = pprint.PrettyPrinter(indent=4)
         raise SaltInvocationError, 'More than one network with those '\
             'options found:\n{}'.format(pp.pformat(net_filters))
     elif len(net_list) == 0:
-        pp = pprint.PrettyPrinter(indent=4)
         raise SaltInvocationError, 'No network with those '\
             'options found:\n{}'.format(pp.pformat(net_filters))
     else:
         param_list = {}
-        if name is not None:
-            param_list['name'] = name
-        if network_id is not None:
-            param_list['network_id'] = network_id
-        if tenant_id is not None:
-            param_list['tenant_id'] = tenant_id
+        if new_name is not None:
+            param_list['name'] = new_name
+        if network_id is None:
+            network_id = net_list[0]['id']
         if admin_state_up is not None:
             param_list['shared'] = shared 
         if tenant_id is not None:
@@ -248,8 +255,7 @@ def network_update(name = None, network_id = None,
             param_list['provider:segmentation_id'] = segmentation_id
         neutron = _auth()
         neutron.format = 'json'
-        return neutron.update_network(**param_list)
-
+        return neutron.update_network(network_id, {'network': param_list})
 
 # TODO: Should be _list!!!
 def subnet_show():
