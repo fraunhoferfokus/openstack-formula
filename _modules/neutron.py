@@ -257,8 +257,7 @@ def network_update(name = None, network_id = None, new_name = None,
         neutron.format = 'json'
         return neutron.update_network(network_id, {'network': param_list})
 
-# TODO: Should be _list!!!
-def subnet_show():
+def subnet_list():
     '''
     List all subnets.
 
