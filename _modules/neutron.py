@@ -68,7 +68,7 @@ def __virtual__():
 
 __opts__ = {}
 
-def auth(profile=None, **connection_args):
+def _auth(profile=None, **connection_args):
     '''
     Set up neutron credentials
 
@@ -130,7 +130,7 @@ def network_create(name, admin_state_up = True, shared = False,
     - network_type (like flat, vlan, vxlan, and gre)
     - segmentation_id (VLAN ID, GRE Key)
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     network = {'name': name, 
         'admin_state_up': admin_state_up,
@@ -151,7 +151,7 @@ def network_delete(network_id):
     '''
     Delete network of given ID.
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     # TODO: Always returns None?
     return neutron.delete_network(network_id)
@@ -170,7 +170,7 @@ def network_list(name = None, admin_state_up = None,
     - status (like "ACTIVE")
     - tenant_id
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     kwargs = {}
     if name is not None:
@@ -191,7 +191,7 @@ def network_show(network_id):
     '''
     Show details for network with given ID.
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     try:
         response = neutron.show_network(network_id)
@@ -205,7 +205,7 @@ def subnet_show():
 
     No filtering/column selection yet.
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     return neutron.list_subnets()
 
@@ -231,7 +231,7 @@ def subnet_create(network_id, cidr, name = None, tenant_id = None,
           e5e85c75-c95a-4cc1-abce-cd719e7ec753 192.168.2.0/24 \\
           allocation_pools=192.168.2.20-192.168.2.30
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     kwargs = { 'network_id': network_id , 'cidr': cidr}
     if tenant_id is not None:
@@ -260,7 +260,7 @@ def subnet_delete(subnet_id):
     '''
     Delete subnet of given ID.
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     # TODO: Always returns None?
     return neutron.delete_subnet(subnet_id)
@@ -269,7 +269,7 @@ def subnet_show(subnet_id):
     '''
     Show details for given subnet.
     '''
-    neutron = auth()
+    neutron = _auth()
     neutron.format = 'json'
     try:
         response = neutron.show_subnet(subnet_id)
