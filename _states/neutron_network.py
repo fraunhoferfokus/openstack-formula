@@ -50,7 +50,7 @@ def managed(name, admin_state_up = None, network_id = None,
     if len(net_list) == 1:
         ret['comment'] = 'Network {0} already exists'.format(name)
     elif len(net_list) == 0:
-        ret['changes'] = __salt__['neutron.network_create'](**list_filters)
+        ret['changes'] = __salt__['neutron.network_create'](**net_params)
         ret['comment'] = 'Created new network {0}'.format(name)
     else:
         pp = pprint.PrettyPrinter(indent=4)
