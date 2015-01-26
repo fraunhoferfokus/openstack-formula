@@ -194,6 +194,9 @@ def network_list(name = None, admin_state_up = None,
 def network_show(network_id):
     '''
     Show details for network with given ID.
+
+    ## TODO ##
+    Implement "salt '*' network_show name=foo-network
     '''
     neutron = _auth()
     neutron.format = 'json'
@@ -257,15 +260,43 @@ def network_update(name = None, network_id = None, new_name = None,
         neutron.format = 'json'
         return neutron.update_network(network_id, {'network': param_list})
 
-def subnet_list():
+def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
+    allocation_pools = None, gateway_ip = None, ip_version = None, 
+    enable_dhcp = None):
     '''
-    List all subnets.
+    List subnets.
 
-    No filtering/column selection yet.
+    Optional parameters to filter by:
+    - name (only works for non-empty names!)
+    - subnet_id (works)
+    - cidr (works)
+    - network_id (seems to work)
+    - allocation_pools (not implemented by Neutron API?)
+    - gateway_ip (works)
+    - ip_version (seems to work)
+    - enable_dhcp (ignored by Neutron API)
     '''
     neutron = _auth()
     neutron.format = 'json'
-    return neutron.list_subnets()
+    kwargs = {}
+    if name is not None:
+        kwargs['name'] = name
+    if subnet_id is not None:
+        kwargs['id'] = subnet_id
+    if cidr is not None:
+        kwargs['cidr'] = cidr
+    if network_id:
+        kwargs['network_id'] = network_id
+    if allocation_pools:
+        kwargs['allocation_pools'] = allocation_pools
+    if gateway_ip:
+        kwargs['gateway_ip'] = gateway_ip
+    if ip_version:
+        kwargs['ip_version'] = ip_version
+    if enable_dhcp:
+        kwargs['enable_dhcp'] = enable_dhcp
+    log.debug("kwargs for list_subnets: " + str(kwargs))
+    return neutron.list_subnets(**kwargs)['subnets']
 
 def subnet_create(network_id, cidr, name = None, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
