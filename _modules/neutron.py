@@ -277,11 +277,16 @@ def subnet_create(network_id, cidr, name = None, tenant_id = None,
     
     Optional arguments are:
     - tenant_id
-    - allocation_pools (format??)
+    - allocation_pools (either a comma separated string with <start>-<end> 
+      tuples like "192.168.17.3-192.168.17.30,192.168.17.34-192.168.17.60"
+      or a YAML list of dictionaries with "start" and "end" keys. 
+      # TODO #
+      The later one should be changed to a YAML list with elements like 
+      "192.168.17.3-192.168.17.30".)
     - gateway_ip
     - ip_version (4 or 6)
     - subnet_id
-    - enable_dhcp
+    - enable_dhcp (bool)
 
     CLI example::
 
@@ -294,7 +299,9 @@ def subnet_create(network_id, cidr, name = None, tenant_id = None,
     kwargs = { 'network_id': network_id , 'cidr': cidr}
     if tenant_id is not None:
         kwargs['tenant_id'] = tenant_id
-    if isinstance(allocation_pools,str):
+    if isinstance(name, str):
+        kwargs['name'] = name
+    if isinstance(allocation_pools, str):
         pools = []
         for pool in allocation_pools.split(','):
             (start, end) = pool.split('-')
