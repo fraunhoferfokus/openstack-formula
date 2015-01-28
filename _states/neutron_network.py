@@ -37,16 +37,18 @@ def managed(name, admin_state_up = None, network_id = None,
     if shared is not None:
         net_params['shared'] = shared
     if physical_network is not None:
-        net_params['provider:physical_network'] = physical_network
+        net_params['physical_network'] = physical_network
     if network_type is not None:
-        net_params['provider:network_type'] = network_type
+        net_params['network_type'] = network_type
     if segmentation_id is not None:
-        net_params['provider:segmentation_id'] = segmentation_id
+        net_params['segmentation_id'] = segmentation_id
     for net in net_list:
         for key, value in net_params.items():
             if net.get(key) != net_params[key]:
-                net_list.remove(net)
-                continue
+                if net in net_list:
+                    net_list.remove(net)
+                else: 
+                    continue
     if len(net_list) == 1:
         ret['comment'] = 'Network {0} already exists'.format(name)
     elif len(net_list) == 0:
