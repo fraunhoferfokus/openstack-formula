@@ -311,7 +311,8 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
 
 def subnet_create(name, cidr, network_id, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
-            subnet_id = None, enable_dhcp = None): 
+            subnet_id = None, enable_dhcp = None, dns_nameservers = None,
+            host_routes = None): 
     '''
     Create a subnet with given parameters.
     "network_id" and "cidr" are required. The API also requires "ip_version"
@@ -329,6 +330,10 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
     - ip_version (4 or 6)
     - subnet_id
     - enable_dhcp (bool)
+    - dns_nameservers*
+    - host_routes*
+
+    *) Not documented in OpenStack Networking API reference
 
     OpenStack Networking API reference:
     http://developer.openstack.org/api-ref-networking-v2.html#subnets
@@ -356,6 +361,10 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
         kwargs['allocation_pools'] = pools
     elif allocation_pools is not None:
         kwargs['allocation_pools'] = allocation_pools
+    if dns_nameservers is not None:
+        kwargs['dns_nameservers'] = dns_nameservers
+    if host_routes is not None:
+        kwargs['host_routes'] = host_routes
     if gateway_ip is not None:
         kwargs['gateway_ip'] = gateway_ip
     if ip_version not in ['4', '6', 4, 6]:
@@ -366,7 +375,10 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
         kwargs['id'] = subnet_id
     if enable_dhcp is not None:
         kwargs['enable_dhcp'] = enable_dhcp
-    return neutron.create_subnet({'subnet': kwargs})
+    try:
+        return neutron.create_subnet({'subnet': kwargs})['subnet']
+    except ValueError:
+        return False
 
 def subnet_delete(subnet_id):
     '''
@@ -400,7 +412,15 @@ def subnet_update(name = None, subnet_id = None, new_name = None,
     If there's more than one subnet with given name
     you have to specify the subnet_id.
     
-    Optional parameters:
+    Parameters for identifying the correct subnet:
+    - name
+    - subnet_id
+    - network_id
+    - tenant_id
+
+    You have to provide at least 'name' OR 'subnet_id'.
+
+    Updatable attributes:
     - new_name
     - gateway_ip
     - enable_dhcp (bool)
@@ -438,23 +458,23 @@ def subnet_update(name = None, subnet_id = None, new_name = None,
     elif len(sub_list) == 0:
         raise SaltInvocationError, 'No subnet with those '\
             'options found:\n{}'.format(pp.pformat(subnet_filters))
-    else:
-        param_list = {}
-        if new_name is not None:
-            param_list['name'] = new_name
-        if subnet_id is None:
-            subnet_id = sub_list[0]['id']
-        #if network_id is not None:
-        #    param_list['network_id'] = network_id
-        #if tenant_id is not None:
-        #    param_list['tenant_id'] = tenant_id
-        #if allocation_pools is not None:
-        #    param_list['allocation_pools'] = allocation_pools
-        if gateway_ip is not None:
-            param_list['gateway_ip'] = gateway_ip
-        #if new_id is not None:
-        #    param_list['id'] = new_id
-        if enable_dhcp is not None:
-            param_list['enable_dhcp'] = enable_dhcp
-        return neutron.update_subnet(subnet_id, {'subnet': param_list})
+    param_list = {}
+    if new_name is not None:
+        param_list['name'] = new_name
+    if subnet_id is None:
+        subnet_id = sub_list[0]['id']
+    #if network_id is not None:
+    #    param_list['network_id'] = network_id
+    #if tenant_id is not None:
+    #    param_list['tenant_id'] = tenant_id
+    #if allocation_pools is not None:
+    #    param_list['allocation_pools'] = allocation_pools
+    if gateway_ip is not None:
+        param_list['gateway_ip'] = gateway_ip
+    #if new_id is not None:
+    #    param_list['id'] = new_id
+    if enable_dhcp is not None:
+        param_list['enable_dhcp'] = enable_dhcp
+    resp = neutron.update_subnet(subnet_id, {'subnet': param_list})
+    return resp['subnet']
 
