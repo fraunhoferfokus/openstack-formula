@@ -112,6 +112,7 @@ neutron:
             #admin_tenant_name: service
             #admin_user = neutron
             admin_password: service_pass_neutron
+        #ovs_integration_bridge: br-int
             
     server:
         DEFAULT:
@@ -136,8 +137,6 @@ neutron:
             #    - openstack_defaults.keystone.admin_tenant_name
         database:
             password:
-    dhcp_agent:
-        ovs_integration_bridge: br-int
     ml2:
         ovs:
             bridge_mappings:
