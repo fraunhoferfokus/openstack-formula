@@ -137,6 +137,8 @@ def network_create(name, admin_state_up = True, shared = False,
     OpenStack Networking API reference:
     http://developer.openstack.org/api-ref-networking-v2.html#networks
     '''
+    # todo: refuse to create multiple networks with the same name
+    # in the same tenant
     neutron = _auth()
     neutron.format = 'json'
     network = {'name': name, 
@@ -307,7 +309,7 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
         log.debug("kwargs for list_subnets: " + str(kwargs))
         return neutron.list_subnets(**kwargs)['subnets']
 
-def subnet_create(network_id, cidr, name = None, tenant_id = None,
+def subnet_create(name, cidr, network_id, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
             subnet_id = None, enable_dhcp = None): 
     '''
@@ -333,10 +335,12 @@ def subnet_create(network_id, cidr, name = None, tenant_id = None,
 
     CLI example::
 
-        salt controller neutron.create_subnet \\
+        salt controller neutron.create_subnet test-subnet \\
           e5e85c75-c95a-4cc1-abce-cd719e7ec753 192.168.2.0/24 \\
           allocation_pools=192.168.2.20-192.168.2.30
     '''
+    # todo: refuse to create multiple subnets with the same name
+    # in the same network
     neutron = _auth()
     neutron.format = 'json'
     kwargs = { 'network_id': network_id , 'cidr': cidr}
