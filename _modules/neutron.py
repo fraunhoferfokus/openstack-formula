@@ -126,13 +126,16 @@ def network_create(name, admin_state_up = True, shared = False,
     '''
     Create a network with given name.
 
-    Additional valid parameters:
+    Optional parameters:
     - admin_state_up (default: True)
     - shared (default: False) 
     - tenant_id (only by admin users) 
     - physical_network 
     - network_type (like flat, vlan, vxlan, and gre)
     - segmentation_id (VLAN ID, GRE Key)
+
+    OpenStack Networking API reference:
+    http://developer.openstack.org/api-ref-networking-v2.html#networks
     '''
     neutron = _auth()
     neutron.format = 'json'
@@ -219,6 +222,9 @@ def network_update(name = None, network_id = None, new_name = None,
     You can't change a network's ID and Neutron will refuse
     to update some other settings as well - or just ignore
     this part of your request.
+
+    OpenStack Networking API reference:
+    http://developer.openstack.org/api-ref-networking-v2.html#networks
     '''
     if name is None and network_id is None:
         raise SaltInvocationError, 'You have to specify'\
@@ -261,7 +267,7 @@ def network_update(name = None, network_id = None, new_name = None,
         return neutron.update_network(network_id, {'network': param_list})
 
 def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
-    gateway_ip = None, ip_version = None):
+    tenant_id = None, gateway_ip = None, ip_version = None):
     '''
     List subnets.
 
@@ -276,24 +282,30 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
     # Those potential parameters don't work:
     #  - allocation_pools (not implemented by Neutron API?)
     #  - enable_dhcp (ignored by Neutron API)
+    # You can't list subnets by ID so we get it via subnet_show.
+    # Neutron would fall apart if you had to subnets with the 
+    # same ID anyway.
 
     neutron = _auth()
     neutron.format = 'json'
     kwargs = {}
-    if name is not None:
-        kwargs['name'] = name
     if subnet_id is not None:
-        kwargs['id'] = subnet_id
-    if cidr is not None:
-        kwargs['cidr'] = cidr
-    if network_id:
-        kwargs['network_id'] = network_id
-    if gateway_ip:
-        kwargs['gateway_ip'] = gateway_ip
-    if ip_version:
-        kwargs['ip_version'] = ip_version
-    log.debug("kwargs for list_subnets: " + str(kwargs))
-    return neutron.list_subnets(**kwargs)['subnets']
+        return([subnet_show(subnet_id)])
+    else:
+        if name is not None:
+            kwargs['name'] = name
+        if cidr is not None:
+            kwargs['cidr'] = cidr
+        if network_id:
+            kwargs['network_id'] = network_id
+        if gateway_ip:
+            kwargs['gateway_ip'] = gateway_ip
+        if ip_version:
+            kwargs['ip_version'] = ip_version
+        if tenant_id:
+            kwargs['tenant_id'] = tenant_id
+        log.debug("kwargs for list_subnets: " + str(kwargs))
+        return neutron.list_subnets(**kwargs)['subnets']
 
 def subnet_create(network_id, cidr, name = None, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
@@ -315,6 +327,9 @@ def subnet_create(network_id, cidr, name = None, tenant_id = None,
     - ip_version (4 or 6)
     - subnet_id
     - enable_dhcp (bool)
+
+    OpenStack Networking API reference:
+    http://developer.openstack.org/api-ref-networking-v2.html#subnets
 
     CLI example::
 
@@ -355,8 +370,11 @@ def subnet_delete(subnet_id):
     '''
     neutron = _auth()
     neutron.format = 'json'
-    # TODO: Always returns None?
-    return neutron.delete_subnet(subnet_id)
+    resp = neutron.delete_subnet(subnet_id)
+    if resp is None:
+        return True
+    elif isinstance(resp, bool) and not resp:
+        return False
 
 def subnet_show(subnet_id):
     '''
@@ -369,3 +387,70 @@ def subnet_show(subnet_id):
     except neutron_exceptions.NeutronClientException:
         return False    
     return response['subnet']
+
+def subnet_update(name = None, subnet_id = None, new_name = None,
+        gateway_ip = None, enable_dhcp = None):
+    '''
+    Update an existing subnet with given parameters.
+    
+    If there's more than one subnet with given name
+    you have to specify the subnet_id.
+    
+    Optional parameters:
+    - new_name
+    - gateway_ip
+    - enable_dhcp (bool)
+
+    Neutron may refuse to update some settings or just ignore
+    this part of your request even if the API reference states
+    something else.
+    
+    OpenStack Networking API reference:
+    http://developer.openstack.org/api-ref-networking-v2.html#subnets
+    '''
+    # Only file bugs for missing parameters if they don't cause those:
+    # - Cannot update read-only attribute allocation_pools
+    # - Cannot update read-only attribute network_id
+    # - Cannot update read-only attribute tenant_id
+    # - Cannot update read-only attribute id 
+    #
+    if name is None and subnet_id is None:
+        raise SaltInvocationError, 'You have to specify'\
+            'at least one of "name" or "subnet_id".'
+    neutron = _auth()
+    neutron.format = 'json'
+    pp = pprint.PrettyPrinter(indent=4)
+    subnet_filters = {}
+    if subnet_id is not None:
+        subnet_filters['subnet_id'] = subnet_id
+    elif name is not None:
+        subnet_filters['name'] = name
+    log.debug('options for subnet_list():\n{0}'.format(
+        pp.pformat(subnet_filters)))
+    sub_list = subnet_list(**subnet_filters)
+    if len(sub_list) > 1:
+        raise SaltInvocationError, 'More than one subnet with those '\
+            'options found:\n{}'.format(pp.pformat(subnet_filters))
+    elif len(sub_list) == 0:
+        raise SaltInvocationError, 'No subnet with those '\
+            'options found:\n{}'.format(pp.pformat(subnet_filters))
+    else:
+        param_list = {}
+        if new_name is not None:
+            param_list['name'] = new_name
+        if subnet_id is None:
+            subnet_id = sub_list[0]['id']
+        #if network_id is not None:
+        #    param_list['network_id'] = network_id
+        #if tenant_id is not None:
+        #    param_list['tenant_id'] = tenant_id
+        #if allocation_pools is not None:
+        #    param_list['allocation_pools'] = allocation_pools
+        if gateway_ip is not None:
+            param_list['gateway_ip'] = gateway_ip
+        #if new_id is not None:
+        #    param_list['id'] = new_id
+        if enable_dhcp is not None:
+            param_list['enable_dhcp'] = enable_dhcp
+        return neutron.update_subnet(subnet_id, {'subnet': param_list})
+
