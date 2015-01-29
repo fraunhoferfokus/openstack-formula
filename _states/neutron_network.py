@@ -12,6 +12,8 @@ import pprint
 import salt.utils
 import salt.utils.templates
 
+import neutronclient.common.exceptions as neutron_exceptions
+
 log = logging.getLogger(__name__)
 
 def managed(name, admin_state_up = None, network_id = None,
@@ -44,7 +46,12 @@ def managed(name, admin_state_up = None, network_id = None,
         net_params['segmentation_id'] = segmentation_id
     for net in net_list:
         for key, value in net_params.items():
-            if net.get(key) != net_params[key]:
+            if key in ['segmentation_id', 'physical_network', 'network_type']:
+                if net.get('provider:' + key) != net_params[key]:
+                    net_list.remove(net)
+                else:
+                    continue
+            elif net.get(key) != net_params[key]:
                 if net in net_list:
                     net_list.remove(net)
                 else: 
@@ -52,8 +59,13 @@ def managed(name, admin_state_up = None, network_id = None,
     if len(net_list) == 1:
         ret['comment'] = 'Network {0} already exists'.format(name)
     elif len(net_list) == 0:
-        ret['changes'] = __salt__['neutron.network_create'](**net_params)
-        ret['comment'] = 'Created new network {0}'.format(name)
+        try: 
+            ret['changes'] = __salt__['neutron.network_create'](**net_params)
+            ret['comment'] = 'Created new network {0}'.format(name)
+        except neutron_exceptions.NeutronClientException, msg:
+            pp = pprint.PrettyPrinter(indent=4)
+            ret['result'] = False
+            ret['comment'] = msg.message
     else:
         pp = pprint.PrettyPrinter(indent=4)
         ret['comment'] = 'More than one network with specified parameters '\
