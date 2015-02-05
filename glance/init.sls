@@ -36,7 +36,7 @@ glance-endpoint in Keystone:
             salt['pillar.get'](
                 'glance:api:bind_host',
                 salt['pillar.get'](
-                    'glance:common:bind_host',
+                    'glance:common:DEFAULT:bind_host',
                     salt['pillar.get']('openstack:controller:address_ext',
                         '127.0.0.1')
                 )
@@ -50,7 +50,7 @@ glance-endpoint in Keystone:
     - internalurl: {{ 
         "http://{0}:{1}/v2".format( 
             salt['pillar.get'](
-                'glance:common:bind_host',
+                'glance:common:DEFAULT:bind_host',
                 salt['pillar.get']('openstack:controller:address_int',
                     '127.0.0.1')
             ),
@@ -63,7 +63,7 @@ glance-endpoint in Keystone:
     - adminurl: {{ 
         "http://{0}:{1}/v2".format( 
             salt['pillar.get'](
-                'glance:common:bind_host',
+                'glance:common:DEFAULT:bind_host',
                 salt['pillar.get']('openstack:controller:address_int',
                     '127.0.0.1')
             ),
