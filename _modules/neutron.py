@@ -179,6 +179,8 @@ def network_list(name = None, admin_state_up = None,
     - status (like "ACTIVE")
     - tenant_id
     '''
+    # Neither filtering by segmentation_id nor 
+    # by provider:segmentation_id works.
     neutron = _auth()
     neutron.format = 'json'
     kwargs = {}
@@ -196,20 +198,31 @@ def network_list(name = None, admin_state_up = None,
         kwargs['tenant_id'] = tenant_id
     return neutron.list_networks(**kwargs)['networks']
 
-def network_show(network_id):
+def network_show(network_id = None, name = None):
     '''
-    Show details for network with given ID.
+    Show details for network with given ID or name.
 
-    ## TODO ##
-    Implement "salt '*' network_show name=foo-network
+    CLI examples:
+        salt controller network_show 6327c548-8d28-4205-a171-99b350aad078
+        salt controller network_show name=foo-network
     '''
     neutron = _auth()
     neutron.format = 'json'
-    try:
-        response = neutron.show_network(network_id)
-    except neutron_exceptions.NetworkNotFoundClient:
-        return False    
-    return response['network']
+    response = False
+    if network_id is not None:
+        try:
+            response = neutron.show_network(network_id)['network']
+        except neutron_exceptions.NetworkNotFoundClient:
+            # response stays False
+            pass
+    elif name is not None:
+        net_list = network_list(name = name)
+        if len(net_list) == 1:
+            response = net_list[0]
+    else:
+        raise (SaltInvocationError, 
+                'network_id or name has to be specified')
+    return response
 
 def network_update(name = None, network_id = None, new_name = None,
         admin_state_up = None, shared = None, tenant_id = None, 
@@ -311,7 +324,7 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
 
 def subnet_create(name, cidr, network_id, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
-            subnet_id = None, enable_dhcp = None, dns_nameservers = None,
+            enable_dhcp = None, dns_nameservers = None,
             host_routes = None): 
     '''
     Create a subnet with given parameters.
@@ -328,7 +341,6 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
       "192.168.17.3-192.168.17.30".)
     - gateway_ip
     - ip_version (4 or 6)
-    - subnet_id
     - enable_dhcp (bool)
     - dns_nameservers*
     - host_routes*
@@ -371,8 +383,6 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
         raise ValueError, "ip_version has to be 4 or 6"
     elif ip_version is not None:
         kwargs['ip_version'] = ip_version
-    if subnet_id is not None:
-        kwargs['id'] = subnet_id
     if enable_dhcp is not None:
         kwargs['enable_dhcp'] = enable_dhcp
     try:
