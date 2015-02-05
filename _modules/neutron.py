@@ -21,7 +21,7 @@ Module for handling openstack neutron calls.
     set up as different configuration profiles:
     For example::
 
-        ## TODO ##
+        ## TODO: test s/t like this ##
     
         openstack1:
           keystone.user: admin
@@ -297,6 +297,7 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
     # Those potential parameters don't work:
     #  - allocation_pools (not implemented by Neutron API?)
     #  - enable_dhcp (ignored by Neutron API)
+    # See https://bugs.launchpad.net/neutron/+bug/1418635
     # You can't list subnets by ID so we get it via subnet_show.
     # Neutron would fall apart if you had to subnets with the 
     # same ID anyway.
@@ -345,7 +346,8 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
     - dns_nameservers*
     - host_routes*
 
-    *) Not documented in OpenStack Networking API reference
+    *) Not documented in OpenStack Networking API reference,
+       see https://bugs.launchpad.net/neutron/+bug/1418635
 
     OpenStack Networking API reference:
     http://developer.openstack.org/api-ref-networking-v2.html#subnets
@@ -437,7 +439,8 @@ def subnet_update(name = None, subnet_id = None, new_name = None,
 
     Neutron may refuse to update some settings or just ignore
     this part of your request even if the API reference states
-    something else.
+    something else (see 
+    https://bugs.launchpad.net/neutron/+bug/1418635)
     
     OpenStack Networking API reference:
     http://developer.openstack.org/api-ref-networking-v2.html#subnets
