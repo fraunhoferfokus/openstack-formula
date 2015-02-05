@@ -323,6 +323,94 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
         log.debug("kwargs for list_subnets: " + str(kwargs))
         return neutron.list_subnets(**kwargs)['subnets']
 
+def router_add_interface(name, router_id, admin_state_up = True,
+        subnet_id = None, port_id = None):
+    '''
+    Add interface ("port") to an existing router. 
+
+    Required parameters:
+    - name
+    - router_id
+
+    Optional parameters:
+    - admin_state_up (defaults to True)
+    - subnet_id
+    - port_id
+    '''
+    neutron = _auth()
+    neutron.format = 'json'
+    kwargs = {
+        'name': name,
+        'admin_state_up': admin_state_up,
+        }
+    if subnet_id is not None:
+        kwargs['subnet_id'] = subnet_id
+    if port_id is not None:
+        kwargs['port_id'] = port_id
+    log.debug(dir(neutron.add_interface_router))
+    return neutron.add_interface_router(router_id, {'port': kwargs})
+
+def router_create(name, admin_state_up = True, network_id = None,
+        tenant_id = None, subnet_id = None, port_id = None):
+    '''
+    Create a new router.
+
+    Required parameters: 
+    - name
+
+    Optional parameters:
+    - admin_state_up (defaults to True)
+    - tenant_id
+    - subnet_id*
+    - port_id*
+
+    *) Specifying those results in an additional call of
+       router_add_interface after creating the actual 
+       router
+    '''
+    # Parameter 'network_id' has to be wrapped like this:
+    #   "external_gateway_info":{
+    #         "network_id":"8ca37218-28ff-41cb-9b10-039601ea7e6b"
+    #               }
+    neutron = _auth()
+    neutron.format = 'json'
+    kwargs = {
+        'name': name,
+        'admin_state_up': admin_state_up,
+        }
+    add_iface = False
+    iface_args = {}
+    if network_id is not None:
+        kwargs['external_gateway_info'] = { 
+            'network_id': network_id }
+    if tenant_id is not None:
+        kwargs['tenant_id'] = tenant_id
+    if subnet_id is not None:
+        add_iface = True
+        iface_args['subnet_id'] = subnet_id 
+    if port_id is not None:
+        add_iface = True
+        iface_args['port_id'] = port_id
+
+    if not add_iface:
+        return neutron.create_router({'router': kwargs})
+    else:
+        try:
+            router = neutron.create_router({'router': kwargs})['router']
+        except neutron_exceptions.NeutronClientException, err_msg:
+            return (False, 
+                'Failed to create router "{0}":\n'.format(name) + str(err_msg))
+                
+        iface = router_add_interface('interface for router {0}'.format(name), 
+            router['id'], **iface_args)['port']
+        if not iface:
+            return(
+                False, 
+                'Failed to add port to router "{0}"\n'.format(name) +\
+                'after router was created with id {0}'.format(router['id'])
+                )
+        return { 'router': router, 'port': iface}
+            
 def subnet_create(name, cidr, network_id, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
             enable_dhcp = None, dns_nameservers = None,
