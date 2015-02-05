@@ -3,28 +3,28 @@ TODO
 
 - **UPDATE README & TODO**
 
-- implement adjusting existing networks int neutron_network.managed
-  with neutron.network_update
+- template `neutron/initial_{network,subnet}.sls`
 
 - don't allow networks of same name in the same tenant
-
-- implement neutron.subnet_modify and neutron_subnet.managed
 
 - keep dnsmasq from breaking name-resolution on network node
 
 - Update README with info on basic Pillar-data
-
-- Add states for Cinder
-
-- Add states for Ceilometer
-
-- Add states for Heat
 
 - Add users for services in Keystone (missing: cinder, ceilometer, heat?)
 
 - Add endpoints in Keystone (missing: cinder, ceilometer, heat?)
 
 - Add services in Keystone (missing: cinder, ceilometer, heat?)
+
+- Add states for Cinder
+
+- Add states for Ceilometer
+
+- add support for OpenStack Juno (configured via 
+    pillar[openstack:release])
+
+- Add states for Heat?
 
 - Figure out how to run `{keystone,nova,...}-manage db_sync` states
   w/o making the dependent services fail for the next execution b/c
@@ -47,5 +47,3 @@ Nice to have
 Might be added later: 
 
   - support for Swift
-  - support for different versions of OpenStack (configured via 
-    pillar[openstack:release])
