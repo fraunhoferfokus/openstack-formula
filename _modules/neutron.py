@@ -121,7 +121,7 @@ def _auth(profile=None, **connection_args):
     return client.Client(**kwargs)
 
 def network_create(name, admin_state_up = True, shared = False, 
-        tenant_id = None, physical_network = None, 
+        tenant_id = None, physical_network = None, external = None,
         network_type = None, segmentation_id = None):
     '''
     Create a network with given name.
@@ -131,6 +131,7 @@ def network_create(name, admin_state_up = True, shared = False,
     - shared (default: False) 
     - tenant_id (only by admin users) 
     - physical_network 
+    - external
     - network_type (like flat, vlan, vxlan, and gre)
     - segmentation_id (VLAN ID, GRE Key)
 
@@ -141,19 +142,20 @@ def network_create(name, admin_state_up = True, shared = False,
     # in the same tenant
     neutron = _auth()
     neutron.format = 'json'
-    network = {'name': name, 
+    param_list = {'name': name, 
         'admin_state_up': admin_state_up,
         'shared': shared }
     if tenant_id is not None:
-        network['tenant_id'] = tenant_id
+        param_list['tenant_id'] = tenant_id
     if physical_network is not None:
-        network['provider:physical_network'] = physical_network
+        param_list['provider:physical_network'] = physical_network
     if network_type is not None:
-        network['provider:network_type'] = network_type
+        param_list['provider:network_type'] = network_type
     if segmentation_id is not None:
-        network['provider:segmentation_id'] = segmentation_id
-    #ret = {}
-    ret = neutron.create_network({'network':network})
+        param_list['provider:segmentation_id'] = segmentation_id
+    if external is not None:
+        param_list['router:external'] = external
+    ret = neutron.create_network({'network': param_list})
     return ret
 
 def network_delete(network_id):
@@ -162,8 +164,14 @@ def network_delete(network_id):
     '''
     neutron = _auth()
     neutron.format = 'json'
-    # TODO: Always returns None?
-    return neutron.delete_network(network_id)
+    # TODO: Always returns None? Can't get this one to 
+    # return False when NetworkNotFoundClient is raised...
+    #try:
+    if neutron.delete_network(network_id) is None:
+        return True
+    #except neutron_exceptions.NetworkNotFoundClient, err_msg:
+    #    return False, err_msg
+    return False
 
 def network_list(name = None, admin_state_up = None,
         network_id = None, shared = None, status = None,
@@ -227,7 +235,7 @@ def network_show(network_id = None, name = None):
 def network_update(name = None, network_id = None, new_name = None,
         admin_state_up = None, shared = None, tenant_id = None, 
         physical_network = None, network_type = None, 
-        segmentation_id = None):
+        external = None, segmentation_id = None):
     '''
     Update an existing network with given parameters.
 
@@ -277,6 +285,8 @@ def network_update(name = None, network_id = None, new_name = None,
             param_list['provider:network_type'] = network_type
         if segmentation_id is not None:
             param_list['provider:segmentation_id'] = segmentation_id
+        if external is not None:
+            param_list['router:external'] = external
         neutron = _auth()
         neutron.format = 'json'
         return neutron.update_network(network_id, {'network': param_list})
@@ -410,6 +420,54 @@ def router_create(name, admin_state_up = True, network_id = None,
                 'after router was created with id {0}'.format(router['id'])
                 )
         return { 'router': router, 'port': iface}
+
+#def router_delete(name = None, router_id = None): # ip = None?
+
+def router_list(): # name = None, ...
+    '''
+    List routers.
+
+    No filters implemented yet.
+    '''
+    neutron = _auth()
+    neutron.format = 'json'
+    return neutron.list_routers()
+
+def router_show(router_id): # name = None, router_id = None
+    '''
+    Show the router specified by UUID
+    '''
+    neutron = _auth()
+    neutron.format = 'json'
+    return neutron.show_router(router_id)
+
+def router_update(router_id, admin_state_up = None, 
+        network_id = None, tenant_id = None, subnet_id = None, 
+        port_id = None, new_name = None):
+    '''
+    Update parameters of given router
+    '''
+    #if name is None and router_id is None:
+    #    raise SaltInvocationError, 'You have to specify'\
+    #        'at least one of "name" or "router_id".'
+    neutron = _auth()
+    neutron.format = 'json'
+
+    kwargs = {}
+    if admin_state_up is not None:
+        kwargs['admin_state_up'] = admin_state_up
+    if network_id is not None:
+        kwargs['external_gateway_info'] = { 'network_id': network_id }
+    if tenant_id is not None:
+        kwargs['tenant_id'] = tenant_id
+    if subnet_id is not None:
+        kwargs['subnet_id'] = subnet_id
+    if port_id is not None:
+        kwargs['port_id'] = port_id
+    if new_name is not None:
+        kwargs['name'] = new_name
+    return neutron.update_router(router_id, {'router': kwargs})
+
             
 def subnet_create(name, cidr, network_id, tenant_id = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
