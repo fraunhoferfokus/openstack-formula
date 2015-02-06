@@ -397,7 +397,8 @@ def router_delete(router_id):
     neutron.format = 'json'
     return neutron.delete_router(router_id)
 
-def router_list(name = None, status = None, tenant_id = None):
+def router_list(name = None, status = None, tenant_id = None,
+        admin_state_up = None):
     '''
     List routers.
 
@@ -406,6 +407,7 @@ def router_list(name = None, status = None, tenant_id = None):
     - status ('ACTIVE', 'DOWN', 'ERROR')
     - tenant_id
     '''
+    # Can't filter by network_id
     neutron = _auth()
     neutron.format = 'json'
     kwargs = {}
@@ -419,6 +421,8 @@ def router_list(name = None, status = None, tenant_id = None):
             kwargs['status'] = status
     if tenant_id is not None:
         kwargs['tenant_id'] = tenant_id
+    if admin_state_up is not None:
+        kwargs['admin_state_up'] = admin_state_up
     return neutron.list_routers(**kwargs)
 
 def router_show(router_id): # name = None, router_id = None
