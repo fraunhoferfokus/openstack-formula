@@ -389,6 +389,13 @@ def router_create(name, admin_state_up = True, network_id = None,
     return neutron.create_router({'router': kwargs})
 
 #def router_delete(name = None, router_id = None): # ip = None?
+def router_delete(router_id):
+    '''
+    Delete the router specified by UUID
+    '''
+    neutron = _auth()
+    neutron.format = 'json'
+    return neutron.delete_router(router_id)
 
 def router_list(): # name = None, ...
     '''
