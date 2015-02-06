@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 def managed(name, admin_state_up = None, network_id = None,
         shared = None, tenant_id = None, physical_network = None,
-        network_type = None, segmentation_id = None):
+        network_type = None, segmentation_id = None, external = None):
     # TODO: docstring
     ret = { 'name': name,
         'changes': {},
@@ -44,10 +44,17 @@ def managed(name, admin_state_up = None, network_id = None,
         net_params['network_type'] = network_type
     if segmentation_id is not None:
         net_params['segmentation_id'] = segmentation_id
+    if external is not None:
+        net_params['external'] = external
     for net in net_list:
         for key, value in net_params.items():
             if key in ['segmentation_id', 'physical_network', 'network_type']:
                 if net.get('provider:' + key) != net_params[key]:
+                    net_list.remove(net)
+                else:
+                    continue
+            elif key in ['external']:
+                if net.get('router:' + key) != net_params[key]:
                     net_list.remove(net)
                 else:
                     continue
