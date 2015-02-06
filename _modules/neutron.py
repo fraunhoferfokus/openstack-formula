@@ -397,15 +397,29 @@ def router_delete(router_id):
     neutron.format = 'json'
     return neutron.delete_router(router_id)
 
-def router_list(): # name = None, ...
+def router_list(name = None, status = None, tenant_id = None):
     '''
     List routers.
 
-    No filters implemented yet.
+    Optional filter parameters:
+    - name
+    - status ('ACTIVE', 'DOWN', 'ERROR')
+    - tenant_id
     '''
     neutron = _auth()
     neutron.format = 'json'
-    return neutron.list_routers()
+    kwargs = {}
+    if name is not None:
+        kwargs['name'] = name
+    if status is not None:
+        if status not in ['ACTIVE','ERROR', 'DOWN']:
+            raise SaltInvocationError, 'status has to be one of' +\
+                '"ACTIVE", "ERROR" or "DOWN"'
+        else:
+            kwargs['status'] = status
+    if tenant_id is not None:
+        kwargs['tenant_id'] = tenant_id
+    return neutron.list_routers(**kwargs)
 
 def router_show(router_id): # name = None, router_id = None
     '''
