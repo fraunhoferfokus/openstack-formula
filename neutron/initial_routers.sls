@@ -11,11 +11,6 @@
     ) -%}
 {% set tenant_id = salt['keystone.tenant_list']()[tenant_name]['id'] -%}
 
-external network:
-    neutron_network.managed:
-        - admin_state_up: True
-        - shared: True
+router for external network:
+    neutron_router.managed:
         - tenant_id: {{ tenant_id }}
-        - physical_network: External
-        - network_type: flat
-        - external: True
