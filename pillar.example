@@ -141,7 +141,6 @@ neutron:
         ovs:
             bridge_mappings:
                 External: br-ex
-                Intnet1: br-int
 
 nova:
    DEFAULT:

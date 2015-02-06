@@ -11,6 +11,9 @@ TODO
 
 - Update README with info on basic Pillar-data
 
+- Why do several states (keystone, glance, nova.controller, horizon, 
+  occasionally openvswitch) need to be run twice to work proberly?? 
+
 - Add users for services in Keystone (missing: cinder, ceilometer, heat?)
 
 - Add endpoints in Keystone (missing: cinder, ceilometer, heat?)
