@@ -198,13 +198,21 @@ libvirt_vif_driver = {{
 volume_api_class = nova.volume.cinder.API
 osapi_volume_listen_port = 5900
 
+vif_plugging_is_fatal = False
+vif_plugging_timeout = 0
+
 [spice]
 enabled = True
 agent_enabled = True
-html5proxy_base_url = http://{{ ctrl_or_localhost }}:6082/spice_auto.html
+html5proxy_base_url = {{ 'http://{0}:{1}/spice_auto.html'.format(
+                            salt['pillar.get'](
+                                'openstack:controller:address_ext',
+                                'localhost'),
+                            get('openstack:nova:spice_port', 6082)
+                        ) }}
 keymap = en-us
 server_listen = ::
-server_proxyclient_address = compute-1.yourdomain.com
+server_proxyclient_address = {{ salt['network.interfaces']()['br-int']['inet'][0]['address'] }}
 
 [database]
 {{ database_connection(get, service) }}
