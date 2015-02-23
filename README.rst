@@ -122,3 +122,21 @@ Minimal data to set in Pillar::
     nova:
       database:
         password: 'Pkbcj5QBD+69pQ_nova_db_pass_UqjG5OzxyPzn3A'
+
+To make IDs of tenants in keystone available for templating
+on other nodes add this to the controllers minion-config or
+Pillar::
+
+    mine_functions:
+      keystone.tenant_list: []
+
+
+``nova.compute``
+----------------
+
+Minimal data to set in Pillar::
+
+    nova:
+      DEFAULT:
+        # The internal IP of each compute-node:
+        my_ip: 1.2.3.4      
