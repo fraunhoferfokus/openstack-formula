@@ -64,15 +64,19 @@ Add repositories like Ubuntu's `Cloud Archive`_ if necessary.
 
 .. _Cloud Archive: https://wiki.ubuntu.com/ServerTeam/CloudArchive
 
+``mysql``
+---------
+Install and configure MySQL for use with OpenStack.
+
 ``rabbitmq``
 ------------
-Install and configure rabbitmq for use with OpenStack.
+Install and configure RabbitMQ for use with OpenStack.
 
 ``keystone``
 ------------
 
-.. note:: For now you should manually run the states `mysql.server`
-    and `mysql.python` before you try to run the `keystone`-state.
+.. note:: Run the states `mysql` and `rabbitmq` before you 
+    try to run the `keystone`-state.
 
 Install and configure OpenStack's Keystone and it's database.
 
