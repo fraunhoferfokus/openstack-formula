@@ -21,7 +21,7 @@ refresh modules and states:
     salt.function:
         - name: saltutil.sync_all
         - tgt: '*'
-        - args:
+        - arg:
            - saltenv: openstack
 
 #restart minion:
@@ -42,17 +42,14 @@ configure network:
 
 install_mysql:
     salt.state:
-        #This "tgt: I@..." assumes the master's
-        #view on pillar!
-        #- tgt: I@roles:openstack-controller
-        - tgt: controller
+        - tgt: 'controller'
         - sls:
             - mysql.server
             - mysql.python
 
 install_rabbitmq:
     salt.state:
-        - tgt: controller
+        - tgt: 'controller*'
         - sls:
             - rabbitmq
 
@@ -61,18 +58,18 @@ install_rabbitmq:
 install_keystone:
     salt.state:
         #- tgt: I@roles:openstack-controller
-        - tgt: controller
+        - tgt: 'controller*'
         - sls:
             - keystone
             - openstack.keystone_rc
         - require:
             - salt: install_mysql
-            #- salt: install_rabbitmq
+            - salt: install_rabbitmq
 
 install_nova-controller:
     salt.state:
-        #- tgt: I@roles:openstack-controller
-        - tgt: controller
+        - tgt: I@roles:openstack-controller
+        - tgt_type: pillar
         - sls:
             - nova.controller
         - require:
@@ -111,9 +108,8 @@ install_horizon:
 
 install_nova-compute:
     salt.state:
-        - tgt:
-            - compute-1
-            - compute-2
+        - tgt: I@roles:openstack-compute
+        - tgt_type: pillar
         - sls:
             - nova.compute
         - require:
@@ -121,12 +117,10 @@ install_nova-compute:
 
 configure openvswitch:
     salt.state:
-        - tgt:
+        # TODO - needs to be changed:
+        - tgt: '*'
             # compute nodes
-            - compute-1
-            - compute-2
             # network node
-            - controller
         - sls:
             - openvswitch
         - require:
@@ -135,8 +129,7 @@ configure openvswitch:
 
 install neutron on network-node:
     salt.state:
-        - tgt:
-            - controller
+        - tgt: controller
         - sls: neutron.network
         - require: 
             - salt: install neutron-server
@@ -144,9 +137,8 @@ install neutron on network-node:
 
 install neutron on compute-nodes:
     salt.state:
-        - tgt:
-            - compute-1
-            - compute-2
+        - tgt: 'compute-[12]'
+        - tgt_type: regexp
         - sls: neutron.compute
         - require:
             - salt: install neutron-server
