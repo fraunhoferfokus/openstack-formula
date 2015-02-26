@@ -3,6 +3,11 @@ TODO
 
 - **UPDATE README & TODO**
 
+- reduce redundancy in Pillar (get listen addr for neutron-server 
+  from neutron.endpoint, get listen addr for keystone from 
+  keystone.endpoint, set passwords/tokens to those in 
+  {neutron,keystone}.{password,token} and so on) 
+
 - template `neutron/initial_{network,subnet}.sls`
 
 - don't allow networks of same name in the same tenant.
@@ -26,6 +31,14 @@ TODO
 
 - Add states for Ceilometer
 
+- write a state-file for the Orchestrate-Runner_
+
+.. _Orchestrate-Runner:
+    http://docs.saltstack.com/en/latest/topics/tutorials/states_pt5.html#orchestrate-runner
+
+- add sanity checks for pillar on minions. make sure all needed 
+  configuration parameters are set in pillar *as seen by the minion*.
+
 - add support for OpenStack Juno (configured via 
     pillar[openstack:release])
 
@@ -41,11 +54,6 @@ TODO
 
 .. _prereq:
     http://docs.saltstack.com/en/latest/ref/states/requisites.html#prereq
-
-- write a state-file for the Orchestrate-Runner_
-
-.. _Orchestrate-Runner:
-    http://docs.saltstack.com/en/latest/topics/tutorials/states_pt5.html#orchestrate-runner
 
 Nice to have
 ------------
