@@ -5,7 +5,9 @@ TODO
 
 - template `neutron/initial_{network,subnet}.sls`
 
-- don't allow networks of same name in the same tenant
+- don't allow networks of same name in the same tenant.
+  (not necessary but would only cause confusion and makes
+  identifying the correct network hard)
 
 - keep dnsmasq from breaking name-resolution on network node
 
