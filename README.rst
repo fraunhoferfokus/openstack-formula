@@ -3,6 +3,13 @@ openstack-formula
 =================
 
 A saltstack formula to deploy OpenStack.
+Supported components are:
+    
+  - Keystone
+  - Nova
+  - Neutron
+  - Glance
+  - Horizon
 
 .. note::
 
@@ -11,8 +18,16 @@ A saltstack formula to deploy OpenStack.
 
 .. note::
     
-    This formula uses the openvswitch-formula and the mysql-formula and 
+    This formula uses the openvswitch-formula_ and the mysql-formula_ and 
     assumes both are present in the same Salt-Environment.
+
+.. note::
+
+    For now the formula is only tested on Ubuntu 14.04. Don't hesitate to
+    add correct package-names for other distributions like CentOS.
+
+.. _openvswitch-formula: https://github.com/saltstack-formulas/openvswitch-formula
+.. _mysql-formula: https://github.com/saltstack-formulas/mysql-formula
 
 Pillar-Data common between States
 =================================
@@ -91,9 +106,10 @@ Minimal data for Pillar::
       database: 
         password: 'sUlPalrGnWTnsg_keystone_db_pass_lTNA2Zse7XkGlA'
 
-``neutron.server``
+``neutron.controller``
 ------------------
-Install and configure the server-part of OpenStack's Neutron.
+Install and configure the server-part of OpenStack's Neutron 
+on the your controller.
 
 Minimal state-specific Pillar::
 
@@ -104,6 +120,18 @@ Minimal state-specific Pillar::
         database:
           password: neutron_qg2bD0_database_gCwXD_pass
 
+
+``neutron.network``
+-------------------
+**TODO**
+
+Network node.
+
+``neutron.network``
+-------------------
+**TODO**
+
+Network node.
 
 ``glance``
 ----------
