@@ -109,7 +109,8 @@ Minimal data for Pillar::
 ``neutron.controller``
 ------------------
 Install and configure the server-part of OpenStack's Neutron 
-on the your controller.
+on the your controller. The MTU is needed because we use 
+tunneling.
 
 Minimal state-specific Pillar::
 
@@ -119,7 +120,9 @@ Minimal state-specific Pillar::
           admin_password: service_bFdYs/+LF0kaD_pass
         database:
           password: neutron_qg2bD0_database_gCwXD_pass
-
+      dhcp_agent:
+        dnsmasq:
+          mtu: 1400
 
 ``neutron.network``
 -------------------
