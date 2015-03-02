@@ -69,4 +69,18 @@ dhcp_agent.ini:
         - template: jinja
         - require:
             - pkg: neutron-network-packages
+{% if salt['pillar.get']('neutron:dhcp_agent:dnsmasq', {}) %}
+            - file: {{ neutron.conf_dir }}/dnsmasq.conf
 
+dnsmasq.conf:
+    file.managed:
+        - name: {{ neutron.conf_dir }}/dnsmasq.conf
+        - user: neutron
+        - node: 640
+        - source: salt://neutron/files/dhcp_agent.ini
+        - template: jinja
+        - context: 
+            config: {{ salt['pillar.get']('neutron:dhcp_agent:dnsmasq').items() }}
+        - require: 
+            - pkg: neutron-network-packages
+{% endif %}
