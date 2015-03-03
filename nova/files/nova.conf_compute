@@ -160,19 +160,7 @@ neutron_auth_strategy = {{ get('nova:DEFAULT:neutron_auth_strategy',
                                 get('openstack:auth_strategy',
                                     openstack_defaults.auth_strategy)
                            ) }}
-{%- set tenant_name = get('nova:DEFAULT:neutron_admin_tenant_name',
-                          get('neutron:common:keystone_authtoken:admin_tenant_name',
-                              get('openstack:keystone:admin_tenant_name',
-                                  openstack_defaults.keystone.admin_tenant_name)
-                          )
-                      ) %}
-{%- set tenants = salt['mine.get']('controller', 'keystone.tenant_list') %}
-{%- if tenants.has_key('controller') and tenants['controller'].has_key(tenant_name) %}
-    {%- set tenant_id = tenants['controller'][tenant_name]['id'] %}
-{%- else %}
-    {%- set tenant_id = '# tenant for Neutron not yet available in Salt Mine' %}
-{%- endif %}
-neutron_admin_tenant_id = {{ tenant_id }}
+neutron_admin_tenant_name = '{{ get('neutron:common:keystone_authtoken:admin_tenant_name', 'service') }}'
 neutron_admin_username = '{{ get('nova:DEFAULT:neutron_admin_username',
                                 get('neutron:common:keystone_authtoken:admin_user',
                                     'neutron')
