@@ -15,34 +15,21 @@ my_ip = {{ salt['pillar.get']('nova:DEFAULT:my_ip',
                     'localhost')
         ) }}
 
-rpc_backend = {{ salt['pillar.get']('nova:DEFAULT:rpc_backend',
-                    salt['pillar.get']('openstack:rpc_backend',
-                        openstack_defaults.rpc_backend)
-                 ) }}
-rabbit_host = {{ salt['pillar.get']('nova:DEFAULT:rabbit_host',
-                    get('openstack:rabbitmq:host',
+rpc_backend = rabbit
+rabbit_host = {{ salt['pillar.get']('openstack:rabbitmq:host',
                         salt['pillar.get'](
-                            'openstack:controller:address_int',
-                            'localhost')
-                    )
+                            'openstack:controller:address_int')
                  ) }}
-rabbit_userid={{ get('glance:api:DEFAULT:rabbit_userid',
-                    get('glance:common:DEFAULT:rabbit_userid',
-                        get('openstack:rabbitmq:userid',
-                            openstack_defaults.rabbitmq.userid)
-                    )
+rabbit_userid={{ salt['pillar.get']('openstack:rabbitmq:userid',
+                    openstack_defaults.rabbitmq.userid) 
                  ) }}
-rabbit_password='{{ get('glance:api:DEFAULT:rabbit_password',
-                        get('glance:common:DEFAULT:rabbit_password',
-                            get('openstack:rabbitmq:password',
-                                openstack_defaults.rabbitmq.password)
-                        )
+rabbit_password='{{ salt['pillar.get'](
+                        'openstack:rabbitmq:password',
+                             openstack_defaults.rabbitmq.password
                     ) }}'
-rabbit_virtual_host={{ get('glance:api:DEFAULT:rabbit_virtual_host',
-                            get('glance:common:DEFAULT:rabbit_virtual_host',
-                                get('openstack:rabbitmq:virtual_host',
-                                    openstack_defaults.rabbitmq.virtual_host)
-                            )
+rabbit_virtual_host={{ salt['pillar.get'](
+                            'openstack:rabbitmq:virtual_host',
+                                openstack_defaults.rabbitmq.virtual_host
                        ) }}
 
 verbose = {{ salt['pillar.get']('nova:DEFAULT:verbose', False) }}

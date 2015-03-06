@@ -3,6 +3,9 @@ TODO
 
 - **UPDATE README & TODO**
 
+- Make RabbitMQ listen only on the internal address of the
+  controller
+
 - reduce redundancy in Pillar (get listen addr for neutron-server 
   from neutron.endpoint, get listen addr for keystone from 
   keystone.endpoint, set passwords/tokens to those in 
