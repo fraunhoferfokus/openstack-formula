@@ -13,6 +13,9 @@ TODO
 
 - template `neutron/initial_{network,subnet}.sls`
 
+- merge `nova.conf` and `nova.conf_compute`, differentiate
+  based on host's roles
+
 - don't allow networks of same name in the same tenant.
   (not necessary but would only cause confusion and makes
   identifying the correct network hard)
