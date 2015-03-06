@@ -3,12 +3,11 @@ openstack:
     # This one is a TODO for most services' config:
     #region: openstack_defaults.region_name = RegionOne
     controller:
-        address_int: # fallback in most places: 127.0.0.1
-        address_ext: # fallback in most places: 0.0.0.0
+        address_int: # MUST be set
+        address_ext: # MUST be set
     #service_email: admin@example.com, ${service}@${pillar[service_domain]}
     #service_domain: openstack_defaults.service_domain = example.com
     #auth_strategy: openstack_defaults.auth_strategy = keystone
-    #rpc_backend: openstack_defaults.rpc_backend = rabbit
     #use_ipv6: False
     database:
         #host: pillar[openstack:controller:address_int]
@@ -28,13 +27,12 @@ openstack:
     neutron:
         #api_port: 9696
     rabbitmq:
-        #host: pillar[openstack:controller:address_int], localhost
+        #host: pillar[openstack:controller:address_int]
         #port: 5672
         #userid: openstack_defaults.rabbitmq.userid = 'openstack'
         password: rabbitmq_pass # Fun Fact: having a '$' in here causes 
                                 # stacktraces in neutron-server
         #use_ssl: False
-        #durable_queues: False
     paste:
         #flavor: keystone
 
@@ -88,9 +86,6 @@ glance:
             #   - pillar['glance:common:DEFAULT:bind_host']
             #   - pillar[openstack:controller:address_ext]
             #   - localhost
-            #rabbit_host: falling back to
-            #    - pillar[openstack:rabbitmq:host]
-            #    - pillar[openstack:controller:address_int]
             #image_cache_dir: /var/lib/glance/image-cache/
     registry:
         DEFAULT:
@@ -145,10 +140,6 @@ neutron:
 nova:
    DEFAULT:
        #my_ip: pillar[openstack:controller:address_int], localhost
-       #rpc_backend: falls back to
-       #    - pillar[openstack:rpc_backend]
-       #    - openstack_defaults.rpc_backend = rabbit
-       #rabbit_host: pillar[openstack:controller:address_int], localhost
        #debug: False
        #verbose: False
        #neutron_admin_username: falls back to
