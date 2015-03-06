@@ -21,7 +21,7 @@ rabbit_host = {{ salt['pillar.get']('openstack:rabbitmq:host',
                             'openstack:controller:address_int')
                  ) }}
 rabbit_userid={{ salt['pillar.get']('openstack:rabbitmq:userid',
-                    openstack_defaults.rabbitmq.userid) 
+                    openstack_defaults.rabbitmq.userid
                  ) }}
 rabbit_password='{{ salt['pillar.get'](
                         'openstack:rabbitmq:password',
