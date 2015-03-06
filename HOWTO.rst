@@ -3,9 +3,14 @@ How To Use the OpenStack Formula for SaltStack
 
 This document describes the whole process of
 deploying OpenStack_ using our formula for
-SaltStack.
+SaltStack_.
+
+We assume you're not to familiar with SaltStack.
+If you are the information from the README should
+be sufficient. If it's not please open an issue.
 
 .. _OpenStack: http://www.openstack.org/
+.. _SaltStack: http://www.saltstack.org/
 
 Prepare your hosts
 ------------------
@@ -59,13 +64,15 @@ Prepare your hosts
     
         - restart salt-master
 
-    - salt-minion on the OpenStack-Nodes
+    - deploy salt-minion on the OpenStack-Nodes
         - set hostnames (compute-1.example.com, 
           compute-2.example.com...)
         - install pkg *salt-minion*
         - run *salt-key -L* to list minion-keys on your
-          salt-master
-        - run *salt-key -A* to accept minion-keys [1]_
+          master
+        - run *salt-key -A* to accept minion-keys on
+          your master [1]_
+
 
 You may want to install more packages useful for debugging
 and fixing stuff (lsof, multitail, nmap, tmux, openssh-server)
@@ -100,4 +107,29 @@ a snapshot.
 Entering Configuration Details in Pillar
 ========================================
 
-Bla bla bla...
+Pillar data in SaltStack is private to the minions it's
+assigned to. Targeting for this assigning can be done in
+several ways (for details see `Storing Static Data in the 
+Pillar`_) and is done in a top file called *top.sls*
+placed in the directory specified unter *pillar_roots* on
+the master.
+
+.. _Storing Static Data in the Pillar: 
+    http://docs.saltstack.com/en/latest/topics/pillar/
+
+We go with a rather simple top file::
+
+    base:
+        '*':
+            - {{ grains.host }}
+        '(controller|network|compute-[0-9])':
+            - match: pcre
+            - openstack
+
+First any node get's the content of a file with its
+hostname (i.e. */srv/salt/pillar/controller.sls*)
+included in its pillar.
+
+Then minions matched by the regex (assuming minion IDs
+with just nodenames, not fully qualified domain names)
+will get the contents of */srv/salt/pillar/openstack.sls*.
