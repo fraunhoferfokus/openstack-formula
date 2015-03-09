@@ -32,29 +32,36 @@ below:
 
 Preparation
 ===========
-We can't just jump into deploying OpenStack without
-making some preparations.
 
-Planing
--------
+In order to deploy OpenStack, some preparations are required:
 
-    - assign hardware and roles
+Planning
+--------
+
+    - Assign hardware and roles
+        - In this example, we will deploy a setup with one controller 
+          node that incorporates the network node, and two compute nodes
+        - A salt-master host that can be reached from all nodes is required,
+          it could be on an extra host inside the management network, 
+          as well as an external host (possibly through a salt-proxy)
         - TODO: Links to OpenStack HW recommendations
-    - plan networks, assign IPs
-        - management network: internal communication 
-          of services, i.e. like database access
-        - external network: exposes public APIs and provides 
-          internet access for tenants' instances
+    - Plan networks, assign IPs
+        - Management network: Internal communication 
+          of services (database, internal APIs), packet forwarding 
+          between controller and compute nodes
+        - External network: Exposes public APIs and provides 
+          internet access for OpenStack instances
 
 Prepare your hosts
 ------------------
 
-    - connect hosts to the networks you defined
-        - controller (and network node if on a separate host) 
+    - Connect hosts to the networks you defined
+        - Controller (and network node if on a separate host) 
           to the external and the management network
-        - compute nodes only to the management network
-    - install OS [1]_, create initial user for mgmt
-    - add `SaltStack PPA`_ (on Ubuntu) or EPEL_ repositories
+        - Compute nodes only to the management network
+    - Install the operating system[1]_, create initial user for
+      management
+    - Add `SaltStack PPA`_ (on Ubuntu) or EPEL_ repositories
       (on RHEL/CentOS) for up-to-date SaltStack packages to 
       all nodes::
         
@@ -62,15 +69,15 @@ Prepare your hosts
         sudo add-apt-repository ppa:saltstack/salt        
         
 
-    - deploy salt-master
-        - preferably on a different host than your controller
-        - install pkg *salt-master*
-        - checkout formulas to */srv/salt/* [3]_
+    - Deploy salt-master
+        - Preferably on a different host than your controller
+        - Install package *salt-master*
+        - Checkout formulas to */srv/salt/* [3]_
             - `MySQL formula`_
             - `OpenvSwitch formula`_
             - `OpenStack formula`_
-            - **TODO**: Correct URLs
-        - configure your master's *file_roots* in 
+            - **TODO**: Use FOKUS repository URLs!
+        - Configure your master's *file_roots* in 
           */etc/salt/master*::
 
             file_roots:
@@ -82,21 +89,21 @@ Prepare your hosts
                 - /srv/salt/mysql-formula
                   
     
-        - configure your master's *pillar_roots*::
+        - Configure your master's *pillar_roots*::
 
             pillar_roots:
               base:
                 - /srv/salt/pillar
     
-        - restart salt-master
+        - Restart salt-master
 
-    - deploy salt-minion on the OpenStack-Nodes
-        - set hostnames (compute-1.example.com, 
+    - Deploy salt-minion on the OpenStack nodes
+        - Set hostnames (compute-1.example.com, 
           compute-2.example.com...)
-        - install pkg *salt-minion*
-        - run *salt-key -L* to list minion-keys on your
+        - Install package *salt-minion*
+        - Run *salt-key -L* to list minion-keys on your
           master
-        - run *salt-key -A* to accept minion-keys on
+        - Run *salt-key -A* to accept minion-keys on
           your master [2]_
 
 
@@ -105,7 +112,7 @@ and fixing stuff (lsof, multitail, nmap, tmux, openssh-server)
 and add your SSH-keys to *~user/.ssh/authorized_keys* now.
 
 As this is a good point to roll back to you may also want
-to make a backup or (if you're testing this on VMs) take
+to make a backup or - if you're testing this on VMs - take
 a snapshot.
 
 .. _SaltStack PPA:
@@ -144,7 +151,7 @@ the master.
 .. _Storing Static Data in the Pillar: 
     http://docs.saltstack.com/en/latest/topics/pillar/
 
-We go with a rather simple top file::
+We start with a rather simple top file::
 
     base:
         '*':
@@ -234,8 +241,8 @@ For `compute-2.sls`::
                 my_ip: 192.0.2.22
 
 
-Deploytment
-===========
+Deployment
+==========
 
 Make sure to sync all modules first::
 
