@@ -3,8 +3,9 @@ keystone-package:
     pkg.installed:
       - name: keystone
 
-/etc/keystone/keystone.conf:
+keystone.conf:
     file.managed:
+        - name: /etc/keystone/keystone.conf
         - source: salt://keystone/files/keystone.conf
         - template: jinja
         - require:
@@ -76,6 +77,7 @@ keystone-manage db_sync:
     - require:
         - pkg: keystone-package
         - mysql_grants: keystone-grants
+        - file: keystone.conf
     - watch:
         - pkg: keystone-package
     - onlyif: test $(keystone-manage db_version 2> /dev/null) -lt $( python manage.py version . 2> /dev/null)
@@ -85,11 +87,11 @@ keystone-service:
         - name: keystone
         - require:
             - pkg: keystone-package
-            - file: /etc/keystone/keystone.conf 
+            - file: keystone.conf 
             - cmd: keystone-manage db_sync
         - watch:
             - pkg: keystone-package
-            - file: /etc/keystone/keystone.conf 
+            - file: keystone.conf 
             - mysql_user: keystone-dbuser
             - cmd: keystone-manage db_sync
 
