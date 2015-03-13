@@ -16,12 +16,13 @@ be sufficient. If it's not please open an issue.
 Example configuration values
 ============================
 Here's an overview of the values used in the examples
-below:
+below you have to replace with your own:
 
     - Networks
         - Management: 192.0.2.0/24 (aka TEST-NET-1 [0]_)
         - External: 203.0.113.0/24 (aka TEST-NET-3)
     - IPs:
+        - salt: 192.0.2.2
         - controller: 203.0.113.10 on eth1
         - controller-mgmt: 192.0.2.10 on eth0
         - compute-1: 192.0.2.21 on eth0
@@ -29,6 +30,8 @@ below:
     - Default gateways:
         - Management: 192.0.2.1
         - External: 203.0.113.1
+
+TODO: Add passwords an so on.
 
 .. [0] Subnets reserved for documentation, see `RFC 5737`_
 .. _RFC 5737: https://tools.ietf.org/html/rfc5737
@@ -62,7 +65,8 @@ Prepare your hosts
     - Connect hosts to the networks you defined
         - Controller (and network node if on a separate host) 
           to the external and the management network
-        - Compute nodes only to the management network
+        - Compute nodes and Salt master only to the management 
+          network
     - Install the operating system[1]_, create initial user for
       management
     - Add `SaltStack PPA`_ (on Ubuntu) or EPEL_ repositories
@@ -71,7 +75,6 @@ Prepare your hosts
         
         sudo apt-get install --yes software-properties-common
         sudo add-apt-repository ppa:saltstack/salt        
-        
 
     - Deploy salt-master
         - Preferably on a different host than your controller
@@ -92,7 +95,6 @@ Prepare your hosts
                 - /srv/salt/openvswitch-formula
                 - /srv/salt/mysql-formula
                   
-    
         - Configure your master's *pillar_roots*::
 
             pillar_roots:
@@ -105,6 +107,14 @@ Prepare your hosts
         - Set hostnames (compute-1.example.com, 
           compute-2.example.com...)
         - Install package *salt-minion*
+        - Point your minions to your master, add those
+          lines to */etc/salt/minion*::
+            
+            master:
+                - salt.example.com
+                - 192.0.2.2
+            master_type: failover
+
         - Run *salt-key -L* to list minion-keys on your
           master
         - Run *salt-key -A* to accept minion-keys on
