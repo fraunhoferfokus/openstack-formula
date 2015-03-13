@@ -67,7 +67,7 @@ Prepare your hosts
           to the external and the management network
         - Compute nodes and Salt master only to the management 
           network
-    - Install the operating system[1]_, create initial user for
+    - Install the operating system [1]_, create initial user for
       management
     - Add `SaltStack PPA`_ (on Ubuntu) or EPEL_ repositories
       (on RHEL/CentOS) for up-to-date SaltStack packages to 
@@ -214,17 +214,14 @@ In `openstack.sls` we define information needed on all hosts::
 Compute Nodes
 `````````````
 
-In `compute_all.sls` we add options common to all compute-nodes::
+In `compute_all.sls` we add options common to all compute-nodes.
+We assign their role and specify an OVS bridge *br-int* should 
+be create with the interface *eth0* as a port and reuse the
+configuration of this interface::
 
     roles:
         - openstack-compute
 
-    keystone.user: nova
-    keystone.password: 'Keystone HowTo Password'
-    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
-    keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
-    
     openvswitch:
         bridges:
             br-int:
@@ -233,7 +230,16 @@ In `compute_all.sls` we add options common to all compute-nodes::
                     - eth0
                 reuse_netcfg: eth0
 
+The salt-minion on the compute node uses these credentials 
+to get data from Keystone. They're also used for the
+Nova configuration::
 
+    keystone.user: nova
+    keystone.password: 'Keystone HowTo Password'
+    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
+    keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
+    keystone.region: 'RegionOne'
+    
 In `compute-1.sls` and `compute-2.sls` we add options
 unique to the particular compute-node.
 
@@ -346,29 +352,134 @@ You only need to change *bind-address* and *root_password*::
 Deployment
 ==========
 
+.. note:: While we plan to use it later we have some issues 
+        with the `orchestrate runner`_ of SaltStack [4]_.
+        Deploying this way is more unreliable so for now 
+        we stick to running the states manually.
+
+.. [4] Yes, we could use `state.highstate` and define requirements
+        between components of OpenStack. But requiring something
+        being done on a different host would involve passing
+        data around through the `Salt Mine`_ and make the whole
+        thing more difficult to debug.
+
+.. _orchestrate runner: 
+    http://docs.saltstack.com/en/latest/topics/tutorials/states_pt5.html#orchestrate-runner
+.. _Salt Mine: http://docs.saltstack.com/en/latest/topics/mine/
+
+
 Make sure to sync all modules first::
 
     sudo salt \* saltutil.sync_all saltenv=base,openstack
 
 Configure openvswitch on network and compute nodes::
 
-    sudo salt -C 'I@roles:openstack-compute or I@openstack-compute' \
+    sudo salt -C \
+        'I@roles:openstack-network or I@roles openstack-compute' \
         state.sls openvswitch saltenv=openstack
 
 Make sure network configuration is correct on all hosts::
 
     sudo salt \* state.sls networking saltenv=openstack
     
-Install MySQL on your controller::
- - mysql
+Install MySQL, RabbitMQ and Keystone on your controller::
 
+    sudo salt -I roles:openstack-controller \
+        state.sls mysql saltenv=openstack && \
+    sudo salt -I roles:openstack-controller \
+        state.sls rabbitmq saltenv=openstack && \
+    sudo salt -I roles:openstack-controller \
+        state.sls keystone saltenv=openstack
 
- - rabbitmq
- - keystone, twice?
- - neutron.controller
- - nova.controller, twice
- - neutron.network
- - neutron.compute
- - nova.compute
- - glance, twice
- - horizon (on fail `local_settings.py` try again)
+If the *keystone* fails re-run the state [5]_::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls keystone saltenv=openstack
+
+Test Keystone by running the `keystone.endpoint_list` function
+on the controller. If you see similiar output Keystone works:: 
+
+    user@master: ~$ sudo salt -I roles:openstack-controller \
+        keystone.endpoint_list
+    controller:
+        ----------
+        1d78ce00dbb642fc95408afaa6c9a1b3:
+            ----------
+            adminurl:
+                http://192.0.2.10:35357/v2.0
+            id:
+                1d78ce00dbb642fc95408afaa6c9a1b3
+            internalurl:
+                http://192.0.2.10:5000/v2.0
+            publicurl:
+                http://203.0.113.10:5000/v2.0
+            region:
+                RegionOne
+            service_id:
+                8ee50c9c787b4d46bb7300b57c83644f
+
+Deploy `neutron-server` on the controller::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls neutron.controller saltenv=openstack
+
+Deploy the controller parts of Nova::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls nova.controller saltenv=openstack
+
+If you see high CPU-usage of the service `nova-consoleauth`
+re-run the state *nova-controller* [5]_.
+
+.. [5] It seems some parts of OpenStack start up to fast or
+       rather the tools managing database schemas return
+       before the database is done applying the changes.
+       This leads to services no working correctly until
+       restarted.
+        
+       For now re-applying the states works in all cases.
+
+Neutron agents on network-node::
+    
+    sudo salt -I roles:openstack-network \
+        state.sls neutron.network saltenv=openstack
+
+Neutron agents on compute-nodes::
+    
+    sudo salt -I roles:openstack-compute \
+        state.sls neutron.compute saltenv=openstack
+
+`nova-compute`::
+
+    sudo salt -I roles:openstack-compute \
+        state.sls nova.compute saltenv=openstack
+
+Glance on controller [5]_::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls glance saltenv=openstack
+
+Horizon (if generating `local_settings.py` fails try again [5]_)::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls horizon saltenv=openstack
+
+Next Steps
+----------
+
+Now you should be able to login on the Horizon webinterface on your
+controller, to upload images, create networks and spawn instances.
+
+  - Start with navigating to 
+    *http://controller.example.com/horizon/project/images/* 
+    and upload a small image like Cirros_
+  - Go to http://controller.example.com/horizon/project/networks/ 
+    and add a tenant network and subnet
+  - Add a router to your subnet with the external network as gateway
+  - Go back to images, click "Launch" on the one you just uploaded
+    and enter some details for your VM
+  - Go to the VMs console. Login and check network connectivity
+  - Assign a floating IP to the VM and try to connect to the VM
+    via SSH using the floating IP
+
+.. _Cirros: https://launchpad.net/cirros
