@@ -22,10 +22,13 @@ below:
         - Management: 192.0.2.0/24 (aka TEST-NET-1 [0]_)
         - External: 203.0.113.0/24 (aka TEST-NET-3)
     - IPs:
-        - controller: 203.0.113.10
-        - controller-mgmt: 192.0.2.10
-        - compute-1: 192.0.2.21
-        - compute-2: 192.0.2.22
+        - controller: 203.0.113.10 on eth1
+        - controller-mgmt: 192.0.2.10 on eth0
+        - compute-1: 192.0.2.21 on eth0
+        - compute-2: 192.0.2.22 on eth0
+    - Default gateways:
+        - Management: 192.0.2.1
+        - External: 203.0.113.1
 
 .. [0] Subnets reserved for documentation, see `RFC 5737`_
 .. _RFC 5737: https://tools.ietf.org/html/rfc5737
@@ -41,9 +44,10 @@ Planning
     - Assign hardware and roles
         - In this example, we will deploy a setup with one controller 
           node that incorporates the network node, and two compute nodes
-        - A salt-master host that can be reached from all nodes is required,
-          it could be on an extra host inside the management network, 
-          as well as an external host (possibly through a salt-proxy)
+        - A salt-master host that can be reached from all nodes is 
+          required, it could be on an extra host inside the management 
+          network, as well as an external host (possibly through a 
+          salt-proxy)
         - TODO: Links to OpenStack HW recommendations
     - Plan networks, assign IPs
         - Management network: Internal communication 
@@ -138,8 +142,8 @@ a snapshot.
 .. _GitFS: 
     http://docs.saltstack.com/en/latest/topics/tutorials/gitfs.html
 
-Entering Configuration Details in Pillar
-----------------------------------------
+Pillar for Configuration Details
+--------------------------------
 
 Pillar data in SaltStack is private to the minions it's
 assigned to. Targeting for this assigning can be done in
@@ -151,22 +155,33 @@ the master.
 .. _Storing Static Data in the Pillar: 
     http://docs.saltstack.com/en/latest/topics/pillar/
 
-We start with a rather simple top file::
+The Topfile
+```````````
+
+We start with a rather simple top.sls::
 
     base:
-        '*':
-            - {{ grains.host }}
         '(controller|network|compute-[0-9])':
             - match: pcre
             - openstack
+        'compute-?':
+            - compute_all
+        '*':
+            - {{ grains.host }}
 
-First any node get's the content of a file with its
-hostname (i.e. `/srv/salt/pillar/controller.sls`)
-included in its pillar.
+Minions matched by the regex (assuming minion IDs with 
+just nodenames, not fully qualified domain names) will 
+get the contents of `/srv/salt/pillar/openstack.sls`.
 
-Then minions matched by the regex (assuming minion IDs
-with just nodenames, not fully qualified domain names)
-will get the contents of `/srv/salt/pillar/openstack.sls`.
+Minions matching the glob *compute-?* get the information 
+needed on all compute nodes from `/srv/salt/pillar/compute_all.sls`.
+
+All minions get the content of a file with a name equal
+to the minions hostname (plus `.sls` like 
+`/srv/salt/pillar/controller.sls`) included in its pillar.
+
+Common Configuration Data
+`````````````````````````
 
 In `openstack.sls` we define information needed on all hosts::
 
@@ -186,30 +201,8 @@ In `openstack.sls` we define information needed on all hosts::
           - 8.8.8.8
           - 8.8.4.4
 
-In `controller.sls` we define information only available 
-to our controller::
-    
-    roles:
-        - openstack-controller
-        - openstack-network
-
-    keystone.token: 'Keystone HowTo Token'
-    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
-    keystone.auth_url:  'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
-
-    neutron.endpoint: 'http://203.0.113.10:9696'
-    #neutron.auth_url:  'http://203.0.113.10:5000/v2.0'
-    neutron.user: neutron
-    neutron.tenant: service
-    neutron.password: 'Neutron HowTo Password'
-
-
-    openstack:
-        neutron:
-            shared_secret: Shared_secret_from_the_HowTo 
-
-
+Compute Nodes
+`````````````
 
 In `compute_all.sls` we add options common to all compute-nodes::
 
@@ -221,6 +214,14 @@ In `compute_all.sls` we add options common to all compute-nodes::
     keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
     keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
     keystone.region: 'RegionOne'
+    
+    openvswitch:
+        bridges:
+            br-int:
+                comment: integration bridge
+                ports: 
+                    - eth0
+                reuse_netcfg: eth0
 
 
 In `compute-1.sls` and `compute-2.sls` we add options
@@ -233,12 +234,103 @@ For `compute-1.sls`::
             DEFAULT:
                 my_ip: 192.0.2.21
 
+    interfaces:
+        eth0:
+            comment: management interface
+            ipv4: 192.0.2.21/24
+            default_gw: 192.0.2.1
+
 For `compute-2.sls`::
 
     nova:
         common:
             DEFAULT:
                 my_ip: 192.0.2.22
+    
+    interfaces:
+        eth0:
+            comment: management interface
+            ipv4: 192.0.2.21/24
+            default_gw: 192.0.2.1
+
+The Controller
+``````````````
+
+In `controller.sls` we define information only available 
+to our controller. Those sections you already know::
+    
+    roles:
+        - openstack-controller
+        - openstack-network
+
+    interfaces:
+        eth0:
+            comment: management interface
+            ipv4: 192.0.2.10/24
+        eth1:
+            comment: external interface
+            ipv4: 203.0.113.10/24
+            default_gw: 203.0.113.1
+    
+    openvswitch:
+        bridges:
+            br-int:
+                comment: integration bridge
+                ports: 
+                    - eth0
+                reuse_netcfg: eth0
+            br-ex:
+                comment: external bridge
+                ports: 
+                    - eth1
+                reuse_netcfg: eth1
+
+The Keystone credentials on the controller are based on a 
+token which is set in the Keystone configuration file::
+
+    keystone.token: 'Keystone HowTo Token'
+    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
+    keystone.auth_url:  'http://203.0.113.10:5000/v2.0'
+    keystone.region: 'RegionOne'
+
+Those Neutron credentials are needed to let salt
+talk to Neutron. The Neutron *shared_secret* is
+for communications between the `neutron-server`
+and its metadata-agent::
+
+    neutron.endpoint: 'http://203.0.113.10:9696'
+    #neutron.auth_url:  'http://203.0.113.10:5000/v2.0'
+    neutron.user: neutron
+    neutron.tenant: service
+    neutron.password: 'Neutron HowTo Password'
+
+    openstack:
+        neutron:
+            shared_secret: Shared_secret_from_the_HowTo 
+
+Here are some settings we need for MySQL. We have to specify 
+the root password and the bind-address so `mysqld` only listens 
+on the management interface. Some encoding related settings are
+needed so Glance won't refuse to put its data into the database.
+You only need to change *bind-address* and *root_password*::
+
+    mysql:
+        server:
+            mysqld:
+                bind-address:
+                    192.0.2.10
+                character-set-server:
+                    utf8
+                collation-server:
+                    utf8_general_ci
+                default-storage-engine:
+                    innodb
+                init-connect:
+                    SET NAMES utf8
+                innodb_file_per_table:
+                    True
+            root_password:
+                rubnaj[swatLaidyalv1
 
 
 Deployment
@@ -248,4 +340,25 @@ Make sure to sync all modules first::
 
     sudo salt \* saltutil.sync_all saltenv=base,openstack
 
-...
+Configure openvswitch on network and compute nodes::
+
+    sudo salt -C 'I@roles:openstack-compute or I@openstack-compute' \
+        state.sls openvswitch saltenv=openstack
+
+Make sure network configuration is correct on all hosts::
+
+    sudo salt \* state.sls networking saltenv=openstack
+    
+Install MySQL on your controller::
+ - mysql
+
+
+ - rabbitmq
+ - keystone, twice?
+ - neutron.controller
+ - nova.controller, twice
+ - neutron.network
+ - neutron.compute
+ - nova.compute
+ - glance, twice
+ - horizon (on fail `local_settings.py` try again)
