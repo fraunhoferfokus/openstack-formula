@@ -188,3 +188,17 @@ keystone-endpoint in Keystone:
             - keystone: keystone-service in Keystone
         - listen: 
           - cmd: keystone-manage db_sync
+
+{% if salt['pillar.get']('keystone:keystone_rc:enable', True) %}
+keystone_rc:
+    file.managed:
+        - name: {{ 
+            salt['pillar.get'](
+                'keystone:keystone_rc:path',
+                '/root/keystone.rc') }}
+        - source: salt://keystone/files/keystone.rc
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: 400
+{% endif %}

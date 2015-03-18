@@ -37,6 +37,9 @@ openstack:
         #flavor: keystone
 
 keystone:
+    #keystone_rc: see keystone_defaults.keystone_rc
+        #enable: 
+        #path: 
     database:
         password:
         #host: falling back to

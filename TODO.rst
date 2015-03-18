@@ -3,6 +3,11 @@ TODO
 
 - **UPDATE README & TODO**
 
+- Clean up `keystone/files/keystone.conf`. Should use the
+  keystone.{user,pass,...} keys in Pillar we need to set anyway
+  and overall work more like the newer templates do (for stuff
+  like accessing Pillar).
+
 - Make RabbitMQ listen only on the internal address of the
   controller
 
