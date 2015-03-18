@@ -230,12 +230,12 @@ configuration of this interface::
                     - eth0
                 reuse_netcfg: eth0
 
-The salt-minion on the compute node uses these credentials 
+The salt-minion on the compute nodes uses these credentials 
 to get data from Keystone. They're also used for the
-Nova configuration::
+Nova configuration (still `compute_all.sls`)::
 
     keystone.user: nova
-    keystone.password: 'Keystone HowTo Password'
+    keystone.password: 'Keystone HowTo Password for Nova'
     keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
     keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
     keystone.region: 'RegionOne'
@@ -309,6 +309,12 @@ token which is set in the Keystone configuration file::
     keystone.auth_url:  'http://203.0.113.10:5000/v2.0'
     keystone.region: 'RegionOne'
 
+Keystone also need to no the password for its database::
+
+    keystone:
+        database:
+            password: 'HowTo Keystone DB Pass'
+
 Those Neutron credentials are needed to let salt
 talk to Neutron. The Neutron *shared_secret* is
 for communications between the `neutron-server`
@@ -328,8 +334,15 @@ Here are some settings we need for MySQL. We have to specify
 the root password and the bind-address so `mysqld` only listens 
 on the management interface. Some encoding related settings are
 needed so Glance won't refuse to put its data into the database.
-You only need to change *bind-address* and *root_password*::
+The entry *mysql.pass* is for the Salt MySQL-module used to
+create the needed databases. You probably want to set this
+entry to the same value as *root_password*.
 
+You only need to change *bind-address*, *root_password* and
+*mysql.pass*::
+
+    mysql.pass: 'rubnaj[swatLaidyalv1'
+    
     mysql:
         server:
             mysqld:
@@ -346,8 +359,11 @@ You only need to change *bind-address* and *root_password*::
                 innodb_file_per_table:
                     True
             root_password:
-                rubnaj[swatLaidyalv1
+                'rubnaj[swatLaidyalv1'
 
+TODO: Not sure if special characters in 
+pillar[mysql:server:root_password] work 
+in all configfiles...
 
 Deployment
 ==========
@@ -375,7 +391,7 @@ Make sure to sync all modules first::
 Configure openvswitch on network and compute nodes::
 
     sudo salt -C \
-        'I@roles:openstack-network or I@roles openstack-compute' \
+        'I@roles:openstack-network or I@roles:openstack-compute' \
         state.sls openvswitch saltenv=openstack
 
 Make sure network configuration is correct on all hosts::
