@@ -13,6 +13,28 @@ be sufficient. If it's not please open an issue.
 .. _OpenStack: http://www.openstack.org/
 .. _SaltStack: http://www.saltstack.org/
 
+TODO
+----
+
+ - fix this:: 
+    root@hw-ctrl:~# neutron agent-list
+    {"error": {"message": "The request you have made requires authentication.", "code": 401, "title": "Unauthorized"}}
+
+   caused by missing `neutron:common:keystone_authtoken:admin_password`
+   to set `/etc/nova/nova.conf:neutron_admin_password`
+
+ - and this::
+    root@hw-ctrl:~# nova list
+    ERROR: Invalid OpenStack Nova credentials.
+
+   caused by missing `neutron:server:DEFAULT:nova_admin_password` to set
+   `/etc/neutron/neutron.conf:nova_admin_password`
+
+ - missing `/etc/neutron/metadata_agent.ini:admin_password` can't help
+   either...
+
+ - rm section TODO
+
 Example configuration values
 ============================
 Here's an overview of the values used in the examples
@@ -210,6 +232,9 @@ In `openstack.sls` we define information needed on all hosts::
       servers:
           - 8.8.8.8
           - 8.8.4.4
+    nova:
+      database:
+        password: 'HowTo-Nova-DB-Password'
 
 Compute Nodes
 `````````````
