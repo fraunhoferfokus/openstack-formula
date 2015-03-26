@@ -72,8 +72,10 @@ nova-endpoint in Keystone:
             salt['pillar.get'](
                 'openstack:nova:compute_port', '8774')
             ) }}
-{#  #TODO:
-    #- region #}
+    - region: {{ salt['pillar.get']('keystone.region',
+                    salt['pillar.get']('openstack.region',
+                        openstack_defaults.region_name)
+                 ) }}
     - require:
         - keystone: nova-service in Keystone
 

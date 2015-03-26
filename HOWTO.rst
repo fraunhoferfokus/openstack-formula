@@ -219,6 +219,7 @@ In `openstack.sls` we define information needed on all hosts::
 
     openstack:
       release: icehouse
+      region_name: RegionOne
       controller:
         address_int: 192.0.2.10
         address_ext: 203.0.113.10
