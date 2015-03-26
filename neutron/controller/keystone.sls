@@ -65,8 +65,10 @@ neutron-endpoint in Keystone:
                     'openstack:neutron:api_port', '9696')
             )
         ) }}
-{#  #TODO:
-    #- region #}
+    - region: {{ salt['pillar.get']('keystone.region',
+                    salt['pillar.get']('openstack:region_name',
+                        openstack_defaults.region_name)
+                 ) }}
     - require:
         - keystone: neutron-service in Keystone
 

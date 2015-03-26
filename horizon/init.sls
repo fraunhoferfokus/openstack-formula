@@ -35,7 +35,7 @@ local_settings.py:
 
 apache2:
     service.running:
-        - listen:
+        - watch:
             - file: local_settings.py
         - require:
             - file: local_settings.py
