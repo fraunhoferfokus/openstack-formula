@@ -4,9 +4,19 @@
 export SERVICE_TOKEN="{{ salt['pillar.get']('keystone.token', 
                             keystone_defaults.admin_token) }}"
 export OS_USERNAME=admin
+{%- if salt['pillar.get']('keystone.username') == 'admin' %}
 export OS_PASSWORD="{{ salt['pillar.get']('keystone.password',
                             keystone_defaults.admin_password) }}"
+{%- else %}
+export OS_PASSWORD="{{ salt['pillar.get']('keystone:admin_password',
+                            keystone_defaults.admin_password) }}"
+{%- endif %}
 export OS_TENANT_NAME=admin
+export OS_REGION_NAME="{{ 
+                        salt['pillar.get']('keystone.region',
+                            salt['pillar.get']('openstack:region_name',
+                                openstack_defaults.region_name)
+                        ) }}"
 export OS_AUTH_URL="{{ salt['pillar.get']('keystone.auth_url') }}"
 export SERVICE_ENDPOINT="{{ salt['pillar.get']('keystone.endpoint')}}"
 export OS_AUTH_STRATEGY=keystone

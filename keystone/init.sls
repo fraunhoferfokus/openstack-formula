@@ -1,3 +1,4 @@
+{% from 'openstack/defaults.jinja' import openstack_defaults %}
 {% from 'keystone/defaults.jinja' import keystone_defaults %}
 keystone-package:
     pkg.installed:
@@ -133,6 +134,10 @@ create admin-user in Keystone:
       - service:
         - admin
         - Member
+    - region: {{ salt['pillar.get']('keystone.region',
+                    salt['pillar.get']('openstack:region_name',
+                        openstack_defaults.region_name)
+                 ) }}
     - require:
       - keystone: create basic tenants in Keystone
       - keystone: create basic roles in Keystone
@@ -183,6 +188,10 @@ keystone-endpoint in Keystone:
                     'openstack:keystone:public_port', 
                     5000)
                 ) }}
+        - region: {{ salt['pillar.get']('keystone.region',
+                    salt['pillar.get']('openstack:region_name',
+                        openstack_defaults.region_name)
+                 ) }}
         - require:
             - cmd: keystone-manage db_sync
             - keystone: keystone-service in Keystone
