@@ -232,9 +232,20 @@ In `openstack.sls` we define information needed on all hosts::
       servers:
           - 8.8.8.8
           - 8.8.4.4
+
     nova:
       database:
         password: 'HowTo-Nova-DB-Password'
+
+    keystone.user: nova
+    keystone.password: 'Keystone HowTo Password for Nova'
+    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
+    keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
+    keystone.region: 'RegionOne'
+
+The `keystone.{user,password,...}` part is use on the salt-minion 
+on the compute nodes uses these credentials to get data from Keystone. 
+They're also used for the Nova configuration.
 
 Compute Nodes
 `````````````
@@ -254,16 +265,6 @@ configuration of this interface::
                 ports: 
                     - eth0
                 reuse_netcfg: eth0
-
-The salt-minion on the compute nodes uses these credentials 
-to get data from Keystone. They're also used for the
-Nova configuration (still `compute_all.sls`)::
-
-    keystone.user: nova
-    keystone.password: 'Keystone HowTo Password for Nova'
-    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
-    keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
     
 In `compute-1.sls` and `compute-2.sls` we add options
 unique to the particular compute-node.
@@ -326,13 +327,10 @@ to our controller. Those sections you already know::
                     - eth1
                 reuse_netcfg: eth1
 
-The Keystone credentials on the controller are based on a 
-token which is set in the Keystone configuration file::
+The controller uses a token which is set in the Keystone 
+configuration file to add users, endpoints and so on::
 
     keystone.token: 'Keystone HowTo Token'
-    keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
-    keystone.auth_url:  'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
 
 Keystone also need to no the password for its database::
 
