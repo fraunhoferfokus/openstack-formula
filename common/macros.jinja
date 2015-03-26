@@ -40,14 +40,31 @@
                                   ) %}
     {%- set keystone_public_port = get('openstack:keystone:public_port',
                                         5000|string) %}
-    {%- set admin_user = get(service+':keystone_authtoken:admin_user', 
-                             get(service+':common:keystone_authtoken:admin_user',
-                                 service) 
-                         )%}
-    {%- set admin_password = 
+    {%- if service == 'nova' and 
+        (
+           get('keystone.user') == 'nova' or
+           get('keystone.user') == get('nova:keystone_authtoken:admin_user')
+        ) %}
+      {%- set admin_user = get('nova:keystone_authtoken:admin_user', 
+                               'nova') %}
+      {%- set admin_password = get('keystone.password') %}
+    {%- elif service == 'neutron' and 
+            get('neutron.user', 'neutron') == get(
+                'neutron:keystone_authtoken:admin_user', 'neutron')
+         %}
+      {%- set admin_user = get('neutron.user') %}
+      {%- set admin_password = get('neutron.password') %}
+    {%- else %}
+      {%- set admin_user = get(
+              service+':keystone_authtoken:admin_user', 
+              get(service+':common:keystone_authtoken:admin_user',
+                  service) 
+              )%}
+      {%- set admin_password = 
             get(service + ':keystone_authtoken:admin_password',
                 get(service + ':common:keystone_authtoken:admin_password')
             ) %}
+    {%- endif %}
     {%- if short %}
 auth_url = {{ get('openstack:keystone:auth_url', 
                 'http://' + ctrl_addr + ':' + 

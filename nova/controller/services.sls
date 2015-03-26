@@ -8,6 +8,8 @@ nova-api:
         - require:
             - file: {{ nova.nova_conf_file }}
             - cmd: nova-manage db sync
+            - service: nova-scheduler
+            - mysql_grants: nova-grants
 
 nova-cert:
     service.running:
@@ -31,9 +33,13 @@ nova-consoleauth:
         - watch:
             - file: {{ nova.nova_conf_file }}
             - cmd: nova-manage db sync
+            - service: nova-api
+            - service: nova-scheduler
         - require:
             - file: {{ nova.nova_conf_file }}
             - cmd: nova-manage db sync
+            - service: nova-api
+            - service: nova-scheduler
 
 nova-novncproxy:
     service.running:
@@ -42,6 +48,7 @@ nova-novncproxy:
             - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
+            - service: nova-consoleauth
 
 nova-scheduler:
     service.running:
@@ -58,3 +65,4 @@ nova-spiceproxy:
             - cmd: nova-manage db sync
         - require:
             - file: {{ nova.nova_conf_file }}
+            - service: nova-consoleauth
