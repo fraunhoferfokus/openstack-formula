@@ -73,8 +73,10 @@ glance-endpoint in Keystone:
                     'openstack:glance:api_port', '9292')
             )
         ) }}
-{#  #TODO:
-    #- region #}
+    - region: {{ salt['pillar.get']('keystone.region',
+                    salt['pillar.get']('openstack:region_name',
+                        openstack_defaults.region_name)
+                 ) }}
     - require:
         - keystone: glance-service in Keystone
 
