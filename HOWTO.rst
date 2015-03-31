@@ -385,6 +385,18 @@ You only need to change *bind-address*, *root_password* and
             root_password:
                 'rubnaj[swatLaidyalv1'
 
+Speaking of MySQL - Glance also needs to know the
+password for its database and its Keystone user::
+
+    glance:
+        common:
+            database:
+                password:
+                    glance_db_pass
+            keystone_authtoken:
+                admin_password:
+                    howto_service_pass_glance
+
 TODO: Not sure if special characters in 
 pillar[mysql:server:root_password] work 
 in all configfiles...
