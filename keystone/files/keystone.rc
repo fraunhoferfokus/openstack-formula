@@ -29,4 +29,4 @@ export NOVA_PASSWORD="${OS_PASSWORD}"
 export NOVA_API_KEY="${OS_PASSWORD}"
 export NOVA_URL="${OS_AUTH_URL}"
 export NOVA_VERSION=1.1
-export NOVA_REGION_NAME={{ salt['pillar.get']('keystone.region') }}
+export NOVA_REGION_NAME=${OS_REGION_NAME}
