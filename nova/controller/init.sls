@@ -1,4 +1,5 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
+{% from 'nova/defaults.jinja' import nova_defaults with context %}
 {% from 'nova/map.jinja' import nova with context %}
 nova-controller-packages:
   pkg.installed:
@@ -15,15 +16,23 @@ nova-controller-packages:
 
 nova-user in Keystone:
   keystone.user_present:
-    - name: nova
+{% set admin_user = salt['pillar.get'](
+                'nova:keystone_authtoken:admin_user', 'nova') %}
+    - name: {{ admin_user }}
     - email: {{ salt['pillar.get'](
                     'openstack.service_email',
-                    'nova@' + salt['pillar.get'](
+                    admin_user + salt['pillar.get'](
                         'openstack:service_domain', 
                         openstack_defaults.service_domain)
                 ) }}
+{% if salt['pillar.get']('keystone.user', 'nova') == admin_user %}
+    - password: {{ salt['pillar.get']('keystone.password',
+                        nova_defaults.keystone_password) }}
+{% else %}
     - password: {{ salt ['pillar.get'](
-        'nova:keystone_authtoken:admin_password') }}
+                        'nova:keystone_authtoken:admin_password',
+                        nova_defaults.keystone_password) }}
+{% endif %}
     - tenant: service
     - roles:
       - service:
