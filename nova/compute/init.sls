@@ -13,7 +13,7 @@ nova-compute:
 nova.conf:
     file.managed:
         - name: {{ nova.nova_conf_file }}
-        - source: salt://nova/files/nova.conf_compute
+        - source: salt://nova/files/nova.conf
         - template: jinja
         - user: nova
         - group: nova
