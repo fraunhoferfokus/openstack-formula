@@ -6,7 +6,7 @@ glance-api.conf:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -17,7 +17,7 @@ glance-api-paste.ini:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -28,7 +28,7 @@ glance-cache.conf:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -39,7 +39,7 @@ glance-registry.conf:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -50,7 +50,7 @@ glance-registry-paste.ini:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -61,7 +61,7 @@ glance-scrubber.conf:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -72,7 +72,7 @@ policy.json:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
@@ -83,7 +83,7 @@ schema-image.json:
         - template: jinja
         - user: glance
         - group: glance
-        - mode: 644
+        - mode: 640
         - require:
             - pkg: glance-packages
 
