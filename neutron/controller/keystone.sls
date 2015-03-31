@@ -2,17 +2,25 @@
 {%- from 'neutron/defaults.jinja' import neutron_defaults -%}
 neutron-user in Keystone:
   keystone.user_present:
-    - name: neutron
+{%- set admin_user = salt['pillar.get'](
+                    'neutron:keystone_authtoken:admin_user', 
+                    'neutron') %}
+    - name: {{ admin_user }}
     - email: {{ salt['pillar.get'](
                     'openstack.service_email',
                     'neutron@' + salt['pillar.get'](
                         'openstack:service_domain',
                         openstack_defaults.service_domain)
                 ) }}
+{%- if salt['pillar.get']('neutron.user', 'neutron') == admin_user %}
+    - password: {{ salt['pillar.get']('neutron.password') }}
+{%- else %}
     - password: {{ salt ['pillar.get'](
         'neutron:common:keystone_authtoken:admin_password',
         neutron_defaults.keystone_password) }}
-    - tenant: service
+{%- endif %}
+    - tenant: {{ salt['pillar.get']('openstack:keystone:tenant_name',
+        'service') }}
     - roles:
       - service:
         - admin
