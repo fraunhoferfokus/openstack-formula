@@ -27,6 +27,8 @@ glance-service in Keystone:
     - name: glance
     - service_type: image
     - description: OpenStack Image Service
+    - require:
+        - keystone: glance-user in Keystone
 
 glance-endpoint in Keystone:
   keystone.endpoint_present:
