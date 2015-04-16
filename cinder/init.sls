@@ -2,6 +2,7 @@
 {%- from 'cinder/map.jinja' import cinder with context %}
 include:
     - cinder.database
+    - cinder.keystone
 
 cinder-packages:
     pkg.installed:
