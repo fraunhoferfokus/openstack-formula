@@ -1,5 +1,5 @@
 #!jinja|yaml
-{% from 'cinder/map.jinja' import cinder with context %}
+{%- from 'cinder/map.jinja' import cinder with context %}
 include:
     - cinder.database
 
@@ -21,11 +21,14 @@ cinder-scheduler:
     service.running:
         - require:
             - file: cinder.conf
+            - cmd: cinder-manage db sync
 
 cinder-api:
     service.running:
         - watch:
             - file: cinder.conf
+            - cmd: cinder-manage db sync
         - require:
             - file: cinder.conf
+            - cmd: cinder-manage db sync
 

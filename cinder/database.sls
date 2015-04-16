@@ -57,7 +57,7 @@ cinder-grants:
         - mysql_database: cinder-db
         - mysql_user: cinder-dbuser
 
-cinder-manage db_sync:
+cinder-manage db sync:
   cmd.run:
     - cwd: {{ cinder.migrate_repo }}
     - name: 'cinder-manage db sync 2> /dev/null; sleep 15'
@@ -67,8 +67,5 @@ cinder-manage db_sync:
         - mysql_grants: cinder-grants
     - watch:
         - pkg: cinder-packages
-    - listen_in:
-        - service: cinder-api
-        - service: cinder-scheduler
     - onlyif: test $(cinder-manage db version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
 {% endif %}
