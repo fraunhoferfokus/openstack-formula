@@ -1,10 +1,18 @@
 {% set cinder = salt['grains.filter_by']({
     'Ubuntu': {
         'conf_dir': '/etc/cinder',
+        'nfs_mount_options': 'default',
+        'nfs_shares_config': 'nfsshares',
+        'lock_path': '/var/lock/cinder',
         'packages': [
                         'cinder-api',
                         'cinder-scheduler',
                         'python-mysqldb',
         ],
+        'state_path': '/var/lib/cinder',
+        'volumes_dir': '/var/lib/cinder/volumes',
+        'volume_driver': 
+            'cinder.volume.drivers.lvm.LVMISCSIDriver',
+        'volume_group': 'cinder-volumes',
     },
 }, merge=salt['pillar.get']('cinder:lookup'), grain='os') %}
