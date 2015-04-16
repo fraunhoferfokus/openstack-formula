@@ -15,12 +15,12 @@ Cinder packages:
 
 cinder-api:
     service.running:
-        require:
+        - require:
             - pkg: Cinder packages
             - file: {{ cinder.conf_dir }}/cinder.conf
 
 cinder-scheduler:
     service.running:
-        require:
+        - require:
             - pkg: Cinder packages
             - file: {{ cinder.conf_dir }}/cinder.conf
