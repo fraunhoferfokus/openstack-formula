@@ -1,0 +1,11 @@
+{% set cinder_defaults = {
+    'admin_password': 'admin password for Cinder is UNSET!',
+    'db_pass': 'database password for Cinder is UNSET!',
+    'db_user': 'cinder',
+    'db_name': 'cinder',
+    'nfs_shares_config': 'nfsshares',
+    'rpc_backend': 'rabbit',
+    'volume_driver': 
+        'cinder.volume.drivers.lvm.LVMISCSIDriver',
+    'volume_group': 'cinder-volumes',
+} %}
