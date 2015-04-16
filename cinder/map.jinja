@@ -1,0 +1,10 @@
+{% set cinder = salt['grains.filter_by']({
+    'Ubuntu': {
+        'conf_dir': '/etc/cinder',
+        'packages': [
+                        'cinder-api',
+                        'cinder-scheduler',
+                        'python-mysqldb',
+        ],
+    },
+}, merge=salt['pillar.get']('cinder:lookup'), grain='os') %}
