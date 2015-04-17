@@ -1,17 +1,27 @@
 {% set cinder = salt['grains.filter_by']({
+    'FreeBSD': {
+        'nfs_pkg': False,
+    },
     'Ubuntu': {
         'conf_dir': '/etc/cinder',
-        'migrate_repo': 
-            '/usr/lib/python2.7/dist-packages/'
-            + 'cinder/db/sqlalchemy/migrate_repo/',
-        'nfs_mount_options': 'default',
-        'lock_path': '/var/lock/cinder',
-        'packages': [
+        'controller_pkgs': [
                         'cinder-api',
                         'cinder-scheduler',
                         'python-mysqldb',
         ],
+        'migrate_repo': 
+            '/usr/lib/python2.7/dist-packages/'
+            + 'cinder/db/sqlalchemy/migrate_repo/',
+        'nfs_pkg': 'nfs-client',
+        'nfs_mount_options': 'default',
+        'node_pkgs': [
+                        'cinder-volume',
+        ],
+        'lock_path': '/var/lock/cinder',
         'state_path': '/var/lib/cinder',
         'volumes_dir': '/var/lib/cinder/volumes',
     },
+    'RedHat': {
+        'nfs_pkg': 'nfs-utils',
+    }
 }, merge=salt['pillar.get']('cinder:lookup'), grain='os') %}

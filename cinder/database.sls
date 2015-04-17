@@ -63,9 +63,9 @@ cinder-manage db sync:
     - name: 'cinder-manage db sync 2> /dev/null; sleep 15'
     - user: cinder
     - require:
-        - pkg: cinder-packages
+        - pkg: cinder-controller-packages
         - mysql_grants: cinder-grants
     - watch:
-        - pkg: cinder-packages
+        - pkg: cinder-controller-packages
     - onlyif: test $(cinder-manage db version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
 {% endif %}
