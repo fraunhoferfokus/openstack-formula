@@ -1,3 +1,9 @@
+roles: 
+    #- openstack-controller
+    #- openstack-compute
+    #- neutron-server
+    #- cinder-controller
+    #- cinder-node
 openstack:
     #release: icehouse
     # This one is a TODO for most services' config:
@@ -188,3 +194,12 @@ nova:
         #   - pillar[nova:DEFAULT:libvirt_vif_driver]
         #   - nova_defaults.vif_driver = 
         #        'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver'
+
+cinder:
+    #volume_driver: cinder.volume.drivers.lvm.LVMISCSIDriver
+    #   also supported: cinder.volume.drivers.nfs.NfsDriver
+    #nfs_shares:
+    #   <nfs-server1>:
+    #       - <share1>
+    #       - <share2>
+    #   <nfs-server2>: <share3>
