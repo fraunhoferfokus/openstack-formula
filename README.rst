@@ -10,6 +10,7 @@ Supported components are:
   - Neutron
   - Glance
   - Horizon
+  - Cinder
 
 .. note::
 
@@ -175,3 +176,24 @@ Minimal data to set in Pillar::
       DEFAULT:
         # The internal IP of each compute-node:
         my_ip: 1.2.3.4      
+
+
+``cinder``
+----------
+The ``cinder`` state checks if at least on or 'cinder-controller'
+and 'cinder-node' is in your pillar[roles].
+
+The OpenStack default it to use iSCSI on LVM volumes.
+If you want to use NFS instead use settings like these::
+
+    cinder:
+        volume_driver: cinder.volume.drivers.nfs.NfsDriver
+        nfs_shares:
+            server1: /vol/share1
+            server2:
+                - /vol/share2a
+                - /vol/share2b
+            server3:
+                - /vol/share3
+
+
