@@ -1,7 +1,7 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults -%}
 {% from 'keystone/defaults.jinja' import keystone_defaults -%}
 # COMMON OPENSTACK ENVS
-export SERVICE_TOKEN="{{ salt['pillar.get']('keystone.token', 
+#export SERVICE_TOKEN="{{ salt['pillar.get']('keystone.token', 
                             keystone_defaults.admin_token) }}"
 export OS_USERNAME=admin
 {%- if salt['pillar.get']('keystone.username') == 'admin' %}
@@ -18,7 +18,7 @@ export OS_REGION_NAME="{{
                                 openstack_defaults.region_name)
                         ) }}"
 export OS_AUTH_URL="{{ salt['pillar.get']('keystone.auth_url') }}"
-export SERVICE_ENDPOINT="{{ salt['pillar.get']('keystone.endpoint')}}"
+#export SERVICE_ENDPOINT="{{ salt['pillar.get']('keystone.endpoint')}}"
 export OS_AUTH_STRATEGY=keystone
 export OS_NO_CACHE=1
 
