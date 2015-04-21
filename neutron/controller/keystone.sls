@@ -22,8 +22,8 @@ neutron-user in Keystone:
     - tenant: {{ salt['pillar.get']('openstack:keystone:tenant_name',
         'service') }}
     - roles:
-      - service:
-        - admin
+        service:
+          - admin
 
 neutron-service in Keystone:
   keystone.service_present:

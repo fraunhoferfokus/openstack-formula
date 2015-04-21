@@ -127,13 +127,13 @@ create admin-user in Keystone:
     - email: {{ salt['pillar.get']('keystone:admin_email',
                     keystone_defaults.admin_email) }}
     - roles:
-      - admin:   # tenants
-        - admin  # roles
-        - KeystoneAdmin
-        - KeystoneServiceAdmin
-      - service:
-        - admin
-        - Member
+        admin:   # tenants
+          - admin  # roles
+          - KeystoneAdmin
+          - KeystoneServiceAdmin
+        service:
+          - admin
+          - Member
     - region: {{ salt['pillar.get']('keystone.region',
                     salt['pillar.get']('openstack:region_name',
                         openstack_defaults.region_name)
