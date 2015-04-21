@@ -182,6 +182,14 @@ Minimal data to set in Pillar::
 ----------
 The ``cinder`` state checks if at least on or 'cinder-controller'
 and 'cinder-node' is in your pillar[roles].
+You need to add at least database password and keystone password
+for cinder to your Pillar::
+
+    cinder:
+        database:
+            password: nakO_cinder_db_pass_Nirw
+        keystone_authtoken:
+            admin_password: aw5s_cinder_keystone_pass_hmif
 
 The OpenStack default it to use iSCSI on LVM volumes.
 If you want to use NFS instead use settings like these::
