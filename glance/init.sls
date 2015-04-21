@@ -19,8 +19,8 @@ glance-user in Keystone:
         'glance:common:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
-      - service:
-        - admin
+        service:
+          - admin
 
 glance-service in Keystone:
   keystone.service_present:

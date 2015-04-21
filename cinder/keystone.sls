@@ -13,8 +13,8 @@ cinder-user in Keystone:
         'cinder:common:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
-      - service:
-        - admin
+       service:
+          - admin
 
 cinder v1 service in Keystone:
   keystone.service_present:

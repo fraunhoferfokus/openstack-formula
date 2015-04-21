@@ -35,8 +35,8 @@ nova-user in Keystone:
 {% endif %}
     - tenant: service
     - roles:
-      - service:
-        - admin
+        service:
+          - admin
     - require:
         - cmd: nova-manage db sync
 
