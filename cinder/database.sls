@@ -67,5 +67,6 @@ cinder-manage db sync:
         - mysql_grants: cinder-grants
     - watch:
         - pkg: cinder-controller-packages
-    - onlyif: test $(cinder-manage db version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
+    # TODO: Fix this
+    #- onlyif: test $(cinder-manage db version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
 {% endif %}
