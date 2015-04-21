@@ -20,7 +20,7 @@ cinder v1 service in Keystone:
   keystone.service_present:
     - name: cinder
     - service_type: volume
-    - description: OpenStack Volume v1 Service
+    - description: OpenStack Block Storage v1
     - require:
         - keystone: cinder-user in Keystone
 
@@ -80,15 +80,15 @@ cinder v1 endpoint in Keystone:
 
 cinder v2 service in Keystone:
   keystone.service_present:
-    - name: cinder
-    - service_type: volume2
-    - description: OpenStack Volume v2 Service
+    - name: cinderv2
+    - service_type: volumev2
+    - description: OpenStack Block Storage v2
     - require:
         - keystone: cinder-user in Keystone
 
 cinder v2 endpoint in Keystone:
   keystone.endpoint_present:
-    - name: cinder
+    - name: cinderv2
     - publicurl: {{ 
         "http://{0}:{1}/v2/%(tenant_id)s".format( 
             salt['pillar.get'](
