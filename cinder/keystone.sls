@@ -10,7 +10,7 @@ cinder-user in Keystone:
                         openstack_defaults.service_domain)
                 ) }}
     - password: {{ salt ['pillar.get'](
-        'cinder:common:keystone_authtoken:admin_password') }}
+        'cinder:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
        service:
