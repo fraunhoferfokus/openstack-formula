@@ -25,7 +25,8 @@ nova-user in Keystone:
                         'openstack:service_domain', 
                         openstack_defaults.service_domain)
                 ) }}
-{% if salt['pillar.get']('keystone.user', 'nova') == admin_user %}
+{# This one isn't allowed to default or the if will break! #}
+{% if salt['pillar.get']('keystone.user') == admin_user %}
     - password: {{ salt['pillar.get']('keystone.password',
                         nova_defaults.keystone_password) }}
 {% else %}
