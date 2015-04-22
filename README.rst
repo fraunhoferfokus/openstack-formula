@@ -146,7 +146,7 @@ Minimal state-specific Pillar::
     glance:
       database:
         password: glance_db_pass
-      keystone:
+      keystone_authtoken:
         admin_password: glance_IotdLq_service_Df2HN2_pass
 
 ``nova.controller``
@@ -158,13 +158,8 @@ Minimal data to set in Pillar::
     nova:
       database:
         password: 'Pkbcj5QBD+69pQ_nova_db_pass_UqjG5OzxyPzn3A'
-
-To make IDs of tenants in keystone available for templating
-on other nodes add this to the controllers minion-config or
-Pillar::
-
-    mine_functions:
-      keystone.tenant_list: []
+      keystone_authtoken:
+        admin_password: 'nova_UqjG5OzxyPzn_service_cj5QBD_pass'
 
 
 ``nova.compute``
@@ -180,10 +175,10 @@ Minimal data to set in Pillar::
 
 ``cinder``
 ----------
-The ``cinder`` state checks if at least on or 'cinder-controller'
-and 'cinder-node' is in your pillar[roles].
+The ``cinder`` state checks if at least one of 'cinder-controller'
+and 'cinder-node' is in your `pillar[roles]`.
 You need to add at least database password and keystone password
-for cinder to your Pillar::
+for cinder to your Pillar for all nodes running Cinder services::
 
     cinder:
         database:
