@@ -24,6 +24,7 @@
   {%- endif -%}
 {%- endmacro %}
 
+{# TODO: Use openstack.defaults #}
 {%- macro keystone_authtoken(get, service, short=False) -%}
     {%- set ctrl_addr = get('openstack:controller:address_int','localhost') %}
     {%- set service_tenant_name = get('openstack:keystone:tenant_name', 
@@ -40,14 +41,16 @@
                                   ) %}
     {%- set keystone_public_port = get('openstack:keystone:public_port',
                                         5000|string) %}
-    {%- if service == 'nova' and 
-        (
-           get('keystone.user') == 'nova' or
-           get('keystone.user') == get('nova:keystone_authtoken:admin_user')
-        ) %}
-      {%- set admin_user = get('nova:keystone_authtoken:admin_user', 
-                               'nova') %}
-      {%- set admin_password = get('keystone.password') %}
+    {%- if service == 'nova' %}
+        {% if get('keystone.user') == 'nova' %}
+            {%- set admin_user = 'nova' %}
+            {%- set admin_password = get('keystone.password') %}
+        {% else %}
+          {%- set admin_user = get(
+                'nova:keystone_authtoken:admin_user', 'nova') %}
+          {%- set admin_password = get(
+                'nova:keystone_authtoken:admin_password') %}
+        {% endif %}
     {%- elif service == 'neutron' and 
             get('neutron.user', 'neutron') == get(
                 'neutron:keystone_authtoken:admin_user', 'neutron')
