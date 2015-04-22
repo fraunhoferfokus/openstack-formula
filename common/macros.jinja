@@ -42,15 +42,15 @@
     {%- set keystone_public_port = get('openstack:keystone:public_port',
                                         5000|string) %}
     {%- if service == 'nova' %}
-        {% if get('keystone.user') == 'nova' %}
+        {%- if get('keystone.user') == 'nova' %}
             {%- set admin_user = 'nova' %}
             {%- set admin_password = get('keystone.password') %}
-        {% else %}
+        {%- else %}
           {%- set admin_user = get(
                 'nova:keystone_authtoken:admin_user', 'nova') %}
           {%- set admin_password = get(
                 'nova:keystone_authtoken:admin_password') %}
-        {% endif %}
+        {%- endif %}
     {%- elif service == 'neutron' and 
             get('neutron.user', 'neutron') == get(
                 'neutron:keystone_authtoken:admin_user', 'neutron')
