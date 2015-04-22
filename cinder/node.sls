@@ -10,6 +10,9 @@ cinder-node-packages:
 
 cinder-volume:
     service.running:
+        - watch:
+            - file: cinder.conf
+            - pkg: cinder-node-packages
         - require:
             - file: cinder.conf
             - pkg: cinder-node-packages
