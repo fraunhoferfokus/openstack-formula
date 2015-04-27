@@ -12,8 +12,11 @@
 
 neutron passwords in pillar:
     test.check_pillar:
+        - failhard: True
         - string:
+{%- if not salt['pillar.get']('neutron.password', False) %}
             - neutron:keystone_authtoken:admin_password
+{%- endif %}
             - neutron:database:password
             - openstack:rabbitmq:password 
         
