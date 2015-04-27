@@ -12,6 +12,15 @@ keystone.conf:
         - require:
             - pkg: keystone-package
 
+{% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
+keystone passwords in pillar:
+    test.check_pillar:
+        - string: 
+            - keystone:database:password
+            - keystone:admin_password
+        - failhard: True
+{%- endif %}
+
 {% set db_user = salt['pillar.get'](
                     'keystone:database:username', 
                     salt['pillar.get'](
@@ -39,6 +48,11 @@ keystone.conf:
 keystone-db:
     mysql_database.present:
         - name: {{ keystone_defaults.db_name }}
+        - failhard: True
+{% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
+        - require:
+            - test: keystone passwords in pillar
+{% endif %}
 
 keystone-dbuser:
     mysql_user.present:
@@ -75,10 +89,14 @@ keystone-manage db_sync:
     - user: keystone
     # TODO: This path shouldn't be Ubuntu-specific!
     - cwd:  /usr/lib/python2.7/dist-packages/keystone/common/sql/migrate_repo/
+    - failhard: True
     - require:
         - pkg: keystone-package
         - mysql_grants: keystone-grants
         - file: keystone.conf
+{% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
+        - test: keystone passwords in pillar
+{% endif %}
     - watch:
         - pkg: keystone-package
     - onlyif: test $(keystone-manage db_version 2> /dev/null) -lt $( python manage.py version . 2> /dev/null)
@@ -86,6 +104,7 @@ keystone-manage db_sync:
 keystone-service:
     service.running:
         - name: keystone
+        - failhard: True
         - require:
             - pkg: keystone-package
             - file: keystone.conf 
@@ -103,6 +122,7 @@ create basic tenants in Keystone:
       - service
     - require:
       - cmd: keystone-manage db_sync
+      - service: keystone-service
     - listen: 
       - cmd: keystone-manage db_sync
 
@@ -116,6 +136,7 @@ create basic roles in Keystone:
       - KeystoneServiceAdmin
     - require:
       - cmd: keystone-manage db_sync
+      - service: keystone-service
     - listen: 
       - cmd: keystone-manage db_sync
 
@@ -139,6 +160,10 @@ create admin-user in Keystone:
                         openstack_defaults.region_name)
                  ) }}
     - require:
+{% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
+      - test: keystone passwords in pillar
+{% endif %}
+      - service: keystone-service
       - keystone: create basic tenants in Keystone
       - keystone: create basic roles in Keystone
     - listen: 
@@ -149,6 +174,8 @@ keystone-service in Keystone:
         - name: keystone
         - service_type: identity
         - description: OpenStack Identity Service
+        - require:
+            - service: keystone-service
         - listen: 
           - cmd: keystone-manage db_sync
 
