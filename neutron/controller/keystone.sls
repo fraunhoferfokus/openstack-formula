@@ -13,11 +13,11 @@ neutron-user in Keystone:
                         openstack_defaults.service_domain)
                 ) }}
 {%- if salt['pillar.get']('neutron.user', 'neutron') == admin_user %}
-    - password: {{ salt['pillar.get']('neutron.password') }}
+    - password: '{{ salt['pillar.get']('neutron.password') }}'
 {%- else %}
-    - password: {{ salt ['pillar.get'](
+    - password: '{{ salt ['pillar.get'](
         'neutron:common:keystone_authtoken:admin_password',
-        neutron_defaults.keystone_password) }}
+        neutron_defaults.keystone_password) }}'
 {%- endif %}
     - tenant: {{ salt['pillar.get']('openstack:keystone:tenant_name',
         'service') }}
