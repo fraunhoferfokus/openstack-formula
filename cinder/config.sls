@@ -1,5 +1,12 @@
 {% from 'cinder/map.jinja' import cinder with context -%}
 {% from 'cinder/defaults.jinja' import cinder_defaults with context -%}
+
+cinder passwords in pillar:
+    test.check_pillar:
+        - failhard: True
+        - string:
+            - cinder:keystone_authtoken:admin_password
+
 cinder.conf:
     file.managed:
         - name: {{ cinder.conf_dir }}/cinder.conf
@@ -7,7 +14,9 @@ cinder.conf:
         - template: jinja
         - user: cinder
         - group: cinder
+        - failhard: True
         - require:
+            - test: cinder passwords in pillar
 {% if 'cinder-controller' in salt['pillar.get']('roles',[]) %}
             - pkg: cinder-controller-packages
 {% endif %}
