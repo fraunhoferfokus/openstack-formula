@@ -7,7 +7,13 @@
 /var/lib/cinder/cinder.sqlite:
     file:
       - absent
-{% endif %}
+  {% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
+cinder-db-password-set:
+    test.check_pillar:
+        - string: cinder:database:password
+        - failhard: True
+  {%- endif %}
+{%- endif %}
 
 {% if salt['pillar.get']('cinder:common:database:type', 
     salt['pillar.get']('openstack:db_type', 
@@ -36,6 +42,11 @@
 cinder-db:
     mysql_database.present:
         - name: {{ cinder_defaults.db_name }}
+        - failhard: True
+  {% if 'test.check_pillar' in salt %}
+        - require:
+            - test: cinder-db-password-set
+  {% endif %}
 
 cinder-dbuser:
     mysql_user.present:
@@ -65,8 +76,12 @@ cinder-manage db sync:
     - require:
         - pkg: cinder-controller-packages
         - mysql_grants: cinder-grants
+  {% if 'test.check_pillar' in salt %}
+        - test: cinder-db-password-set
+  {% endif %}
     - watch:
         - pkg: cinder-controller-packages
     # TODO: Fix this
     #- onlyif: test $(cinder-manage db version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
+{# End of MySQL specific block #}
 {% endif %}
