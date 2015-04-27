@@ -116,10 +116,9 @@ tunneling.
 Minimal state-specific Pillar::
 
     neutron:
-      common:
-        DEFAULT:
+      keystone_authtoken:
           admin_password: service_bFdYs/+LF0kaD_pass
-        database:
+      database:
           password: neutron_qg2bD0_database_gCwXD_pass
       dhcp_agent:
         dnsmasq:
@@ -131,11 +130,11 @@ Minimal state-specific Pillar::
 
 Network node.
 
-``neutron.network``
+``neutron.compute``
 -------------------
 **TODO**
 
-Network node.
+Compute node.
 
 ``glance``
 ----------

@@ -111,40 +111,38 @@ horizon:
     #webroot: horizon_defaults.webroot = '/horizon'
 
 neutron:
-    common:
-        keystone_authtoken:
+    #debug: False
+    #verbose: False
+    keystone_authtoken:
             #admin_tenant_name: service
             #admin_user = neutron
             admin_password: service_pass_neutron
+    common:
         #ovs_integration_bridge: br-int
-            
-    server:
-        DEFAULT:
-            #debug: False
-            #verbose: False
-            #bind_host: 0.0.0.0
-            #bind_port: pillar[openstack:neutron:api_port], 9696
-            #core_plugin: ml2
-            #allow_overlapping_ips: False
-            #notify_nova_on_port_status_changes: True
-            #notify_nova_on_port_data_changes: True
-            #nova_admin_password: falls back to
-            #   - pillar[nova:keystone_authtoken:admin_password]
-            #     (which shouldn't be availabe if you separated
-            #     controller and network-host)
-            #nova_admin_user: falls back to
-            #   - pillar[nova:keystone_authtoken:admin_user]
-            #   - 'nova'
-            #nova_admin_tenant_name: falls back to
-            #    - pillar[nova:keystone_authtoken:admin_tenant_name]
-            #    - pillar[openstack:keystone:admin_tenant_name]
-            #    - openstack_defaults.keystone.admin_tenant_name
-        database:
-            password:
+        #notify_nova_on_port_status_changes: True
+        #notify_nova_on_port_data_changes: True
+    database:
+        password:
     ml2:
         ovs:
             bridge_mappings:
                 External: br-ex
+    server:
+        #nova_admin_password: falls back to
+        #   - pillar[nova:keystone_authtoken:admin_password]
+        #     (which shouldn't be availabe if you separated
+        #     controller and network-host)
+        #nova_admin_user: falls back to
+        #   - pillar[nova:keystone_authtoken:admin_user]
+        #   - 'nova'
+        #nova_admin_tenant_name: falls back to
+        #    - pillar[nova:keystone_authtoken:admin_tenant_name]
+        #    - pillar[openstack:keystone:admin_tenant_name]
+        #    - openstack_defaults.keystone.admin_tenant_name
+        #bind_host: 0.0.0.0
+        #bind_port: pillar[openstack:neutron:api_port], 9696
+        #core_plugin: ml2
+        #allow_overlapping_ips: False
 
 nova:
    DEFAULT:
@@ -196,6 +194,10 @@ nova:
         #        'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver'
 
 cinder:
+    database:
+        password:
+    keystone_authtoken:
+        admin_password:
     #volume_driver: cinder.volume.drivers.lvm.LVMISCSIDriver
     #   also supported: cinder.volume.drivers.nfs.NfsDriver
     #nfs_shares:
