@@ -9,6 +9,13 @@
         - mode: 755
 {% endif %}
         - makedirs: True
+
+neutron passwords in pillar:
+    test.check_pillar:
+        - string:
+            - neutron:keystone_authtoken:admin_password
+            - neutron:database:password
+            - openstack:rabbitmq:password 
         
 neutron.conf:
     file.managed:
@@ -22,5 +29,7 @@ neutron.conf:
 {% endif %}
         - source: salt://neutron/files/neutron.conf
         - template: jinja
-        #- require:
-        #    - pkg: neutron-server
+        - failhard: True
+        - require:
+            - test: neutron passwords in pillar
+        #   - pkg: neutron-server
