@@ -15,6 +15,7 @@ cinder-user in Keystone:
     - roles:
        service:
           - admin
+    - failhard: True
 
 cinder v1 service in Keystone:
   keystone.service_present:
