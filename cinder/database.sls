@@ -1,7 +1,7 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
 {% from 'cinder/defaults.jinja' import cinder_defaults %}
 {% from 'cinder/map.jinja' import cinder with context %}
-{% if salt['pillar.get']('cinder:common:database:type', 
+{% if salt['pillar.get']('cinder:database:type', 
     salt['pillar.get']('openstack:db_type', 
         openstack_defaults.db_type)) != 'sqlite' %}
 /var/lib/cinder/cinder.sqlite:
@@ -15,23 +15,19 @@ cinder-db-password-set:
   {%- endif %}
 {%- endif %}
 
-{% if salt['pillar.get']('cinder:common:database:type', 
+{% if salt['pillar.get']('cinder:database:type', 
     salt['pillar.get']('openstack:db_type', 
         openstack_defaults.db_type)) == 'mysql' %}
     {% set db_user = salt['pillar.get'](
                     'cinder:database:username',
-                    salt['pillar.get'](
-                        'cinder:common:database:username',
-                        cinder_defaults.db_user)
+                    cinder_defaults.db_user
                ) %}
     {% set db_pass = salt['pillar.get'](
                     'cinder:database:password',
-                    salt['pillar.get'](
-                        'cinder:common:database:password',
-                        cinder_defaults.db_pass)
+                    cinder_defaults.db_pass
                ) %}
     {% set db_host = salt['pillar.get'](
-                        'cinder:common:database:host', 
+                        'cinder:database:host', 
                         salt['pillar.get'](
                             'opestack:database:host',
                             salt['pillar.get'](
