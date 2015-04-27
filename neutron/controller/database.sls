@@ -1,17 +1,23 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
 {% from 'neutron/defaults.jinja' import neutron_defaults %}
 {% from 'neutron/map.jinja' import neutron with context %}
-{% if salt['pillar.get']('neutron:common:database:type',
-    salt['pillar.get']('openstack:db_type',
-        openstack_defaults.db_type)) != 'sqlite' %}
+{% set db_type = salt['pillar.get']('neutron:database:type',
+        salt['pillar.get']('openstack:db_type',
+            openstack_defaults.db_type)) %}
+
+{%- if db_type != 'sqlite' %}
+neutron database password in pillar:
+    test.check_pillar:
+        - failhard: True
+        - string: 
+            - neutron:database:password
+
 /var/lib/neutron/neutron.sqlite:
     file:
       - absent
-{% endif %}
+{%- endif %}
 
-{% if salt['pillar.get']('neutron:common:database:type',
-    salt['pillar.get']('openstack:db_type',
-        openstack_defaults.db_type)) == 'mysql' %}
+{% if db_type == 'mysql' %}
     {% set db_user = salt['pillar.get'](
                     'neutron:database:username',
                     salt['pillar.get'](
@@ -36,6 +42,9 @@
 neutron-db:
     mysql_database.present:
         - name: {{ neutron_defaults.db_name }}
+        - failhard: True
+        - require:
+            - test: neutron database password in pillar
 
 neutron-dbuser:
     mysql_user.present:
