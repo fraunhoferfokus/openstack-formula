@@ -22,6 +22,11 @@ neutron-server:
             - file: ml2_conf.ini
             #- cmd: neutron-db-manage upgrade
 
+shared secret for metadata_agent in pillar:
+    test.check_pillar:
+        - string:
+            - openstack:neutron:shared_secret
+
 neutron-metadata-agent:
     service.running:
         - require:
@@ -42,3 +47,4 @@ metadata_agent.ini:
         - template: jinja
         - require:
             - pkg: neutron-server
+            - test: shared secret for metadata_agent in pillar:
