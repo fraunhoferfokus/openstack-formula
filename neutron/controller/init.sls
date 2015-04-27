@@ -47,4 +47,4 @@ metadata_agent.ini:
         - template: jinja
         - require:
             - pkg: neutron-server
-            - test: shared secret for metadata_agent in pillar:
+            - test: shared secret for metadata_agent in pillar
