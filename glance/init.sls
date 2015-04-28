@@ -29,7 +29,7 @@ glance-user in Keystone:
                         openstack_defaults.service_domain)
                 ) }}
     - password: {{ salt ['pillar.get'](
-        'glance:common:keystone_authtoken:admin_password') }}
+        'glance:keystone_authtoken:admin_password') }}
     - tenant: service
     - roles:
         service:
