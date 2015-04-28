@@ -5,36 +5,15 @@
 include:
     - nova.controller.database
     - nova.controller.services
-
-nova passwords in pillar:
-    test.check_pillar:
-        - failhard: True
-        - string:
-            - nova:database:password
-{# The keystone credentials for Nova could be set unser those keys: #}
-{% if not (salt['pillar.get']('keystone.user', False) == 'nova' and
-        salt['pillar.get']('keystone.password', False)) %}
-            - nova:keystone_authtoken:admin_password
-{% endif %}
+    - nova.nova_conf
 
 nova-controller-packages:
   pkg.installed:
     - names: {{ nova.controller_packages }}
 
-{{ nova.nova_conf_file }}:
-    file.managed:
-      - user: nova
-      - mode: 640
-      - source: salt://nova/files/nova.conf
-      - template: jinja
-      - failhard: True
-      - require:
-        - pkg: nova-controller-packages
-        - test: nova passwords in pillar
-
 nova-user in Keystone:
   keystone.user_present:
-{% set admin_user = salt['pillar.get'](
+{%- set admin_user = salt['pillar.get'](
                 'nova:keystone_authtoken:admin_user', 'nova') %}
     - name: {{ admin_user }}
     - email: {{ salt['pillar.get'](
@@ -44,14 +23,14 @@ nova-user in Keystone:
                         openstack_defaults.service_domain)
                 ) }}
 {# This one isn't allowed to default or the if will break! #}
-{% if salt['pillar.get']('keystone.user') == admin_user %}
+{%- if salt['pillar.get']('keystone.user') == admin_user %}
     - password: {{ salt['pillar.get']('keystone.password',
                         nova_defaults.keystone_password) }}
-{% else %}
+{%- else %}
     - password: {{ salt ['pillar.get'](
                         'nova:keystone_authtoken:admin_password',
                         nova_defaults.keystone_password) }}
-{% endif %}
+{%- endif %}
     - tenant: service
     - roles:
         service:
