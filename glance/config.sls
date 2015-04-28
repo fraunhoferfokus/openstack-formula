@@ -9,6 +9,7 @@ glance-api.conf:
         - mode: 640
         - require:
             - pkg: glance-packages
+            - test: passwords for glance in pillar
 
 glance-api-paste.ini:
     file.managed:
@@ -29,8 +30,10 @@ glance-cache.conf:
         - user: glance
         - group: glance
         - mode: 640
+        - failhard: True
         - require:
             - pkg: glance-packages
+            - test: passwords for glance in pillar
 
 glance-registry.conf:
     file.managed:
@@ -40,8 +43,10 @@ glance-registry.conf:
         - user: glance
         - group: glance
         - mode: 640
+        - failhard: True
         - require:
             - pkg: glance-packages
+            - test: passwords for glance in pillar
 
 glance-registry-paste.ini:
     file.managed:
@@ -62,8 +67,10 @@ glance-scrubber.conf:
         - user: glance
         - group: glance
         - mode: 640
+        - failhard: True
         - require:
             - pkg: glance-packages
+            - test: passwords for glance in pillar
 
 policy.json:
     file.managed:

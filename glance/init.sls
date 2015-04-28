@@ -1,5 +1,18 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
 {% from 'glance/map.jinja' import glance with context %}
+
+include:
+    - glance.config
+    - glance.database
+    - glance.services
+
+passwords for glance in pillar:
+    test.check_pillar:
+        - failhard: True
+        - string:
+            - glance:keystone_authtoken:admin_password
+            - glance:database:password
+
 glance-packages:
     pkg.installed:
         - names: 
@@ -21,6 +34,9 @@ glance-user in Keystone:
     - roles:
         service:
           - admin
+    - failhard: True
+    - require:
+        - test: passwords for glance in pillar
 
 glance-service in Keystone:
   keystone.service_present:
@@ -81,8 +97,3 @@ glance-endpoint in Keystone:
                  ) }}
     - require:
         - keystone: glance-service in Keystone
-
-include:
-    - glance.config
-    - glance.database
-    - glance.services
