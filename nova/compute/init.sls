@@ -6,15 +6,9 @@ nova-compute:
     service.running:
         - require:
             - pkg: nova-compute
-            - file: nova.conf
+            - file: {{ nova.nova_conf_file }}
         - watch:
-            - file: nova.conf
+            - file: {{ nova.nova_conf_file }}
 
-nova.conf:
-    file.managed:
-        - name: {{ nova.nova_conf_file }}
-        - source: salt://nova/files/nova.conf
-        - template: jinja
-        - user: nova
-        - group: nova
-        - mode: 640
+include:
+    - nova.nova_conf
