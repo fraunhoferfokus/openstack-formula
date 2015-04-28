@@ -3,11 +3,11 @@
 glance-api:
     service.running:
         - watch:
-            - file: glance-api.conf
             - file: glance-api-paste.ini
         - require: 
             - file: glance-api.conf
             - file: glance-api-paste.ini
+            - test: passwords for glance in pillar
 
 glance-registry:
     service.running:
@@ -17,4 +17,4 @@ glance-registry:
         - require: 
             - file: glance-registry.conf
             - file: glance-registry-paste.ini
-
+            - test: passwords for glance in pillar
