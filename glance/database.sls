@@ -36,6 +36,9 @@
 glance-db:
     mysql_database.present:
         - name: {{ glance_defaults.db_name }}
+        - failhard: True
+        - require:
+            - test: passwords for glance in pillar
 
 glance-dbuser:
     mysql_user.present:
@@ -71,4 +74,7 @@ glance-manage db_sync:
         - service: glance-api
         - service: glance-registry
     - onlyif: test $(glance-manage db_version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
+    - failhard: True
+    - require:
+        - test: passwords for glance in pillar
 {% endif %}
