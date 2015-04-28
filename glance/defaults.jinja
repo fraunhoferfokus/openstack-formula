@@ -1,5 +1,15 @@
+{# Default values, generic/not OS specific #}
 {% set glance_defaults = {
+    'api_bind_port': 9292,
+    'bind_host': '0.0.0.0',
     'db_name': 'glance',
     'db_user': 'glance',
     'db_pass': 'MEYKzDK0zsB/sw_<Glance DB Password is UNSET>_dUTghFnIVtSlU',
+    'default_store': 'file',
+    'known_stores': [
+        'glance.store.filesystem.Store',
+        'glance.store.http.Store'
+    ],
+    'paste_deploy_flavor': 'keystone',
+    'registry_client_protocol': 'http',
 } %}
