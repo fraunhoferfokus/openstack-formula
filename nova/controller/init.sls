@@ -1,6 +1,22 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults with context %}
 {% from 'nova/defaults.jinja' import nova_defaults with context %}
 {% from 'nova/map.jinja' import nova with context %}
+
+include:
+    - nova.controller.database
+    - nova.controller.services
+
+nova passwords in pillar:
+    test.check_pillar:
+        - failhard: True
+        - string:
+            - nova:database:password
+{# The keystone credentials for Nova could be set unser those keys: #}
+{% if not (salt['pillar.get']('keystone.user', False) == 'nova' and
+        salt['pillar.get']('keystone.password', False)) %}
+            - nova:keystone_authtoken:admin_password
+{% endif %}
+
 nova-controller-packages:
   pkg.installed:
     - names: {{ nova.controller_packages }}
@@ -11,8 +27,10 @@ nova-controller-packages:
       - mode: 640
       - source: salt://nova/files/nova.conf
       - template: jinja
+      - failhard: True
       - require:
         - pkg: nova-controller-packages
+        - test: nova passwords in pillar
 
 nova-user in Keystone:
   keystone.user_present:
@@ -38,8 +56,10 @@ nova-user in Keystone:
     - roles:
         service:
           - admin
+    - failhard: True
     - require:
         - cmd: nova-manage db sync
+        - test: nova passwords in pillar
 
 nova-service in Keystone:
   keystone.service_present:
@@ -88,7 +108,3 @@ nova-endpoint in Keystone:
                  ) }}
     - require:
         - keystone: nova-service in Keystone
-
-include:
-    - nova.controller.database
-    - nova.controller.services
