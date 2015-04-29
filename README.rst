@@ -30,6 +30,23 @@ Supported components are:
 .. _openvswitch-formula: https://github.com/saltstack-formulas/openvswitch-formula
 .. _mysql-formula: https://github.com/saltstack-formulas/mysql-formula
 
+
+Configure Salt-Mine
+===================
+UUIDs in OpenStack are assigned at creation of entities.
+You can't know the UUID of a tenant befor the creatio of said tenant.
+
+We thus use the `Salt-Mine`_ to communicate the UUID of the tenant
+used for services. To configure this add the following to your
+controller's pillar::
+
+    mine_functions:
+        keystone.tenant_list: []
+
+    mine_interval: 5
+
+.. _Salt-Mine: http://docs.saltstack.com/en/latest/topics/mine/
+
 Pillar-Data common between States
 =================================
 Some settings are used by several or even all states - like the address of 
