@@ -3,10 +3,20 @@ TODO
 
 - **UPDATE README & TODO**
 
+- add sanity checks for pillar on minions. make sure all needed 
+  configuration parameters are set in pillar *as seen by the minion*.
+  IN PROGRESS
+
+- Update README with info on basic Pillar-data - PARTLY DONE
+
 - Clean up `keystone/files/keystone.conf`. Should use the
   keystone.{user,pass,...} keys in Pillar we need to set anyway
   and overall work more like the newer templates do (for stuff
   like accessing Pillar).
+
+- Specifying `pillar[glance:bind_host]` may cause a connection
+  refused for nova-api. Maybe the nova state should also use 
+  `pillar[glance:bind_host]`?
 
 - Make RabbitMQ listen only on the internal address of the
   controller
@@ -18,16 +28,11 @@ TODO
 
 - template `neutron/initial_{network,subnet}.sls`
 
-- merge `nova.conf` and `nova.conf_compute`, differentiate
-  based on host's roles
-
 - don't allow networks of same name in the same tenant.
   (not necessary but would only cause confusion and makes
   identifying the correct network hard)
 
 - keep dnsmasq from breaking name-resolution on network node
-
-- Update README with info on basic Pillar-data
 
 - Why do several states (keystone, glance, nova.controller, horizon, 
   occasionally openvswitch) need to be run twice to work proberly?? 
@@ -38,17 +43,14 @@ TODO
 
 - Add services in Keystone (missing: cinder, ceilometer, heat?)
 
-- Add states for Cinder
+- Add states for Heat
 
 - Add states for Ceilometer
 
-- write a state-file for the Orchestrate-Runner_
+- write a state-file for the `Orchestrate-Runner`_
 
 .. _Orchestrate-Runner:
     http://docs.saltstack.com/en/latest/topics/tutorials/states_pt5.html#orchestrate-runner
-
-- add sanity checks for pillar on minions. make sure all needed 
-  configuration parameters are set in pillar *as seen by the minion*.
 
 - add support for OpenStack Juno (configured via 
     pillar[openstack:release])
