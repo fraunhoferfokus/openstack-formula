@@ -2,12 +2,25 @@
 nova passwords in pillar:
     test.check_pillar:
         - failhard: True
+        - verbose: True
         - string:
             - nova:database:password
 {# The keystone credentials for Nova could be set unser those keys: #}
 {% if not (salt['pillar.get']('keystone.user', False) == 'nova' and
         salt['pillar.get']('keystone.password', False)) %}
             - nova:keystone_authtoken:admin_password
+{% endif %}
+
+neutron-credentials for Nova in pillar:
+    test.check_pillar:
+        - failhard: True
+        - verbose: True
+        - string:
+{% if salt['pillar.get'](
+    'neutron:keystone_authtoken:admin_password', False) %}
+            - neutron:keystone_authtoken:admin_password
+{% else %}
+            - nova:neutron_admin_password
 {% endif %}
 
 {{ nova.nova_conf_file }}:
