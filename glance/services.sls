@@ -3,6 +3,7 @@
 glance-api:
     service.running:
         - watch:
+            - file: glance-api.conf
             - file: glance-api-paste.ini
         - require: 
             - file: glance-api.conf
