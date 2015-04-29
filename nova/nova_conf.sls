@@ -71,7 +71,7 @@ neutron_admin_tenant_id in salt-mine:
             tenant_name: {{ tenant_name }}
             tenant_id: {{ tenant_id }}
       - require:
-        - test: tenant_id in salt-mine
+        - test: neutron_admin_tenant_id in salt-mine
         - test: nova passwords in pillar
 {% if 'openstack-controller' in salt['pillar.get']('roles') %}
         - pkg: nova-controller-packages
