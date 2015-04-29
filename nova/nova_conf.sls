@@ -41,6 +41,7 @@ neutron-credentials for Nova in pillar:
 
 neutron_admin_tenant_id in salt-mine:
     test.configurable_test_state:
+        - failhard: True
         - changes: False
 {%- if mine_data|length > 0 %}
     {%- set controller_id, tenants = mine_data.items()[0] %}
