@@ -3,6 +3,8 @@ TODO
 
 - **UPDATE README & TODO**
 
+- Turn retrieval of tenant_id from salt-mine into a jinja-macro.
+
 - add sanity checks for pillar on minions. make sure all needed 
   configuration parameters are set in pillar *as seen by the minion*.
   IN PROGRESS
