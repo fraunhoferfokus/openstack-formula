@@ -13,12 +13,33 @@
 neutron passwords in pillar:
     test.check_pillar:
         - failhard: True
+        - verbose: True
         - string:
 {%- if not salt['pillar.get']('neutron.password', False) %}
             - neutron:keystone_authtoken:admin_password
+{% else %}
+            - neutron.password
 {%- endif %}
+{#- Only the neutron-server needs the db credentials #}
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
             - neutron:database:password
+{%- endif %}
             - openstack:rabbitmq:password 
+
+nova-credentials for Neutron in pillar:
+    test.check_pillar:
+        - failhard: True
+        - verbose: True
+        - string: 
+{% if not salt['pillar.get'](
+    'nova:keystone_authtoken:admin_password', False) %}
+            - neutron:nova_admin_password
+{% elif salt['pillar.get']('keystone.user') == 'nova' and
+    salt['pillar.get']('keystone.password', False) is string %}
+            - keystone.password
+{% else %}
+            - nova:keystone_authtoken:admin_password
+{% endif %}
         
 neutron.conf:
     file.managed:
