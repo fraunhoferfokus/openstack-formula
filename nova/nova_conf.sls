@@ -3,7 +3,8 @@
 nova passwords in pillar:
     test.check_pillar:
         - failhard: True
-        - verbose: True
+        - verbose: {{ salt['pillar.get']('nova:verbose', False) or
+                        salt['pillar.get']('nova:debug:', False) }}
         - string:
             - nova:database:password
 {# The keystone credentials for Nova could be set unser those keys: #}
@@ -18,7 +19,8 @@ nova passwords in pillar:
 neutron-credentials for Nova in pillar:
     test.check_pillar:
         - failhard: True
-        - verbose: True
+        - verbose: {{ salt['pillar.get']('nova:verbose', False) or
+                        salt['pillar.get']('nova:debug:', False) }}
         - string:
 {% if salt['pillar.get'](
     'neutron:keystone_authtoken:admin_password', False) %}
