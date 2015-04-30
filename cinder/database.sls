@@ -7,12 +7,13 @@
 /var/lib/cinder/cinder.sqlite:
     file:
       - absent
-  {% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
+
 cinder-db-password-set:
     test.check_pillar:
-        - string: cinder:database:password
         - failhard: True
-  {%- endif %}
+        - verbose: {{ salt['pillar.get']('cinder:verbose', False) or
+                        salt['pillar.get']('cinder:debug:', False) }}
+        - string: cinder:database:password
 {%- endif %}
 
 {% if salt['pillar.get']('cinder:database:type', 
@@ -39,10 +40,8 @@ cinder-db:
     mysql_database.present:
         - name: {{ cinder_defaults.db_name }}
         - failhard: True
-  {% if 'test.check_pillar' in salt %}
         - require:
             - test: cinder-db-password-set
-  {% endif %}
 
 cinder-dbuser:
     mysql_user.present:
@@ -72,9 +71,7 @@ cinder-manage db sync:
     - require:
         - pkg: cinder-controller-packages
         - mysql_grants: cinder-grants
-  {% if 'test.check_pillar' in salt %}
         - test: cinder-db-password-set
-  {% endif %}
     - watch:
         - pkg: cinder-controller-packages
     # TODO: Fix this
