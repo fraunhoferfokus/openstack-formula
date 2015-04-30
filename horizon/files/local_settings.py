@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from openstack_dashboard import exceptions
 
-DEBUG = True
+DEBUG = {{ salt['pillar.get']('horizon:debug', False }}
 TEMPLATE_DEBUG = DEBUG
 
 SITE_BRANDING = '{{ salt['pillar.get']('horizon:site_branding', 
