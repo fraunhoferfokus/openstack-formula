@@ -9,6 +9,8 @@ include:
 passwords for glance in pillar:
     test.check_pillar:
         - failhard: True
+        - verbose: {{ salt['pillar.get']('glance:verbose', False) or
+                        salt['pillar.get']('glance:debug:', False) }}
         - string:
             - glance:keystone_authtoken:admin_password
             - glance:database:password

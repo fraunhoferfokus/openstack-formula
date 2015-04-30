@@ -21,6 +21,13 @@ horizon-lockdir:
         - mode: 755
     #}
 
+controllers external address known to horizon:
+    test.check_pillar:
+        - failhard: True
+        - verbose: {{ salt['pillar.get']('horizon:verbose', False) or
+                        salt['pillar.get']('horizon:debug:', False) }}
+        - string: 'openstack:controller:address_ext'
+
 local_settings.py:
     file.managed:
         - name: {{ horizon.local_settings }}
@@ -29,8 +36,10 @@ local_settings.py:
         - user: horizon
         - group: horizon
         - mode: 644
+        - failhard: True
         - require:
             - pkg: horizon-packages
+            - test: controllers external address known to horizon
             - file: horizon-lockdir
 
 apache2:
