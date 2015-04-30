@@ -7,8 +7,11 @@ nova passwords in pillar:
         - string:
             - nova:database:password
 {# The keystone credentials for Nova could be set unser those keys: #}
-{% if not (salt['pillar.get']('keystone.user', False) == 'nova' and
+{% if (salt['pillar.get']('keystone.user', False) == 'nova' and
         salt['pillar.get']('keystone.password', False)) %}
+            - keystone.user
+            - keystone.password
+{% else %}
             - nova:keystone_authtoken:admin_password
 {% endif %}
 
