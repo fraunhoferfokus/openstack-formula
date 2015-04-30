@@ -23,6 +23,7 @@ neutron-credentials for Nova in pillar:
 {% else %}
             - nova:neutron_admin_password
 {% endif %}
+            - openstack:neutron:shared_secret
 
 {#- TODO:   Turn this into a jinja-macro that will be
             used here and in neutron.neutron_config #}
