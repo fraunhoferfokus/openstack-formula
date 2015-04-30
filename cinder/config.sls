@@ -4,6 +4,8 @@
 cinder passwords in pillar:
     test.check_pillar:
         - failhard: True
+        - verbose:  {{ salt['pillar.get']('cinder:verbose', False) or
+                        salt['pillar.get']('cinder:debug:', False) }}
         - string:
             - cinder:keystone_authtoken:admin_password
 

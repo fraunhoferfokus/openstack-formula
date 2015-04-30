@@ -14,7 +14,8 @@
 neutron passwords in pillar:
     test.check_pillar:
         - failhard: True
-        - verbose: True
+        - verbose: {{ salt['pillar.get']('nova:verbose', False) or
+                        salt['pillar.get']('nova:debug:', False) }}
         - string:
 {%- if not salt['pillar.get']('neutron.password', False) %}
             - neutron:keystone_authtoken:admin_password
@@ -30,7 +31,8 @@ neutron passwords in pillar:
 nova-credentials for Neutron in pillar:
     test.check_pillar:
         - failhard: True
-        - verbose: True
+        - verbose: {{ salt['pillar.get']('nova:verbose', False) or
+                        salt['pillar.get']('nova:debug:', False) }}
         - string: 
 {% if not salt['pillar.get'](
     'nova:keystone_authtoken:admin_password', False) %}

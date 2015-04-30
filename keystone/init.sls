@@ -12,14 +12,14 @@ keystone.conf:
         - require:
             - pkg: keystone-package
 
-{% if 'test.check_pillar' in salt['sys.list_state_functions']() %}
 keystone passwords in pillar:
     test.check_pillar:
+        - failhard: True
+        - verbose: {{ salt['pillar.get']('keystone:verbose', False) or
+                        salt['pillar.get']('keystone:debug:', False) }}
         - string: 
             - keystone:database:password
             - keystone:admin_password
-        - failhard: True
-{%- endif %}
 
 {% set db_user = salt['pillar.get'](
                     'keystone:database:username', 
