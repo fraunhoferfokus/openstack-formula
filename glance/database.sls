@@ -63,7 +63,12 @@ glance-grants:
 glance-manage db_sync:
   cmd.run:
     - cwd: {{ glance.migrate_repo }}
-    - name: 'glance-manage db_sync 2> /dev/null; sleep 15'
+{% if salt['pillar.get']('glance:debug', False) %}
+    {%- set redirect = '' %}
+{% else %}
+    {%- set redirect = ' 2> /dev/null' %}
+{%- endif %}
+    - name: 'glance-manage db_sync {{- redirect }}; sleep 15'
     - user: glance
     - require:
         - pkg: glance-packages
