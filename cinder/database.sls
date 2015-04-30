@@ -66,7 +66,12 @@ cinder-grants:
 cinder-manage db sync:
   cmd.run:
     - cwd: {{ cinder.migrate_repo }}
-    - name: 'cinder-manage db sync 2> /dev/null; sleep 15'
+{%- if salt['pillar.get']('cinder:debug', False) %}
+    {%- set redirect = '' %}
+{%- else %}
+    {%- set redirect = ' 2> /dev/null' %}
+{%- endif %}
+    - name: 'cinder-manage db sync {{- redirect }}; sleep 15'
     - user: cinder
     - require:
         - pkg: cinder-controller-packages
@@ -75,6 +80,6 @@ cinder-manage db sync:
     - watch:
         - pkg: cinder-controller-packages
     # TODO: Fix this
-    #- onlyif: test $(cinder-manage db version 2> /dev/null) -lt $(python manage.py version 2> /dev/null)
+    #- onlyif: test $(cinder-manage db version {{ redirect }}) -lt $(python manage.py version {{ redirect }})
 {# End of MySQL specific block #}
 {% endif %}
