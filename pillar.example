@@ -54,55 +54,30 @@ keystone:
         # - keystone_defaults.db_host
 
 glance:
-    common:
-        #known_stores: falling back to
-        #  - glance.store.filesystem.Store
-        #  - glance.store.http.Store
-        #debug: False
-        #verbose: False
-        #api_port: 9292
-        #bind_host: pillar[openstack:controller:address_int]
-        #registry_port: falling back to
-        #   - openstack:glance:registry_port
-        #   - 9191
-        #file_store_datadir: '/var/lib/glance/images/'
-        #scrubber_datadir: '/var/lib/glance/scrubber'
-        database:
-            #username: glance
-            password: glance_pass
-        keystone_authtoken:
-            #admin_user = glance
-            admin_password: service_pass_glance
-            #auth_uri: http://controller:5000
-            #auth_port: 35357
-            #auth_protocol: http
-            #admin_tenant_name: service
-         paste_deploy:
-            #flavor: keystone
-    api:
-        DEFAULT:
-            #bind_host: falling back to
-            # - glance:common:DEFAULT:bind_host
-            # - openstack:controller:address_ext
-            # - 0.0.0.0
-            #debug: pillar[glance:common:DEFAULT:debug], False
-            #verbose: False
-            #default_store: file
-            #known_stores: 'glance.store.filesystem.Store, glance.store.http.Store'
-            #filesystem_store_datadir: /var/lib/glance/images/
-            #registry_host: falling back to
-            #   - pillar['glance:registry:DEFAULT:bind_host']
-            #   - pillar['glance:common:DEFAULT:bind_host']
-            #   - pillar[openstack:controller:address_ext]
-            #   - localhost
-            #image_cache_dir: /var/lib/glance/image-cache/
+    #debug: False
+    #verbose: False
+    #bind_host
+    database:
+        #username: glance
+        password: glance_pass
+    keystone_authtoken:
+        #admin_user = glance
+        admin_password: service_pass_glance
+        #auth_uri: http://controller:5000
+        #auth_port: 35357
+        #auth_protocol: http
+        #admin_tenant_name: service
+    #file_store_datadir: '/var/lib/glance/images/'
+    #image_cache_dir: /var/lib/glance/image-cache/
+    #scrubber_datadir: '/var/lib/glance/scrubber'
+    #known_stores: falling back to
+    #api_port: 9292
+    paste_deploy_flavor: keystone
+    #api:
+        # bind_port
+        # log_file
+        # workers
     registry:
-        DEFAULT:
-            #bind_host: falling back to
-            #   - pillar['glance:common:DEFAULT:bind_host']
-            #   - pillar[openstack:controller:address_ext]
-            #   - 0.0.0.0
-            #bind_port: falling back to
             # - pillar[openstack:glance:registry_port]
             # - 9191
 
