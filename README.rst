@@ -3,6 +3,12 @@ openstack-formula
 =================
 
 A saltstack formula to deploy OpenStack.
+
+Consider this formula's state as **beta** as there are still 
+some issues (see TODO.rst). If you find problems not mentioned 
+in the TODO please open a issue at 
+https://github.com/fraunhoferfokus/openstack-formula/issues
+
 Supported components are:
     
   - Keystone
@@ -165,9 +171,10 @@ Minimal state-specific Pillar::
       keystone_authtoken:
         admin_password: glance_IotdLq_service_Df2HN2_pass
 
-``nova.controller``
--------------------
-Install and configure Nova services on the controller.
+``nova.controller`` and ``nova.compute``
+----------------------------------------
+Install and configure Nova services on the controller and 
+the compute nodes, respectively.
 
 Minimal data to set in Pillar::
 
@@ -177,15 +184,11 @@ Minimal data to set in Pillar::
       keystone_authtoken:
         admin_password: 'nova_UqjG5OzxyPzn_service_cj5QBD_pass'
 
-
-``nova.compute``
-----------------
-
-Minimal data to set in Pillar::
+In addition the compute nodes need they're own internal
+IP address under `pillar[nova:my_ip]`::
 
     nova:
-      DEFAULT:
-        # The internal IP of each compute-node:
+        # The internal IP of this compute-node:
         my_ip: 1.2.3.4      
 
 
