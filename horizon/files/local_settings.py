@@ -27,7 +27,14 @@ LOGIN_REDIRECT_URL = WEBROOT
 # with the list of host/domain names that the application can serve.
 # For more information see:
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-#ALLOWED_HOSTS = ['horizon.example.com', ]
+{%- set allowed_hosts = {
+  'ctrl_ext': salt['pillar.get']('openstack:controller:address_ext', False),
+  'spice_host': salt['pillar.get']('openstack:nova:spice_host', False),
+  } %}
+ALLOWED_HOSTS = [{%
+    for value in allowed_hosts.values() %}
+    {%- if value %}'{{ value }}', {% endif -%}
+{% endfor %}]
 
 # Set SSL proxy settings:
 # For Django 1.4+ pass this header from the proxy after terminating the SSL,
