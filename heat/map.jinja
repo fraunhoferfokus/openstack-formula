@@ -1,0 +1,9 @@
+{% set heat = salt['grains.filter_by']({
+    'Ubuntu': {
+        'packages': [
+            'heat-api', 
+            'heat-api-cfn',
+            'heat-engine'
+        ],
+    },
+}, merge=salt['pillar.get']('heat:lookup'), grain='os') %}

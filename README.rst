@@ -17,6 +17,7 @@ Supported components are:
   - Glance
   - Horizon
   - Cinder
+  - Heat (in progress)
 
 .. note::
 
@@ -219,3 +220,12 @@ If you want to use NFS instead use settings like these::
                 - /vol/share3
 
 
+``heat``
+--------
+Minimal pillar data for Heat, OpenStack's orchestration engine::
+
+    heat:
+        database:
+            password: hiedsIg-heat_db_pass-Coryein
+        keystone_authtoken:
+            admin_password: Coryeinn1O-heat_keystone_pass-rerernab

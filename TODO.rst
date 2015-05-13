@@ -3,6 +3,8 @@ TODO
 
 - **UPDATE README & TODO**
 
+- Add states for Heat (IN PROGRESS)
+
 - Turn retrieval of tenant_id from salt-mine into a jinja-macro.
 
 - add sanity checks for pillar on minions. make sure all needed 
@@ -44,8 +46,6 @@ TODO
 - Add endpoints in Keystone (missing: cinder, ceilometer, heat?)
 
 - Add services in Keystone (missing: cinder, ceilometer, heat?)
-
-- Add states for Heat
 
 - Add states for Ceilometer
 
