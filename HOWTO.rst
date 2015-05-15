@@ -3,7 +3,7 @@ How To Use the OpenStack Formula for SaltStack
 ==============================================
 
 This document describes the whole process of
-deploying OpenStack_ using our formula for
+deploying OpenStack_ using `our formula`_ for
 SaltStack_.
 
 We assume you're not to familiar with SaltStack.
@@ -12,20 +12,26 @@ be sufficient. If it's not please open an issue.
 
 .. _OpenStack: http://www.openstack.org/
 .. _SaltStack: http://www.saltstack.org/
+.. _our formula: 
+  https://github.com/fraunhoferfokus/openstack-formula
 
 TODO
-----
+====
 
  - fix this:: 
+
     root@hw-ctrl:~# neutron agent-list
-    {"error": {"message": "The request you have made requires authentication.", "code": 401, "title": "Unauthorized"}}
+    {"error": {"message": "The request you have made requires\
+     authentication.", "code": 401, "title": "Unauthorized"}}
+    root@hw-ctrl:~#
 
    caused by missing `neutron:common:keystone_authtoken:admin_password`
    to set `/etc/nova/nova.conf:neutron_admin_password`
 
  - and this::
-    root@hw-ctrl:~# nova list
-    ERROR: Invalid OpenStack Nova credentials.
+
+     root@hw-ctrl:~# nova list
+     ERROR: Invalid OpenStack Nova credentials.
 
    caused by missing `neutron:server:DEFAULT:nova_admin_password` to set
    `/etc/neutron/neutron.conf:nova_admin_password`
@@ -33,7 +39,7 @@ TODO
  - missing `/etc/neutron/metadata_agent.ini:admin_password` can't help
    either...
 
- - rm section TODO
+ - remove section TODO
 
 Example configuration values
 ============================
@@ -156,9 +162,9 @@ a snapshot.
 .. _MySQL Formula:
     https://github.com/saltstack-formulas/mysql-formula/
 .. _OpenvSwitch Formula: 
-    https://github.com/0xf10e/openvswitch-formula
+    https://github.com/fraunhoferfokus/openvswitch-formula
 .. _OpenStack formula: 
-    https://github.com/0xf10e/openstack-formula
+    https://github.com/fraunhoferfokus/openstack-formula
 .. [1] We use Ubuntu 14.04 for which Canonical will 
        (according to their `CloudArchive page`_) 
        provide updated packages for OpenStack Icehouse
@@ -272,10 +278,9 @@ unique to the particular compute-node.
 
 For `compute-1.sls`::
 
-    nova:
+    openstack:
         common:
-            DEFAULT:
-                my_ip: 192.0.2.21
+            my_ip: 192.0.2.21
 
     interfaces:
         eth0:
@@ -285,10 +290,9 @@ For `compute-1.sls`::
 
 For `compute-2.sls`::
 
-    nova:
+    openstack:
         common:
-            DEFAULT:
-                my_ip: 192.0.2.22
+            my_ip: 192.0.2.22
     
     interfaces:
         eth0:
@@ -481,9 +485,9 @@ Deploy the controller parts of Nova::
         state.sls nova.controller saltenv=openstack
 
 If you see high CPU-usage of the service `nova-consoleauth`
-re-run the state *nova-controller* [5]_.
+re-run the state *nova.controller* [5]_.
 
-.. [5] It seems some parts of OpenStack start up to fast or
+.. [5] It seems some parts of OpenStack start up too fast or
        rather the tools managing database schemas return
        before the database is done applying the changes.
        This leads to services no working correctly until

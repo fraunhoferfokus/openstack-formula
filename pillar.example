@@ -8,6 +8,8 @@ openstack:
     #release: icehouse
     # This one is a TODO for most services' config:
     #region: openstack_defaults.region_name = RegionOne
+    common:
+        my_ip: # MUST be set on compute nodes
     controller:
         address_int: # MUST be set
         address_ext: # MUST be set

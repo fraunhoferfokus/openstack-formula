@@ -132,7 +132,7 @@ Minimal data for Pillar::
         password: 'sUlPalrGnWTnsg_keystone_db_pass_lTNA2Zse7XkGlA'
 
 ``neutron.controller``
-------------------
+----------------------
 Install and configure the server-part of OpenStack's Neutron 
 on the your controller. The MTU is needed because we use 
 tunneling.
@@ -186,9 +186,10 @@ Minimal data to set in Pillar::
         admin_password: 'nova_UqjG5OzxyPzn_service_cj5QBD_pass'
 
 In addition the compute nodes need they're own internal
-IP address under `pillar[nova:my_ip]`::
+IP address under `pillar[openstack:common:my_ip]`::
 
-    nova:
+    openstack:
+      common:
         # The internal IP of this compute-node:
         my_ip: 1.2.3.4      
 
