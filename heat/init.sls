@@ -18,12 +18,22 @@ heat.conf:
         - require:
             - pkg: heat-packages
 
+heat log_dir:
+    file.directory:
+        - name: {{ heat.log_dir }}
+        - user: heat
+        - group: heat
+        - mode: 770
+        - require:
+            - pkg: heat-packages
+
 {% for service in heat['services'] %}
 {{service}}:
     service.running:
         - require:
             - pkg: heat-packages
             - file: heat.conf
+            - file: heat log_dir
         - watch:
             - pkg: heat-packages
             - file: heat.conf

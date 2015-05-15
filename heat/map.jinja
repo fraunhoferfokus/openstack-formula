@@ -1,6 +1,7 @@
 {% set heat = salt['grains.filter_by']({
     'Ubuntu': {
         'heat_conf_file': '/etc/heat/heat.conf',
+        'log_dir': '/var/log/heat',
         'packages': [
             'heat-api', 
             'heat-api-cfn',
