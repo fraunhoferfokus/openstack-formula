@@ -2,6 +2,7 @@
 
 include: 
     - heat.database
+    - heat.keystone
 
 heat-packages:
     pkg.installed:
