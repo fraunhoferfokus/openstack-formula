@@ -395,7 +395,14 @@ def router_delete(router_id):
     '''
     neutron = _auth()
     neutron.format = 'json'
-    return neutron.delete_router(router_id)
+    try:
+        neutron.delete_router(router_id)
+        log.debug('Deleted router {0}'.format(router_id))
+        return True
+    except neutron_exceptions.NeutronClientException, msg:
+        log.debug('NeutronClientException: {0}'.format(msg))
+        return False
+    return None
 
 def router_list(name = None, status = None, tenant_id = None,
         admin_state_up = None):
