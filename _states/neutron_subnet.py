@@ -8,9 +8,10 @@ import logging
 import pprint
 #import yaml
 
-# Import salt libs
+# Import salt libs and exceptions
 import salt.utils
 import salt.utils.templates
+from salt.exceptions import SaltInvocationError
 
 log = logging.getLogger(__name__)
 
@@ -95,8 +96,8 @@ def managed(name, cidr, network_id, allocation_pools = None,
     
     list_filters = {'name': name}
     # Only filter 
-    if network_id is not None:
-        list_filters['network_id'] = network_id
+    if not network_id:
+        raise SaltInvocationError('Can\'t continue without arg "network_id"')
     if subnet_id is not None:
         list_filters['subnet_id'] = subnet_id
     if tenant_id is not None:
@@ -108,6 +109,8 @@ def managed(name, cidr, network_id, allocation_pools = None,
         # retry, maybe only the name doesn't match
         list_filters.pop('name')
         subnet_list = __salt__['neutron.subnet_list'](**list_filters)
+        log.debug('filtering for "{0}" we got "{1}"'.format(
+            list_filters, subnet_list))
     # cidr, network_id attributes and a subnet's id are read-only, 'name'
     # can be changed. Thus we ignore subnets with wrong cidr, network_id
     # for now.
@@ -146,10 +149,13 @@ def managed(name, cidr, network_id, allocation_pools = None,
         else:
             ret['comment'] = 'Failed to update subnet "{0}".'.format(name)
     elif len(subnet_list) == 0:
+        log.debug('No matching subnet found, creating a new one ' + \
+            '(name = {0}, cidr = {1}, network_id = {2}, {0})'.format(
+                name, cidr, network_id, subnet_params))
         if subnet_params.has_key('new_name'):
             subnet_params.pop('new_name')
         #cidr = subnet_params.pop('cidr')
-        network_id = subnet_params.pop('network_id')
+        #network_id = subnet_params.pop('network_id')
         subnet = __salt__['neutron.subnet_create'](
                 name, cidr, network_id, **subnet_params)
         if not subnet:
