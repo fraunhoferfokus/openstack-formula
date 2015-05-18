@@ -49,6 +49,9 @@ def managed(name, network_id = None, admin_state_up = None,
         log.debug('Creating router with those parameters: \n' +\
                 '{0}'.format(router_params))
         router = __salt__['neutron.router_create'](**router_params)
+        if router.has_key('router'):
+            router = router['router']
+        log.debug('New router: {0}'.format(router))
         ret['comment'] = 'Created new router.'
         # TODO: Add subnets/ports HERE
         ret['changes'] = __salt__['neutron.router_show'](router['id'])
