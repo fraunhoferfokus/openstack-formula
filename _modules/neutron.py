@@ -448,7 +448,7 @@ def router_set_gateway(router_id, ext_net_id,
     neutron = _auth()
     neutron.format = 'json'
     return router_update(router_id, 
-        network_id = ext_net_id, enable_snat = enable_snat)
+        gateway_network = ext_net_id, enable_snat = enable_snat)
 
 def router_show(router_id): # name = None, router_id = None
     '''
@@ -459,7 +459,7 @@ def router_show(router_id): # name = None, router_id = None
     return neutron.show_router(router_id)
 
 def router_update(router_id, admin_state_up = None, 
-        new_name = None, network_id = None, 
+        new_name = None, gateway_network = None, 
         enable_snat = True):
     '''
     Update parameters of given router.
@@ -467,7 +467,7 @@ def router_update(router_id, admin_state_up = None,
     Optional parameters:
     - admin_state_up
     - new_name
-    - network_id (external gateway network)
+    - gateway_network (network_id of external network)
     - enable_snat
     '''
     # - Cannot update read-only attribute tenant_id
@@ -481,9 +481,9 @@ def router_update(router_id, admin_state_up = None,
     kwargs = {}
     if admin_state_up is not None:
         kwargs['admin_state_up'] = admin_state_up
-    if network_id is not None:
+    if gateway_network is not None:
         kwargs['external_gateway_info'] = { 
-            'network_id': network_id,
+            'network_id': gateway_network,
             'enable_snat': enable_snat,
             }
     if new_name is not None:
