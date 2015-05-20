@@ -432,6 +432,16 @@ def router_list(name = None, status = None, tenant_id = None,
         kwargs['admin_state_up'] = admin_state_up
     return neutron.list_routers(**kwargs)
 
+def router_set_gateway(router_id, ext_net_id, 
+        enable_snat = True):
+    '''
+    Set external network as gateway for fiven router.
+    '''
+    neutron = _auth()
+    neutron.format = 'json'
+    return router_update(router_id, 
+        network_id = ext_net_id, enable_snat = enable_snat)
+
 def router_show(router_id): # name = None, router_id = None
     '''
     Show the router specified by UUID
@@ -441,14 +451,16 @@ def router_show(router_id): # name = None, router_id = None
     return neutron.show_router(router_id)
 
 def router_update(router_id, admin_state_up = None, 
-        network_id = None, new_name = None):
+        new_name = None, network_id = None, 
+        enable_snat = True):
     '''
     Update parameters of given router.
 
     Optional parameters:
     - admin_state_up
-    - network_id (has to be an external network!)
     - new_name
+    - network_id (external gateway network)
+    - enable_snat
     '''
     # - Cannot update read-only attribute tenant_id
     # 
@@ -457,16 +469,19 @@ def router_update(router_id, admin_state_up = None,
     #        'at least one of "name" or "router_id".'
     neutron = _auth()
     neutron.format = 'json'
-
+    pp = pprint.PrettyPrinter(indent=4)
     kwargs = {}
     if admin_state_up is not None:
         kwargs['admin_state_up'] = admin_state_up
     if network_id is not None:
-        kwargs['external_gateway_info'] = { 'network_id': network_id }
-    if tenant_id is not None:
-        kwargs['tenant_id'] = tenant_id
+        kwargs['external_gateway_info'] = { 
+            'network_id': network_id,
+            'enable_snat': enable_snat,
+            }
     if new_name is not None:
         kwargs['name'] = new_name
+    log.debug('options for router_update() on router {0}:\n{1}'.format(
+        router_id, pp.pformat(kwargs)))
     return neutron.update_router(router_id, {'router': kwargs})
 
             
