@@ -16,8 +16,9 @@ import neutronclient.common.exceptions as neutron_exceptions
 
 log = logging.getLogger(__name__)
 
-def managed(name, network_id = None, admin_state_up = None, 
-        tenant_id = None, subnet_ids = [], port_ids = []):
+def managed(name, admin_state_up = None, tenant_id = None, 
+        subnet_ids = [], port_ids = [],
+        gateway_network = None, enable_snat = None):
     '''
     Manage routers in OpenStack Neutron
 
@@ -26,8 +27,9 @@ def managed(name, network_id = None, admin_state_up = None,
 
     Optional parameters:
     - admin_state_up*
-    - network_id
     - tenant_id (only works for admin-users)
+    - gateway_network (network_id of external network)
+    - enable_snat*
 
     TODO: use router_add_interface() to add subnets and ports
     
@@ -45,6 +47,10 @@ def managed(name, network_id = None, admin_state_up = None,
         list_filters['tenant_id'] = tenant_id
     router_list = __salt__['neutron.router_list'](**list_filters)['routers']
     router_params = list_filters.copy()
+    if gateway_network is not None:
+        router_params['gateway_network'] = gateway_network
+    if enable_snat is not None:
+        router_params['enable_snat'] = enable_snat
     if len(router_list) == 0:
         log.debug('Creating router with those parameters: \n' +\
                 '{0}'.format(router_params))
