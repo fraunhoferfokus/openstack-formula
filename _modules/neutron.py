@@ -175,7 +175,7 @@ def network_delete(network_id):
 
 def network_list(name = None, admin_state_up = None,
         network_id = None, shared = None, status = None,
-        tenant_id = None):
+        tenant_id = None, external = None):
     '''
     List networks.
 
@@ -186,9 +186,11 @@ def network_list(name = None, admin_state_up = None,
     - shared (bool, might be silently dropped on Icehouse)
     - status (like "ACTIVE")
     - tenant_id
+    - external (bool)
     '''
     # Neither filtering by segmentation_id nor 
-    # by provider:segmentation_id works.
+    # by provider:segmentation_id works, but
+    # "router:external" does!
     neutron = _auth()
     neutron.format = 'json'
     kwargs = {}
@@ -204,6 +206,8 @@ def network_list(name = None, admin_state_up = None,
         kwargs['status'] = status
     if tenant_id:
         kwargs['tenant_id'] = tenant_id
+    if external is not None:
+        kwargs['router:external'] = external
     return neutron.list_networks(**kwargs)['networks']
 
 def network_show(network_id = None, name = None):
@@ -360,8 +364,8 @@ def router_add_interface(name, router_id, admin_state_up = True,
     log.debug(dir(neutron.add_interface_router))
     return neutron.add_interface_router(router_id, {'port': kwargs})
 
-def router_create(name, admin_state_up = True, network_id = None,
-        tenant_id = None):
+def router_create(name, admin_state_up = True, tenant_id = None, 
+        gateway_network = None, enable_snat = True):
     '''
     Create a new router.
 
@@ -371,6 +375,8 @@ def router_create(name, admin_state_up = True, network_id = None,
     Optional parameters:
     - admin_state_up (defaults to True)
     - tenant_id
+    - gateway_network (network_id of external network)
+    - enable_snat (defaults to True)
     '''
     neutron = _auth()
     neutron.format = 'json'
@@ -380,9 +386,11 @@ def router_create(name, admin_state_up = True, network_id = None,
         }
     add_iface = False
     iface_args = {}
-    if network_id is not None:
+    if gateway_network is not None:
         kwargs['external_gateway_info'] = { 
-            'network_id': network_id }
+            'network_id': gateway_network,
+            'enable_snat': enable_snat,
+            }
     if tenant_id is not None:
         kwargs['tenant_id'] = tenant_id
 
