@@ -39,6 +39,7 @@ def managed(name, admin_state_up = None, tenant_id = None,
         'changes': {},
         'result': True,
         'comment': ''}
+    pp = pprint.PrettyPrinter(indent=4)
     
     list_filters = {'name': name}
     if admin_state_up is not None:
@@ -53,7 +54,7 @@ def managed(name, admin_state_up = None, tenant_id = None,
         router_params['enable_snat'] = enable_snat
     if len(router_list) == 0:
         log.debug('Creating router with those parameters: \n' +\
-                '{0}'.format(router_params))
+                '{0}'.format(pp.pformat(router_params)))
         router = __salt__['neutron.router_create'](**router_params)
         if router.has_key('router'):
             router = router['router']
@@ -64,6 +65,9 @@ def managed(name, admin_state_up = None, tenant_id = None,
     elif len(router_list) == 1:
         # TODO: check if admin_state_up has the correct value and if
         # correct subnets and ports exist.
+        log.debug('Found one router "{0}" '.format(name) +\
+                'with following properties: \n{0}'.format(
+                    pp.pformat(router_list[0])))
         ret['comment'] = 'Router "{0}" already exists.'.format(name) +\
                 '\n(ID: {0})'.format(router_list[0]['id']) +\
                 '\n(Checking attributes not implemented yet!)'
@@ -71,5 +75,6 @@ def managed(name, admin_state_up = None, tenant_id = None,
     else:
         ret['result'] = False
         ret['comment'] = 'More than one router with this name already ' +\
-                'exists in this tenant.'
+                'exists in this tenant. See debug information for details.'
+        log.debug('Existing routers: \n{0}'.format(pp.pformat(router_list)))
     return ret
