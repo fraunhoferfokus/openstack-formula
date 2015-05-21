@@ -24,13 +24,14 @@
 
   {% for builder, base_port in salt['pillar.get']('swift:builder_ports',{'account.builder':6002,'container.builder':6001,'object.builder':6000}).iteritems() %}
     {% set type = builder.split('.')[0] %}
+    {% if salt['pillar.get']('swift:all_in_one', False) %}
 /etc/swift/{{ type }}-server:
   file.directory:
     - user: root
     - group: swift
     - mode: 750
 
-    {% for zone in salt['pillar.get']('swift:devices',{}).keys() %}
+      {% for zone in salt['pillar.get']('swift:devices',{}).keys() %}
 /etc/swift/{{ type }}-server/{{ zone[1]|int - 1 }}.conf:
   file.managed:
     - source: salt://swift/notproxy-server.jinja
@@ -46,7 +47,23 @@
        mount_point: {{ salt['pillar.get']('swift:devices:'+ zone +':mnt') }}
        user: {{ salt['pillar.get']('swift:user','swift') }}
        log_facility: LOG_LOCAL{{zone[1]|int + 1}}
-    {% endfor %}
+      {% endfor %}
+    {% else %}
+       {% set zone = salt['pillar.get']('swift:devices',{}).keys()[0] %}
+/etc/swift/{{ type }}-server.conf:
+  file.managed:
+    - source: salt://swift/notproxy-server.jinja
+    - template: jinja
+    - user: root
+    - group: swift
+    - mode: 640
+    - context:
+       bind_port: {{ base_port + zone[1]|int * 10 }}
+       type: {{ type }}
+       mount_point: {{ salt['pillar.get']('swift:devices:'+ zone +':mnt') }}
+       user: {{ salt['pillar.get']('swift:user','swift') }}
+       log_facility: LOG_LOCAL{{zone[1]|int + 1}}
+    {% endif %}
   {% endfor %}
 {% endif %}
 
