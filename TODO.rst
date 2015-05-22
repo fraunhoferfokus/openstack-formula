@@ -6,21 +6,22 @@ TODO
 - Add states for Heat (IN PROGRESS)
 
 - Turn retrieval of tenant_id from salt-mine into a jinja-macro.
+  (Why do we need this again...?)
 
 - add sanity checks for pillar on minions. make sure all needed 
   configuration parameters are set in pillar *as seen by the minion*.
-  IN PROGRESS
+  (IN PROGRESS - via ``test.check_pillar()``)
 
 - Update README with info on basic Pillar-data - PARTLY DONE
 
-- Clean up `keystone/files/keystone.conf`. Should use the
+- Clean up ``keystone/files/keystone.conf``. Should use the
   keystone.{user,pass,...} keys in Pillar we need to set anyway
   and overall work more like the newer templates do (for stuff
   like accessing Pillar).
 
-- Specifying `pillar[glance:bind_host]` may cause a connection
+- Specifying ``pillar[glance:bind_host]`` may cause a connection
   refused for nova-api. Maybe the nova state should also use 
-  `pillar[glance:bind_host]`?
+  ``pillar[glance:bind_host]``?
 
 - Make RabbitMQ listen only on the internal address of the
   controller
@@ -30,7 +31,7 @@ TODO
   keystone.endpoint, set passwords/tokens to those in 
   {neutron,keystone}.{password,token} and so on) 
 
-- template `neutron/initial_{network,subnet}.sls`
+- template ``neutron/initial_{network,subnet}.sls``
 
 - don't allow networks of same name in the same tenant.
   (not necessary but would only cause confusion and makes
@@ -59,7 +60,7 @@ TODO
 
 - Add states for Heat?
 
-- Figure out how to run `{keystone,nova,...}-manage db_sync` states
+- Figure out how to run ``{keystone,nova,...}-manage db_sync`` states
   w/o making the dependent services fail for the next execution b/c
   the DB doesn't work yet.
   Maybe we can use the prereq_ requisite to check if the DB schema
