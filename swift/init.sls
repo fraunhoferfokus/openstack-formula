@@ -14,3 +14,7 @@ include:
   - swift.rings
   - swift.proxy-services
 {% endif %}
+{%- if salt['pillar.get'](
+    'swift:constraints:max_header_size', False) %}
+  - swift.patch
+{%- endif %}
