@@ -50,6 +50,9 @@
       {% endfor %}
     {% else %}
        {% set zone = salt['pillar.get']('swift:devices',{}).keys()[0] %}
+/etc/swift/{{ type }}-server/?.conf:
+  file.absent
+
 /etc/swift/{{ type }}-server.conf:
   file.managed:
     - source: salt://swift/notproxy-server.jinja
