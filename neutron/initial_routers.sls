@@ -14,3 +14,12 @@
 router for external network:
     neutron_router.managed:
         - tenant_id: {{ tenant_id }}
+
+test-router :
+    neutron_router.managed:
+        - tenant_id: {{
+            salt['keystone.tenant_list']()['test-tenant']['id'] }}
+        - gateway_network: {{ 
+            salt['neutron.network_list'](external=True)[0]['id'] }}
+        - enable_snat: True
+        #- enable_snat: False
