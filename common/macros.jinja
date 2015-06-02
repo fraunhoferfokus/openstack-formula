@@ -1,3 +1,4 @@
+{% from 'openstack/defaults.jinja' import openstack_defaults %}
 {% macro comment_if_default(get, pillar_key, 
     default='', quoted=False, no_space=False) -%}
   {% set conf_key = pillar_key.split(':')[-1] %}
@@ -25,22 +26,20 @@
 {%- endmacro %}
 
 {# TODO: Use openstack.defaults #}
-{%- macro keystone_authtoken(get, service, short=False) -%}
-    {%- set ctrl_addr = get('openstack:controller:address_int','localhost') %}
+{%- macro keystone_authtoken(get, service, short=False, version=2.0) -%}
+    {%- set ctrl_addr = get('openstack:controller:address_int') %}
     {%- set service_tenant_name = get('openstack:keystone:tenant_name', 
-        'service') %}
+        openstack_defaults.keystone.admin_tenant_name) %}
     {%- set keystone_protocol = get('openstack:keystone:protocol', 
-        'http') %}
+        openstack_defaults.keystone.auth_protocol) %}
     {%- set keystone_host = get(service+':keystone_authtoken:auth_host', 
                                 get('openstack:keystone:host',
                                     ctrl_addr)
                             ) %}
-    {%- set keystone_auth_port = get(service+':keystone_authtoken:auth_port',
-                                    get('openstack:keystone:auth_port', 
-                                        35357|string)
-                                  ) %}
+    {%- set keystone_auth_port = get('openstack:keystone:auth_port', 
+                        openstack_defaults.keystone.public_port)|string %}
     {%- set keystone_public_port = get('openstack:keystone:public_port',
-                                        5000|string) %}
+                        openstack_defaults.keystone.public_port)|string %}
     {%- if service == 'nova' %}
         {%- if get('keystone.user') == 'nova' %}
             {%- set admin_user = 'nova' %}
@@ -83,8 +82,14 @@ auth_protocol={{ keystone_protocol }}
 admin_tenant_name={{ service_tenant_name }}
 admin_user={{ admin_user }}
 admin_password='{{ admin_password }}'
+{%- if version == 1 %}
+  {% set ver_str = '' %}
+{%- else %}
+  {%- set ver_str = 'v' + version|string %}
+{%- endif %}
 auth_uri={{ get(service+':keystone_authtoken:auth_uri',
-                keystone_protocol + '://' + ctrl_addr + ':' + keystone_public_port
+                '{0}://{1}:{2}/{3}'.format(keystone_protocol,
+                    ctrl_addr, keystone_public_port, ver_str)
             ) }}
     {%- endif %}
 {%- endmacro %}
