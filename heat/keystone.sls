@@ -61,8 +61,8 @@ heat endpoint in Keystone:
 heat-cfn service in Keystone:
   keystone.service_present:
     - name: heat-cfn
-    - service_type: orchestration
-    - description: OpenStack Orchestration
+    - service_type: cloudformation
+    - description: Cloudformation
     - require:
         - keystone: heat-user in Keystone
 
@@ -71,7 +71,7 @@ heat-cfn endpoint in Keystone:
     - name: heat-cfn
 {% for url_type in ['publicurl', 'internalurl', 'adminurl'] %}
     - {{ url_type }}: {{
-        "http://{0}:{1}/v1/%(tenant_id)s".format( 
+        "http://{0}:{1}/v1".format( 
             salt['pillar.get'](
                 'heat:api_host',
                     salt['pillar.get'](
@@ -79,10 +79,10 @@ heat-cfn endpoint in Keystone:
                         '127.0.0.1')
             ),
             salt['pillar.get'](
-                'heat:metadata_port',
+                'heat:cfn_port',
                 salt['pillar.get'](
-                    'openstack:heat:metadata_port', 
-                    heat_defaults.metadata_port)
+                    'openstack:heat:cfn_port', 
+                    heat_defaults.cfn_port)
             )
         ) }}
 {% endfor %}
@@ -91,4 +91,4 @@ heat-cfn endpoint in Keystone:
                         openstack_defaults.region_name)
                  ) }}
     - require:
-        - keystone: heat service in Keystone
+        - keystone: heat-cfn service in Keystone
