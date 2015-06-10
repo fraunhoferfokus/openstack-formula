@@ -559,7 +559,11 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
         kwargs['enable_dhcp'] = enable_dhcp
     try:
         return neutron.create_subnet({'subnet': kwargs})['subnet']
-    except ValueError:
+    except ValueError, msg:
+        log.debug('ValueError: {0}'.format(msg))
+        return False
+    except neutron_exceptions.NeutronClientException, msg:
+        log.error('NeutronClientException: {0}'.format(msg))
         return False
 
 def subnet_delete(subnet_id):
