@@ -579,7 +579,13 @@ def subnet_delete(name = None, subnet_id = None):
             'Specify name XOR subnet_id')
     elif subnet_id is None:
         subnet_id = subnet_show(name = name)
-    resp = neutron.delete_subnet(subnet_id)
+    try:
+        resp = neutron.delete_subnet(subnet_id)
+    except neutron_exceptions.NeutronClientException, msg:
+        log.error('NeutronClientException in subnet_delete(' + \
+            'name = {0}, subnet_id = {1}): {2}'.format(
+                name, subnet_id, msg))
+        return False
     if resp is None:
         return True
     elif isinstance(resp, bool) and not resp:
