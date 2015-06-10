@@ -67,7 +67,7 @@ def _update_subnet(subnet_id, subnet_params):
 
 def managed(name, cidr, network_id, allocation_pools = None, 
             gateway_ip = None, ip_version = None, subnet_id = None, 
-            enable_dhcp = None, tenant_id = None):
+            enable_dhcp = None, tenant = None):
     '''
     ### TODO:
     an existing subnet with given CIDR, network_id, 
@@ -85,7 +85,7 @@ def managed(name, cidr, network_id, allocation_pools = None,
     - ip_version (4 xor 6)
     - subnet_id
     - enable_dhcp (bool)
-    - tenant_id
+    - tenant
     
     For details see neutron.subnet_create.
     '''
@@ -101,7 +101,8 @@ def managed(name, cidr, network_id, allocation_pools = None,
     if subnet_id is not None:
         list_filters['subnet_id'] = subnet_id
     if tenant_id is not None:
-        list_filters['tenant_id'] = tenant_id
+        list_filters['tenant_id'] = \
+            __salt__['keystone.tenant_get'](tenant)['id']
     subnet_list = __salt__['neutron.subnet_list'](**list_filters)
     log.debug('filtering for "{0}" we got "{1}"'.format(
         list_filters, subnet_list))

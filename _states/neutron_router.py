@@ -16,7 +16,7 @@ import neutronclient.common.exceptions as neutron_exceptions
 
 log = logging.getLogger(__name__)
 
-def managed(name, admin_state_up = None, tenant_id = None, 
+def managed(name, admin_state_up = None, tenant = None, 
         subnet_ids = [], port_ids = [],
         gateway_network = None, enable_snat = None):
     '''
@@ -27,8 +27,8 @@ def managed(name, admin_state_up = None, tenant_id = None,
 
     Optional parameters:
     - admin_state_up*
-    - tenant_id (only works for admin-users)
-    - gateway_network (network_id of external network)
+    - tenant (only works for admin-users)
+    - gateway_network (name of external network)
     - enable_snat*
 
     TODO: use router_add_interface() to add subnets and ports
@@ -44,12 +44,20 @@ def managed(name, admin_state_up = None, tenant_id = None,
     list_filters = {'name': name}
     if admin_state_up is not None:
         list_filters['admin_state_up'] = admin_state_up
-    if tenant_id is not None:
-        list_filters['tenant_id'] = tenant_id
+    if tenant is not None:
+        # Workaround for https://github.com/saltstack/salt/issues/24568
+        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
+        if tenant_dict.has_key(tenant):
+            tenant_dict = tenant_dict[tenant]
+        try:
+            list_filters['tenant_id'] = tenant_dict['id']
+        except KeyError:
+            raise KeyError, 'no key "id": ' + str(tenant_dict)
     router_list = __salt__['neutron.router_list'](**list_filters)['routers']
     router_params = list_filters.copy()
     if gateway_network is not None:
-        router_params['gateway_network'] = gateway_network
+        router_params['gateway_network'] = \
+            __salt__['neutron.network_show'](name=gateway_network)['id']
     if enable_snat is not None:
         router_params['enable_snat'] = enable_snat
     if len(router_list) == 0:
@@ -74,12 +82,17 @@ def managed(name, admin_state_up = None, tenant_id = None,
                 router.admin_state_up != admin_state_up:
             to_update['admin_state_up'] = admin_state_up
         if gateway_network is not None or enable_snat is not None:
-            if router['external_gateway_info']['network_id'] != \
+            if router.has_key('external_gateway_info') and \
+                    router['external_gateway_info'] is not None and \
+                    (
+                    router['external_gateway_info']['network_id'] != \
                     gateway_network or \
                     router['external_gateway_info']['enable_snat'] != \
-                    enable_snat:
+                    enable_snat):
                 to_update['external_gateway_info'] = {
-                    'network_id': gateway_network,
+                    'network_id': \
+                        __salt__['neutron.network_show'](
+                            name = gateway_network)['id'],
                     'enable_snat': enable_snat,
                     }
         ret['comment'] = 'Router "{0}" already exists.'.format(name) +\

@@ -17,7 +17,7 @@ import neutronclient.common.exceptions as neutron_exceptions
 log = logging.getLogger(__name__)
 
 def managed(name, admin_state_up = None, network_id = None,
-        shared = None, tenant_id = None, physical_network = None,
+        shared = None, tenant = None, physical_network = None,
         network_type = None, segmentation_id = None, external = None):
     # TODO: docstring
     ret = { 'name': name,
@@ -30,8 +30,9 @@ def managed(name, admin_state_up = None, network_id = None,
         list_filters['admin_state_up'] = admin_state_up
     if network_id is not None:
         list_filters['network_id'] = network_id
-    if tenant_id is not None:
-        list_filters['tenant_id'] = tenant_id
+    if tenant is not None:
+        list_filters['tenant_id'] = \
+            __salt__['keystone.tenant_get'](tenant)['id']
     net_list = __salt__['neutron.network_list'](**list_filters)
     log.debug(net_list)
     net_params = list_filters.copy()
