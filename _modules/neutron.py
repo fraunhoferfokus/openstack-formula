@@ -295,8 +295,9 @@ def network_update(name = None, network_id = None, new_name = None,
         neutron.format = 'json'
         return neutron.update_network(network_id, {'network': param_list})
 
-def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
-    tenant_id = None, gateway_ip = None, ip_version = None):
+def subnet_list(name = None, subnet_id = None, cidr = None, 
+        network_id = None, tenant = None, gateway_ip = None, 
+        ip_version = None):
     '''
     List subnets.
 
@@ -320,7 +321,7 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
     neutron.format = 'json'
     kwargs = {}
     if subnet_id is not None:
-        return([subnet_show(subnet_id)])
+        return([subnet_show(subnet_id = subnet_id)])
     else:
         if name is not None:
             kwargs['name'] = name
@@ -332,8 +333,9 @@ def subnet_list(name = None, subnet_id = None, cidr = None, network_id = None,
             kwargs['gateway_ip'] = gateway_ip
         if ip_version:
             kwargs['ip_version'] = ip_version
-        if tenant_id:
-            kwargs['tenant_id'] = tenant_id
+        if tenant:
+            kwargs['tenant_id'] = \
+                __salt__['keystone.tenant_get'](name = tenant)
         log.debug("kwargs for list_subnets: " + str(kwargs))
         return neutron.list_subnets(**kwargs)['subnets']
 
@@ -566,28 +568,68 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
         log.error('NeutronClientException: {0}'.format(msg))
         return False
 
-def subnet_delete(subnet_id):
+def subnet_delete(name = None, subnet_id = None):
     '''
     Delete subnet of given ID.
     '''
     neutron = _auth()
     neutron.format = 'json'
+    if name is not None and subnet_id is not None:
+        raise SaltInvocationError(
+            'Specify name XOR subnet_id')
+    elif subnet_id is None:
+        subnet_id = subnet_show(name = name)
     resp = neutron.delete_subnet(subnet_id)
     if resp is None:
         return True
     elif isinstance(resp, bool) and not resp:
         return False
 
-def subnet_show(subnet_id):
+def subnet_show(name = None, subnet_id = None, 
+        cidr = None, tenant = None):
     '''
     Show details for given subnet.
     '''
+    pp = pprint.PrettyPrinter(indent=4)
     neutron = _auth()
     neutron.format = 'json'
-    try:
-        response = neutron.show_subnet(subnet_id)
-    except neutron_exceptions.NeutronClientException:
-        return False    
+    if subnet_id is not None:
+        try:
+            response = neutron.show_subnet(subnet_id)
+        except neutron_exceptions.NeutronClientException, msg:
+            log.debug('NeutronClientException: {0}'.format(msg))
+            return False    
+    elif name is not None or cidr is not None or tenant is not None:
+        kwargs = {}
+        if name is not None:
+            kwargs['name'] = name
+        if cidr is not None:
+            kwargs['cidr'] = cidr
+        if tenant is not None:
+            kwargs['tenant'] = tenant
+        sub_list = subnet_list(**kwargs)
+        if len(sub_list) == 0:
+            return False
+        elif len(sub_list) > 1:
+            collision_list = []
+            for sub in sub_list:
+                col_sub = {}
+                for key in ['name', 'id', 'cidr']:
+                    col_sub[key] = sub[key]
+                # Workaround for 
+                # https://github.com/saltstack/salt/issues/24568
+                tenant_dict = \
+                    __salt__['keystone.tenant_get'](sub['tenant_id'])
+                if len(tenant_dict) == 1:
+                    tenant_dict = tenant_dict[tenant_dict.keys()[0]]
+                col_sub['tenant'] = \
+                    tenant_dict['name']
+                collision_list += [col_sub]
+            raise SaltInvocationError("Result for given\nkwargs " + \
+                "({0}) ambiguous:\n{1}".format(kwargs.keys(), 
+                    pp.pformat(collision_list)))
+        else:
+            return sub_list[0]
     return response['subnet']
 
 def subnet_update(name = None, subnet_id = None, new_name = None,
