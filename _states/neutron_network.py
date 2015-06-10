@@ -31,8 +31,14 @@ def managed(name, admin_state_up = None, network_id = None,
     if network_id is not None:
         list_filters['network_id'] = network_id
     if tenant is not None:
-        list_filters['tenant_id'] = \
-            __salt__['keystone.tenant_get'](tenant)['id']
+        # Workaround for https://github.com/saltstack/salt/issues/24568
+        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
+        if tenant_dict.has_key(tenant):
+            tenant_dict = tenant_dict[tenant]
+        try:
+            list_filters['tenant_id'] = tenant_dict['id']
+        except KeyError:
+            raise KeyError, 'no key "id": ' + str(tenant_dict)
     net_list = __salt__['neutron.network_list'](**list_filters)
     log.debug(net_list)
     net_params = list_filters.copy()

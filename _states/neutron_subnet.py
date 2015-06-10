@@ -65,7 +65,7 @@ def _update_subnet(subnet_id, subnet_params):
         __salt__['neutron.subnet_update'](subnet_id = subnet_id, **to_update)
         return(True, to_update)
 
-def managed(name, cidr, network_id, allocation_pools = None, 
+def managed(name, cidr, network, allocation_pools = None, 
             gateway_ip = None, ip_version = None, subnet_id = None, 
             enable_dhcp = None, tenant = None):
     '''
@@ -96,13 +96,19 @@ def managed(name, cidr, network_id, allocation_pools = None,
     
     list_filters = {'name': name}
     # Only filter 
-    if not network_id:
-        raise SaltInvocationError('Can\'t continue without arg "network_id"')
+    if not network:
+        raise SaltInvocationError('Can\'t continue without arg "network"')
     if subnet_id is not None:
         list_filters['subnet_id'] = subnet_id
-    if tenant_id is not None:
-        list_filters['tenant_id'] = \
-            __salt__['keystone.tenant_get'](tenant)['id']
+    if tenant is not None:
+        # Workaround for https://github.com/saltstack/salt/issues/24568
+        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
+        if tenant_dict.has_key(tenant):
+            tenant_dict = tenant_dict[tenant]
+        try:
+            list_filters['tenant_id'] = tenant_dict['id']
+        except KeyError:
+            raise KeyError, 'no key "id": ' + str(tenant_dict)
     subnet_list = __salt__['neutron.subnet_list'](**list_filters)
     log.debug('filtering for "{0}" we got "{1}"'.format(
         list_filters, subnet_list))
@@ -151,12 +157,12 @@ def managed(name, cidr, network_id, allocation_pools = None,
             ret['comment'] = 'Failed to update subnet "{0}".'.format(name)
     elif len(subnet_list) == 0:
         log.debug('No matching subnet found, creating a new one ' + \
-            '(name = {0}, cidr = {1}, network_id = {2}, {0})'.format(
-                name, cidr, network_id, subnet_params))
+            '(name = {0}, cidr = {1}, network = {2}, {0})'.format(
+                name, cidr, network, subnet_params))
         if subnet_params.has_key('new_name'):
             subnet_params.pop('new_name')
         #cidr = subnet_params.pop('cidr')
-        #network_id = subnet_params.pop('network_id')
+        network_id = __salt__['neutron.network_show'](name = network)['id']
         subnet = __salt__['neutron.subnet_create'](
                 name, cidr, network_id, **subnet_params)
         if not subnet:
