@@ -9,13 +9,12 @@
                 openstack_defaults.keystone.admin_tenant_name)
         )
     ) -%}
-{% set tenant_id = salt['keystone.tenant_list']()[tenant_name]['id'] -%}
 
 external network:
     neutron_network.managed:
         - admin_state_up: True
         - shared: True
-        - tenant_id: {{ tenant_id }}
+        - tenant: {{ tenant_name }}
         - physical_network: External
         - network_type: flat
         - external: True
