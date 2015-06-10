@@ -20,8 +20,3 @@ external network:
         - network_type: flat
         - external: True
 
-test-network:
-    neutron_network.managed:
-        - admin_state_up: True
-        - tenant_id: {{ 
-            salt['keystone.tenant_list']()['test-tenant']['id'] }}
