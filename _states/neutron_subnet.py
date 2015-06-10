@@ -101,14 +101,7 @@ def managed(name, cidr, network, allocation_pools = None,
     if subnet_id is not None:
         list_filters['subnet_id'] = subnet_id
     if tenant is not None:
-        # Workaround for https://github.com/saltstack/salt/issues/24568
-        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
-        if tenant_dict.has_key(tenant):
-            tenant_dict = tenant_dict[tenant]
-        try:
-            list_filters['tenant_id'] = tenant_dict['id']
-        except KeyError:
-            raise KeyError, 'no key "id": ' + str(tenant_dict)
+        list_filters['tenant'] = tenant
     subnet_list = __salt__['neutron.subnet_list'](**list_filters)
     log.debug('filtering for "{0}" we got "{1}"'.format(
         list_filters, subnet_list))
