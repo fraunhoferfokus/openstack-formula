@@ -9,8 +9,8 @@ import pprint
 #import yaml
 
 # Import salt libs and exceptions
-import salt.utils
-import salt.utils.templates
+#import salt.utils
+#import salt.utils.templates
 from salt.exceptions import SaltInvocationError
 
 log = logging.getLogger(__name__)
@@ -20,7 +20,8 @@ def _update_subnet(subnet_id, subnet_params):
     Private function to compare an existing subnet's attributes to
     those requested by the state.
     '''
-    log.debug("subnet_params passed to _update_subnet():\n" + str(subnet_params))
+    log.debug("subnet_params passed to _update_subnet():\n" +\
+        str(subnet_params))
     subnet = __salt__['neutron.subnet_show'](subnet_id)
     to_update = {}
 
@@ -41,8 +42,8 @@ def _update_subnet(subnet_id, subnet_params):
         elif subnet[key] != value and subnet[key] != str(value):
             to_update[key] = value
     re_create = False
-    needs_re_creation = ['cidr', 'network_id', 'tenant_id', 
-            'allocation_pools', 'ip_version' ]
+    needs_re_creation = ['cidr', 'network_id', 'tenant_id',
+            'allocation_pools', 'ip_version']
     for key in needs_re_creation:
         if to_update.has_key(key):
             re_create = True
@@ -62,15 +63,15 @@ def _update_subnet(subnet_id, subnet_params):
         __salt__['neutron.subnet_create'](name, cidr, network_id, **subnet)
         return (True, to_update)
     else:
-        __salt__['neutron.subnet_update'](subnet_id = subnet_id, **to_update)
+        __salt__['neutron.subnet_update'](subnet_id=subnet_id, **to_update)
         return(True, to_update)
 
-def managed(name, cidr, network, allocation_pools = None, 
-            gateway_ip = None, ip_version = None, subnet_id = None, 
-            enable_dhcp = None, tenant = None):
+def managed(name, cidr, network, allocation_pools=None,
+            gateway_ip=None, ip_version=None, subnet_id=None,
+            enable_dhcp=None, tenant=None, router=None):
     '''
     ### TODO:
-    an existing subnet with given CIDR, network_id, 
+    an existing subnet with given CIDR, network_id,
     tenant_id won't get its name changed!
     ###
 
@@ -80,22 +81,22 @@ def managed(name, cidr, network, allocation_pools = None,
     - network_id of the Neutron-network this subnet is part of
 
     Optional parameters:
-    - allocation_pools 
+    - allocation_pools
     - gateway_ip
     - ip_version (4 xor 6)
     - subnet_id
     - enable_dhcp (bool)
     - tenant
-    
+
     For details see neutron.subnet_create.
     '''
-    ret = { 'name': name,
+    ret = {'name': name,
         'changes': {},
         'result': True,
         'comment': ''}
-    
+
     list_filters = {'name': name}
-    # Only filter 
+    # Only filter
     if not network:
         raise SaltInvocationError('Can\'t continue without arg "network"')
     if subnet_id is not None:
@@ -121,7 +122,7 @@ def managed(name, cidr, network, allocation_pools = None,
     # If tenant_id is specified we only get subnets from this
     # tenant anyway, no need to remove them.
     subnet_params = list_filters.copy()
-    # 
+    #
     if allocation_pools is not None:
         subnet_params['allocation_pools'] = allocation_pools
     if gateway_ip is not None:
@@ -132,11 +133,11 @@ def managed(name, cidr, network, allocation_pools = None,
         subnet_params['enable_dhcp'] = enable_dhcp
     if name is not None:
         subnet_params['new_name'] = name
-    # 
+    #
     if len(subnet_list) == 1:
         subnet = subnet_list[0]
         (ret['result'], ret['changes']) = _update_subnet(
-                subnet['id'], 
+                subnet['id'],
                 subnet_params)
         if ret['result'] and len(ret['changes'].keys()) == 0:
             ret['comment'] = 'Subnet "{0}" already exists.'.format(name)
@@ -155,7 +156,7 @@ def managed(name, cidr, network, allocation_pools = None,
         if subnet_params.has_key('new_name'):
             subnet_params.pop('new_name')
         #cidr = subnet_params.pop('cidr')
-        network_id = __salt__['neutron.network_show'](name = network)['id']
+        network_id = __salt__['neutron.network_show'](name=network)['id']
         subnet = __salt__['neutron.subnet_create'](
                 name, cidr, network_id, **subnet_params)
         if not subnet:
@@ -165,11 +166,19 @@ def managed(name, cidr, network, allocation_pools = None,
             ret['changes'] = subnet
             ret['comment'] = 'Created new subnet "{0}"'.format(name)
     else:
-        pp = pprint.PrettyPrinter(indent=4)
+        ppr = pprint.PrettyPrinter(indent=4)
         for subnet in subnet_list:
             if subnet.get('name') == name:
                 subnet_list.remove(subnet)
-        ret['comment'] = 'Other subnets with specified parameters '\
-                        'already exist:\n{0}'.format(pp.pformat(net_list))
+        ret['comment'] = 'Other subnets with specified parameters ' + \
+                            'already exist:\n{0}'.format(
+                                ppr.pformat(subnet_list))
         ret['result'] = False
+    if ret['result'] and router is not None:
+        added_iface = __salt__['neutron.router_add_interface'](
+            router=router, subnet=subnet['name'])
+        ret['comment'] += '\nAdded router "{0}" ({1}) to subnet.'.format(
+            router, added_iface['id'])
+        ret['changes']['router'] = router
     return ret
+
