@@ -387,7 +387,7 @@ def router_add_interface(router = None, subnet = None,
             router['id'], kwargs)
     except neutron_exceptions.NeutronClientException, msg:
         log.error ('Calling neutron.add_interface_router(' + \
-            "{0}, {{'port': {1} }})".format(router['id'], 
+            "{0}, {1})".format(router['id'],
                 kwargs) + 'caused:\n{0}'.format(msg))
         raise neutron_exceptions.NeutronClientException
     return result
