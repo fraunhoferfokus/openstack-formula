@@ -1,0 +1,33 @@
+# swift-{{type}}{% if num %}-{{num}}){% endif %}
+#
+# The swift {{ type }}{% if num %} for zone {{num}}){% endif %}.
+
+description     "SWIFT {{ type }}{% if num %}(zone {{num}}){% endif %}"
+author          "Florian Ermisch <florian.ermisch@fokus.fraunhofer.de>"
+# based on the Ubuntu-version by "Marc Cluet <marc.cluet@ubuntu.com>"
+
+start on runlevel [2345]
+stop on runlevel [016]
+
+pre-start script{% if not num %}
+  CONF="/etc/swift/{{ type.split('-')[0] }}-server.conf"{% else %}
+  # Just for fun, let's use "(N - 1).conf" for zone N!
+  CONF="/etc/swift/{{ type.split('-')[0] }}-server/{{ num - 1 }}.conf"{% endif %}
+  for DEV in `sed -ne '/^devices/s:devices = ::p' $CONF`; do
+    mount | grep $DEV || mount $DEV || exit 1
+  done
+  if [ -f $CONF ]; then{% if not num %}
+    exec /usr/bin/swift-init {{ type }} start{% else %}
+    exec /usr/bin/swift-init {{ type }} start -c {{ num }}{% endif %}
+  else
+    exit 1
+  fi
+end script
+
+post-stop script{% if not num %}
+  CONF="/etc/swift/{{ type.split('-')[0] }}-server.conf"{% else %}
+  # Just for fun, let's use "(N - 1).conf" for zone N!
+  CONF="/etc/swift/{{ type.split('-')[0] }}-server/{{ num - 1 }}.conf"{% endif %}
+  umount `sed -ne '/^devices/s:devices = ::p' $CONF`
+  exec /usr/bin/swift-init {{ type }} stop {% if num %}-c {{ num }}{% endif %}
+end script
