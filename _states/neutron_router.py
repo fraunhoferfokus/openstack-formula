@@ -45,14 +45,7 @@ def managed(name, admin_state_up = None, tenant = None,
     if admin_state_up is not None:
         list_filters['admin_state_up'] = admin_state_up
     if tenant is not None:
-        # Workaround for https://github.com/saltstack/salt/issues/24568
-        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
-        if tenant_dict.has_key(tenant):
-            tenant_dict = tenant_dict[tenant]
-        try:
-            list_filters['tenant_id'] = tenant_dict['id']
-        except KeyError:
-            raise KeyError, 'no key "id": ' + str(tenant_dict)
+        list_filters['tenant'] = tenant
     router_list = __salt__['neutron.router_list'](**list_filters)
     router_params = list_filters.copy()
     if gateway_network is not None:

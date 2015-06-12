@@ -123,6 +123,29 @@ def _auth(profile=None, **connection_args):
 
     return client.Client(**kwargs)
 
+def _id_to_tenantname(tenant_id):
+    '''
+    Uses keystone.tenant_get() get the tenant name to given ID.
+
+    Workaround for https://github.com/saltstack/salt/issues/24568
+    '''
+    tenant_dict = \
+        __salt__['keystone.tenant_get'](tenant_id)
+    if len(tenant_dict) == 1:
+        tenant_dict = tenant_dict[tenant_dict.keys()[0]]
+    return tenant_dict['name']
+
+def _tenantname_to_id(tenant):
+    '''
+    Uses keystone.tenant_get() to resolv a tenant name.
+
+    Workaround for https://github.com/saltstack/salt/issues/24568
+    '''
+    tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
+    if tenant_dict.has_key(tenant):
+        tenant_dict = tenant_dict[tenant]
+    return tenant_dict['id']
+
 def network_create(name, admin_state_up=True, shared=False,
         tenant_id=None, physical_network=None, external=None,
         network_type=None, segmentation_id=None):
@@ -337,16 +360,7 @@ def subnet_list(name = None, subnet_id = None, cidr = None,
         if ip_version:
             kwargs['ip_version'] = ip_version
         if tenant:
-            # TODO: Remove workaround for
-            # https://github.com/saltstack/salt/issues/24568
-            tenant_dict = \
-                __salt__['keystone.tenant_get'](name=tenant)
-            if tenant_dict.has_key(tenant):
-                tenant_dict = tenant_dict[tenant]
-            try:
-                kwargs['tenant_id'] = tenant_dict['id']
-            except KeyError:
-                raise KeyError, 'No key "id" in dict {0}'.format(tenant_dict)
+            kwargs['tenant_id'] = _tenantname_to_id(tenant)
             log.debug("kwargs for list_subnets: " + str(kwargs))
         return neutron.list_subnets(**kwargs)['subnets']
 
@@ -440,7 +454,7 @@ def router_delete(router_id):
         return False
     return None
 
-def router_list(name = None, status = None, tenant_id = None,
+def router_list(name = None, status = None, tenant = None,
         admin_state_up = None):
     '''
     List routers.
@@ -448,7 +462,7 @@ def router_list(name = None, status = None, tenant_id = None,
     Optional filter parameters:
     - name
     - status ('ACTIVE', 'DOWN', 'ERROR')
-    - tenant_id
+    - tenant
     '''
     # Can't filter by network_id
     neutron = _auth()
@@ -462,8 +476,8 @@ def router_list(name = None, status = None, tenant_id = None,
                 '"ACTIVE", "ERROR" or "DOWN"'
         else:
             kwargs['status'] = status
-    if tenant_id is not None:
-        kwargs['tenant_id'] = tenant_id
+    if tenant is not None:
+        kwargs['tenant_id'] = _tenantname_to_id(tenant)
     if admin_state_up is not None:
         kwargs['admin_state_up'] = admin_state_up
     router_list = neutron.list_routers(**kwargs)
@@ -575,11 +589,7 @@ def subnet_create(name, cidr, network_id, tenant = None,
     neutron.format = 'json'
     kwargs = { 'network_id': network_id , 'cidr': cidr}
     if tenant is not None:
-        # Workaround for https://github.com/saltstack/salt/issues/24568
-        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
-        if tenant_dict.has_key(tenant):
-            tenant_dict = tenant_dict[tenant]
-        kwargs['tenant_id'] = tenant_dict['id']
+        kwargs['tenant_id'] = _tenantname_to_id(tenant)
     if isinstance(name, str):
         kwargs['name'] = name
     if isinstance(allocation_pools, str):
@@ -669,30 +679,17 @@ def subnet_show(name = None, subnet_id = None,
                 col_sub = {}
                 for key in ['name', 'id', 'cidr']:
                     col_sub[key] = sub[key]
-                # Workaround for 
-                # https://github.com/saltstack/salt/issues/24568
-                tenant_dict = \
-                    __salt__['keystone.tenant_get'](sub['tenant_id'])
-                if len(tenant_dict) == 1:
-                    tenant_dict = tenant_dict[tenant_dict.keys()[0]]
-                col_sub['tenant'] = \
-                    tenant_dict['name']
+                col_sub['tenant'] = _id_to_tenant(sub['tenant_id'])
                 collision_list += [col_sub]
             raise SaltInvocationError("Result for given\nkwargs " + \
                 "({0}) ambiguous:\n{1}".format(kwargs.keys(), 
                     pp.pformat(collision_list)))
         else:
             response = sub_list[0]
-    # Workaround for 
-    # https://github.com/saltstack/salt/issues/24568
-    tenant_dict = \
-        __salt__['keystone.tenant_get'](response['tenant_id'])
-    if len(tenant_dict) == 1:
-        tenant_dict = tenant_dict[tenant_dict.keys()[0]]
     response['network_name'] = \
         __salt__['neutron.network_show'](
             response['network_id'])['name']
-    response['tenant_name'] = tenant_dict['name']
+    response['tenant_name'] = _id_to_tenantname(response['tenant_id'])
     return response
 
 def subnet_update(name = None, subnet_id = None, new_name = None,
