@@ -9,7 +9,7 @@ Module for handling openstack neutron calls.
     either in a pillar or in the minion's config file::
 
         ## TODO: Check which of those are needed
-    
+ 
         neutron.user: neutron
         neutron.password: verybadpass
         neutron.tenant: service
@@ -22,7 +22,7 @@ Module for handling openstack neutron calls.
     For example::
 
         ## TODO: test s/t like this ##
-    
+
         openstack1:
           keystone.user: admin
           keystone.password: verybadpass
@@ -50,7 +50,7 @@ from salt.exceptions import SaltInvocationError
 HAS_NEUTRON = False
 try:
     from neutronclient.v2_0 import client # as neutron_client
-    from neutronclient.neutron.v2_0 import agent
+    #from neutronclient.neutron.v2_0 import agent
     import neutronclient.common.exceptions as neutron_exceptions
     HAS_NEUTRON = True
     import pprint
@@ -86,6 +86,9 @@ def _auth(profile=None, **connection_args):
 
     # look in connection_args first, then default to config file
     def get(key, default=None):
+        '''
+        TODO
+        '''
         return connection_args.get('connection_' + key,
             __salt__['config.get'](prefix + key, default))
 
@@ -120,9 +123,9 @@ def _auth(profile=None, **connection_args):
 
     return client.Client(**kwargs)
 
-def network_create(name, admin_state_up = True, shared = False, 
-        tenant_id = None, physical_network = None, external = None,
-        network_type = None, segmentation_id = None):
+def network_create(name, admin_state_up=True, shared=False,
+        tenant_id=None, physical_network=None, external=None,
+        network_type=None, segmentation_id=None):
     '''
     Create a network with given name.
 
@@ -334,37 +337,60 @@ def subnet_list(name = None, subnet_id = None, cidr = None,
         if ip_version:
             kwargs['ip_version'] = ip_version
         if tenant:
-            kwargs['tenant_id'] = \
-                __salt__['keystone.tenant_get'](name = tenant)
-        log.debug("kwargs for list_subnets: " + str(kwargs))
+            # TODO: Remove workaround for
+            # https://github.com/saltstack/salt/issues/24568
+            tenant_dict = \
+                __salt__['keystone.tenant_get'](name=tenant)
+            if tenant_dict.has_key(tenant):
+                tenant_dict = tenant_dict[tenant]
+            try:
+                kwargs['tenant_id'] = tenant_dict['id']
+            except KeyError:
+                raise KeyError, 'No key "id" in dict {0}'.format(tenant_dict)
+            log.debug("kwargs for list_subnets: " + str(kwargs))
         return neutron.list_subnets(**kwargs)['subnets']
 
-def router_add_interface(name, router_id, admin_state_up = True,
-        subnet_id = None, port_id = None):
+def router_add_interface(router = None, subnet = None,
+        port_name = None, tenant = None, 
+        admin_state_up = True, port_id = None):
     '''
     Add interface ("port") to an existing router. 
 
     Required parameters:
-    - name
-    - router_id
-
+    - router
+    - subnet or port_id 
+    
     Optional parameters:
     - admin_state_up (defaults to True)
-    - subnet_id
-    - port_id
     '''
     neutron = _auth()
     neutron.format = 'json'
+    if router is None:
+        log.error('Required arg "router" not specified')
+        return False
+    else:
+        router = router_show(name=router)
+    if subnet is None and port_id is None:
+        log.error('Neither subnet nor port_id specified')
+        return False
     kwargs = {
-        'name': name,
         'admin_state_up': admin_state_up,
         }
-    if subnet_id is not None:
-        kwargs['subnet_id'] = subnet_id
+    if subnet is not None:
+        kwargs['subnet_id'] = \
+            __salt__['neutron.subnet_show'](subnet)['id']
     if port_id is not None:
         kwargs['port_id'] = port_id
-    log.debug(dir(neutron.add_interface_router))
-    return neutron.add_interface_router(router_id, {'port': kwargs})
+    #log.debug(dir(neutron.add_interface_router))
+    try:
+        result = neutron.add_interface_router(
+            router['id'], kwargs)
+    except neutron_exceptions.NeutronClientException, msg:
+        log.error ('Calling neutron.add_interface_router(' + \
+            "{0}, {{'port': {1} }})".format(router['id'], 
+                kwargs) + 'caused:\n{0}'.format(msg))
+        raise neutron_exceptions.NeutronClientException
+    return result
 
 def router_create(name, admin_state_up = True, tenant_id = None, 
         gateway_network = None, enable_snat = True):
@@ -452,12 +478,18 @@ def router_set_gateway(router_id, ext_net_id,
     return router_update(router_id, 
         gateway_network = ext_net_id, enable_snat = enable_snat)
 
-def router_show(router_id): # name = None, router_id = None
+def router_show(name = None, router_id = None):
     '''
     Show the router specified by UUID
     '''
     neutron = _auth()
     neutron.format = 'json'
+    if name is None and router_id is None:
+        raise SaltInvocationError('Neither name nor router_id given!')
+    elif router_id is None:
+        routers = router_list(name=name)['routers']
+        if len(routers) == 1:
+            return routers[0]
     return neutron.show_router(router_id)
 
 def router_update(router_id, admin_state_up = None, 
@@ -495,7 +527,7 @@ def router_update(router_id, admin_state_up = None,
     return neutron.update_router(router_id, {'router': kwargs})
 
             
-def subnet_create(name, cidr, network_id, tenant_id = None,
+def subnet_create(name, cidr, network_id, tenant = None,
             allocation_pools = None, gateway_ip = None, ip_version = '4',
             enable_dhcp = None, dns_nameservers = None,
             host_routes = None): 
@@ -505,7 +537,7 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
     which this function sets to 4 by default.
     
     Optional arguments are:
-    - tenant_id
+    - tenant
     - allocation_pools (either a comma separated string with <start>-<end> 
       tuples like "192.168.17.3-192.168.17.30,192.168.17.34-192.168.17.60"
       or a YAML list of dictionaries with "start" and "end" keys. 
@@ -535,8 +567,12 @@ def subnet_create(name, cidr, network_id, tenant_id = None,
     neutron = _auth()
     neutron.format = 'json'
     kwargs = { 'network_id': network_id , 'cidr': cidr}
-    if tenant_id is not None:
-        kwargs['tenant_id'] = tenant_id
+    if tenant is not None:
+        # Workaround for https://github.com/saltstack/salt/issues/24568
+        tenant_dict = __salt__['keystone.tenant_get'](name=tenant)
+        if tenant_dict.has_key(tenant):
+            tenant_dict = tenant_dict[tenant]
+        kwargs['tenant_id'] = tenant_dict['id']
     if isinstance(name, str):
         kwargs['name'] = name
     if isinstance(allocation_pools, str):
@@ -595,13 +631,17 @@ def subnet_show(name = None, subnet_id = None,
         cidr = None, tenant = None):
     '''
     Show details for given subnet.
+
+        salt '*' neutron.subnet_show test-subnet
+        salt '*' neutron.subnet_show \\
+            subnet_id=ee699962-38ef-4f94-bbd0-2def3f0e20ab
     '''
     pp = pprint.PrettyPrinter(indent=4)
     neutron = _auth()
     neutron.format = 'json'
     if subnet_id is not None:
         try:
-            response = neutron.show_subnet(subnet_id)
+            response = neutron.show_subnet(subnet_id)['subnet']
         except neutron_exceptions.NeutronClientException, msg:
             log.debug('NeutronClientException: {0}'.format(msg))
             return False    
@@ -635,11 +675,21 @@ def subnet_show(name = None, subnet_id = None,
                 "({0}) ambiguous:\n{1}".format(kwargs.keys(), 
                     pp.pformat(collision_list)))
         else:
-            return sub_list[0]
-    return response['subnet']
+            response = sub_list[0]
+    # Workaround for 
+    # https://github.com/saltstack/salt/issues/24568
+    tenant_dict = \
+        __salt__['keystone.tenant_get'](response['tenant_id'])
+    if len(tenant_dict) == 1:
+        tenant_dict = tenant_dict[tenant_dict.keys()[0]]
+    response['network_name'] = \
+        __salt__['neutron.network_show'](
+            response['network_id'])['name']
+    response['tenant_name'] = tenant_dict['name']
+    return response
 
 def subnet_update(name = None, subnet_id = None, new_name = None,
-        gateway_ip = None, enable_dhcp = None):
+        gateway_ip = None, enable_dhcp = None, tenant = None):
     '''
     Update an existing subnet with given parameters.
     
@@ -650,7 +700,7 @@ def subnet_update(name = None, subnet_id = None, new_name = None,
     - name
     - subnet_id
     - network_id
-    - tenant_id
+    - tenant
 
     You have to provide at least 'name' OR 'subnet_id'.
 
@@ -674,8 +724,8 @@ def subnet_update(name = None, subnet_id = None, new_name = None,
     # - Cannot update read-only attribute id 
     #
     if name is None and subnet_id is None:
-        raise SaltInvocationError, 'You have to specify'\
-            'at least one of "name" or "subnet_id".'
+        raise SaltInvocationError('You have to specify' +\
+            'at least one of "name" or "subnet_id".')
     neutron = _auth()
     neutron.format = 'json'
     pp = pprint.PrettyPrinter(indent=4)
@@ -684,6 +734,8 @@ def subnet_update(name = None, subnet_id = None, new_name = None,
         subnet_filters['subnet_id'] = subnet_id
     elif name is not None:
         subnet_filters['name'] = name
+    if tenant is not None:
+        subnet_filters['tenant'] = tenant
     log.debug('options for subnet_list():\n{0}'.format(
         pp.pformat(subnet_filters)))
     sub_list = subnet_list(**subnet_filters)

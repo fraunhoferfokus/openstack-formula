@@ -22,7 +22,11 @@ def _update_subnet(subnet_id, subnet_params):
     '''
     log.debug("subnet_params passed to _update_subnet():\n" +\
         str(subnet_params))
-    subnet = __salt__['neutron.subnet_show'](subnet_id)
+    subnet = __salt__['neutron.subnet_show'](subnet_id=subnet_id)
+    # neutron.subnet_show() returns
+    # False on any caught error:
+    if not subnet:
+        return (False, 'subnet not found')
     to_update = {}
 
     allocation_pools = subnet_params.get('allocation_pools')
@@ -39,6 +43,10 @@ def _update_subnet(subnet_id, subnet_params):
                 to_update['name'] = subnet_params['new_name']
             else:
                 continue
+        elif key == 'tenant': 
+            tenant_id = __salt__['keystone.tenant_get'](name=value)
+            if subnet['tenant_id'] != tenant_id:
+                to_update['tenant'] = value
         elif subnet[key] != value and subnet[key] != str(value):
             to_update[key] = value
     re_create = False
@@ -78,7 +86,7 @@ def managed(name, cidr, network, allocation_pools=None,
     Required parameters:
     - name
     - CIDR
-    - network_id of the Neutron-network this subnet is part of
+    - network: the Neutron-network this subnet is part of
 
     Optional parameters:
     - allocation_pools
@@ -112,12 +120,13 @@ def managed(name, cidr, network, allocation_pools=None,
         subnet_list = __salt__['neutron.subnet_list'](**list_filters)
         log.debug('filtering for "{0}" we got "{1}"'.format(
             list_filters, subnet_list))
-    # cidr, network_id attributes and a subnet's id are read-only, 'name'
+    # cidr, network attributes and a subnet's id are read-only, 'name'
     # can be changed. Thus we ignore subnets with wrong cidr, network_id
     # for now.
     for subnet in subnet_list:
         if subnet.get('cidr') != cidr or \
-                subnet.get('network_id') != network_id:
+            subnet.get('network_id') != \
+                __salt__['neutron.network_show'](name=network)['id']:
             subnet_list.remove(subnet)
     # If tenant_id is specified we only get subnets from this
     # tenant anyway, no need to remove them.
@@ -136,17 +145,20 @@ def managed(name, cidr, network, allocation_pools=None,
     #
     if len(subnet_list) == 1:
         subnet = subnet_list[0]
-        (ret['result'], ret['changes']) = _update_subnet(
+        updated_subnet = _update_subnet(
                 subnet['id'],
                 subnet_params)
+        (ret['result'], ret['changes']) = updated_subnet
         if ret['result'] and len(ret['changes'].keys()) == 0:
             ret['comment'] = 'Subnet "{0}" already exists.'.format(name)
         elif ret['result']:
             if ret['changes'].has_key('name'):
                 identifier = name
+                ret['comment'] = 'Updated subnet "{0}"\n({1}).'.format(
+                    name, identifier)
             else:
                 identifier = subnet['id']
-            ret['comment'] = 'Updated subnet "{0}".'.format(identifier)
+                ret['comment'] = 'Updated subnet "{0}".'.format(identifier)
         else:
             ret['comment'] = 'Failed to update subnet "{0}".'.format(name)
     elif len(subnet_list) == 0:
