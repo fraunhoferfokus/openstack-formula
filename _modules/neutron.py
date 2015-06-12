@@ -485,6 +485,13 @@ def router_list(name = None, status = None, tenant = None,
         router_list = router_list['routers']
     else:
         return None
+    for router in router_list:
+        router['tenant'] = _id_to_tenantname(router['tenant_id'])
+        if router.has_key('external_gateway_info') and \
+                router['external_gateway_info'].has_key('network_id'):
+            net_id = router['external_gateway_info']['network_id']
+            net_name = __salt__['neutron.network_show'](net_id)['name']
+            router['external_gateway_info']['network'] = net_name
     return router_list
 
 def router_set_gateway(router_id, ext_net_id, 
