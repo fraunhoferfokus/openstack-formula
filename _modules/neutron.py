@@ -466,7 +466,12 @@ def router_list(name = None, status = None, tenant_id = None,
         kwargs['tenant_id'] = tenant_id
     if admin_state_up is not None:
         kwargs['admin_state_up'] = admin_state_up
-    return neutron.list_routers(**kwargs)
+    router_list = neutron.list_routers(**kwargs)
+    if router_list.has_key('routers'):
+        router_list = router_list['routers']
+    else:
+        return None
+    return router_list
 
 def router_set_gateway(router_id, ext_net_id, 
         enable_snat = True):
@@ -482,12 +487,14 @@ def router_show(name = None, router_id = None):
     '''
     Show the router specified by UUID
     '''
+    # TODO: Add tenant kwarg b/c different tenants
+    #   could use the same names for their routers
     neutron = _auth()
     neutron.format = 'json'
     if name is None and router_id is None:
         raise SaltInvocationError('Neither name nor router_id given!')
     elif router_id is None:
-        routers = router_list(name=name)['routers']
+        routers = router_list(name=name)
         if len(routers) == 1:
             return routers[0]
     return neutron.show_router(router_id)

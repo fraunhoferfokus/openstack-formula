@@ -53,7 +53,7 @@ def managed(name, admin_state_up = None, tenant = None,
             list_filters['tenant_id'] = tenant_dict['id']
         except KeyError:
             raise KeyError, 'no key "id": ' + str(tenant_dict)
-    router_list = __salt__['neutron.router_list'](**list_filters)['routers']
+    router_list = __salt__['neutron.router_list'](**list_filters)
     router_params = list_filters.copy()
     if gateway_network is not None:
         router_params['gateway_network'] = \
