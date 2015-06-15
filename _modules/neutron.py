@@ -439,8 +439,8 @@ def router_add_interface(router = None, subnet = None,
     neutron = _auth()
     neutron.format = 'json'
     if router is None:
-        log.error('Required arg "router" not specified')
-        return False
+        raise SaltInvocationError(
+            'Required arg "router" not specified')
     else:
         router = router_show(name=router)
     if subnet is None and port_id is None:
