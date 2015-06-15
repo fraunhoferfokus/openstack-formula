@@ -189,8 +189,12 @@ def managed(name, cidr, network, allocation_pools=None,
     if ret['result'] and router is not None:
         added_iface = __salt__['neutron.router_add_interface'](
             router=router, subnet=subnet['name'])
-        ret['comment'] += '\nAdded router "{0}" ({1}) to subnet.'.format(
-            router, added_iface['id'])
-        ret['changes']['router'] = router
+        if added_iface is None:
+            ret['comment'] += '\nRouter "{0}" '.format(router) + \
+                'already connected to subnet.'
+        else:
+            ret['comment'] += '\nAdded router "{0}" ({1}) '.format(
+                router, added_iface['id']) + 'to subnet.'
+            ret['changes']['router'] = router
     return ret
 

@@ -423,8 +423,8 @@ def subnet_list(name = None, subnet_id = None, cidr = None,
             log.debug("kwargs for list_subnets: " + str(kwargs))
         return neutron.list_subnets(**kwargs)['subnets']
 
-def router_add_interface(router = None, subnet = None,
-        tenant = None, admin_state_up = True):
+def router_add_interface(router=None, subnet=None,
+        tenant=None, admin_state_up=True):
     '''
     Add interface ("port") to an existing router.
 
@@ -433,25 +433,40 @@ def router_add_interface(router = None, subnet = None,
     - subnet
 
     Optional parameters:
-    - tenant
+    - tenant # TODO
     - admin_state_up (defaults to True)
     '''
     neutron = _auth()
     neutron.format = 'json'
+    pformat = pprint.PrettyPrinter(indent=4).pformat
     if router is None:
         raise SaltInvocationError(
             'Required arg "router" not specified')
     else:
         router = router_show(name=router)
-    if subnet is None and port_id is None:
+    if subnet is None:
         raise SaltInvocationError(
             'Required arg "subnet" not specified')
     kwargs = {
         'admin_state_up': admin_state_up,
         }
     if subnet is not None:
-        kwargs['subnet_id'] = \
-            __salt__['neutron.subnet_show'](subnet)['id']
+        # def router_in_subnet()?
+        subnet = \
+            __salt__['neutron.subnet_show'](subnet)
+        kwargs['subnet_id'] = subnet['id']
+        network_id = subnet['network_id']
+        ports = port_list(network_id=network_id)
+        log.debug('Ports for subnet "{0}" '.format(subnet['name']) + \
+            'in network "{0}":\n'.format(network_id) + \
+            pformat(ports))
+        for port in ports:
+            dev_type = 'network:router_interface'
+            dev_id = port['device_id']
+            if port['device_owner'] == dev_type and \
+                    dev_id == router['id']:
+                # result = router, exists_already=True??
+                return None
     try:
         result = neutron.add_interface_router(
             router['id'], kwargs)
