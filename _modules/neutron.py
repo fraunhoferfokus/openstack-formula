@@ -321,6 +321,65 @@ def network_update(name = None, network_id = None, new_name = None,
         neutron.format = 'json'
         return neutron.update_network(network_id, {'network': param_list})
 
+def port_list(network_id = None, mac_address = None):
+    '''
+    List ports.
+
+    Implemented filters:
+    - network_id
+    - mac_address
+
+    Details contain:
+    - port_id
+    - name
+    - mac_address
+    - fixed_ip, which consists of:
+        - subnet_id
+        - ip_address
+
+    CLI example::
+
+        salt \* neutron.port_list mac_address='fa:16:3e:50:8a:fa'
+    '''
+    # For details see
+    # http://developer.openstack.org/api-ref-networking-v2-ext.html#listPorts
+    neutron = _auth()
+    neutron.format = 'json'
+
+    retrieve_all = True
+    params = {}
+    if network_id:
+        #retrieve_all = False
+        params['network_id'] = network_id
+    if mac_address:
+        params['mac_address'] = mac_address
+    try:
+        return neutron.list_ports(retrieve_all, **params)['ports']
+    except TypeError:
+        return False
+
+def port_show(port_id):
+    '''
+    List ports.
+
+    No filters implemented yet.
+
+    Details contain:
+    - port_id
+    - name
+    - mac_address
+    - fixed_ip:
+        subnet_id
+        ip_address
+    '''
+    neutron = _auth()
+    neutron.format = 'json'
+
+    try:
+        return neutron.show_port(port_id)['port']
+    except neutron_exceptions.PortNotFoundClient:
+        return False
+
 def subnet_list(name = None, subnet_id = None, cidr = None, 
         network_id = None, tenant = None, gateway_ip = None, 
         ip_version = None):
