@@ -444,8 +444,8 @@ def router_add_interface(router = None, subnet = None,
     else:
         router = router_show(name=router)
     if subnet is None and port_id is None:
-        log.error('Neither subnet nor port_id specified')
-        return False
+        raise SaltInvocationError(
+            'Neither subnet nor port_id specified')
     kwargs = {
         'admin_state_up': admin_state_up,
         }
