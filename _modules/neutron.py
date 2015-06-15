@@ -424,16 +424,16 @@ def subnet_list(name = None, subnet_id = None, cidr = None,
         return neutron.list_subnets(**kwargs)['subnets']
 
 def router_add_interface(router = None, subnet = None,
-        port_name = None, tenant = None, 
-        admin_state_up = True, port_id = None):
+        tenant = None, admin_state_up = True):
     '''
-    Add interface ("port") to an existing router. 
+    Add interface ("port") to an existing router.
 
     Required parameters:
     - router
-    - subnet or port_id 
-    
+    - subnet
+
     Optional parameters:
+    - tenant
     - admin_state_up (defaults to True)
     '''
     neutron = _auth()
@@ -445,21 +445,18 @@ def router_add_interface(router = None, subnet = None,
         router = router_show(name=router)
     if subnet is None and port_id is None:
         raise SaltInvocationError(
-            'Neither subnet nor port_id specified')
+            'Required arg "subnet" not specified')
     kwargs = {
         'admin_state_up': admin_state_up,
         }
     if subnet is not None:
         kwargs['subnet_id'] = \
             __salt__['neutron.subnet_show'](subnet)['id']
-    if port_id is not None:
-        kwargs['port_id'] = port_id
-    #log.debug(dir(neutron.add_interface_router))
     try:
         result = neutron.add_interface_router(
             router['id'], kwargs)
     except neutron_exceptions.NeutronClientException, msg:
-        log.error ('Calling neutron.add_interface_router(' + \
+        log.error('Calling neutron.add_interface_router(' + \
             "{0}, {1})".format(router['id'],
                 kwargs) + 'caused:\n{0}'.format(msg))
         raise neutron_exceptions.NeutronClientException
