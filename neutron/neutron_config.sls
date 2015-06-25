@@ -14,8 +14,8 @@
 neutron passwords in pillar:
     test.check_pillar:
         - failhard: True
-        - verbose: {{ salt['pillar.get']('nova:verbose', False) or
-                        salt['pillar.get']('nova:debug:', False) }}
+        - verbose: {{ salt['pillar.get']('neutron:verbose', False) or
+                        salt['pillar.get']('neutron:debug:', False) }}
         - string:
 {%- if not salt['pillar.get']('neutron.password', False) %}
             - neutron:keystone_authtoken:admin_password
@@ -28,21 +28,23 @@ neutron passwords in pillar:
 {%- endif %}
             - openstack:rabbitmq:password
 
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
 nova-credentials for Neutron in pillar:
     test.check_pillar:
         - failhard: True
         - verbose: {{ salt['pillar.get']('nova:verbose', False) or
                         salt['pillar.get']('nova:debug:', False) }}
         - string:
-{% if not salt['pillar.get'](
+    {% if not salt['pillar.get'](
     'nova:keystone_authtoken:admin_password', False) %}
             - neutron:nova_admin_password
-{% elif salt['pillar.get']('keystone.user') == 'nova' and
+    {% elif salt['pillar.get']('keystone.user') == 'nova' and
     salt['pillar.get']('keystone.password', False) is string %}
             - keystone.password
-{% else %}
+    {% else %}
             - nova:keystone_authtoken:admin_password
-{% endif %}
+    {%- endif %}
+{%- endif %}
 
 neutron.conf:
     file.managed:
@@ -56,9 +58,11 @@ neutron.conf:
 {% endif %}
         - source: salt://neutron/files/neutron.conf
         - template: jinja
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
         - context:
             tenant_name: service
             tenant_id: {{ salt['keystone.tenant_get'](name='service')['service']['id'] }}
+{% endif %}
         - failhard: True
         - require:
             - test: neutron passwords in pillar
