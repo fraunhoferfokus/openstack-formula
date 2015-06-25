@@ -16,19 +16,21 @@ nova passwords in pillar:
             - nova:keystone_authtoken:admin_password
 {% endif %}
 
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
 neutron-credentials for Nova in pillar:
     test.check_pillar:
         - failhard: True
         - verbose: {{ salt['pillar.get']('nova:verbose', False) or
                         salt['pillar.get']('nova:debug:', False) }}
         - string:
-{% if salt['pillar.get'](
+    {% if salt['pillar.get'](
     'neutron:keystone_authtoken:admin_password', False) %}
             - neutron:keystone_authtoken:admin_password
-{% else %}
+    {% else %}
             - nova:neutron_admin_password
-{% endif %}
+    {% endif %}
             - openstack:neutron:shared_secret
+{%- endif %}
 
 {{ nova.nova_conf_file }}:
     file.managed:
@@ -37,9 +39,11 @@ neutron-credentials for Nova in pillar:
       - source: salt://nova/files/nova.conf
       - template: jinja
       - failhard: True
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
       - context:
             tenant_name: service
             tenant_id: {{ salt['keystone.tenant_get'](name='service')['service']['id'] }}
+{%- endif %}
       - require:
         - test: nova passwords in pillar
 {% if 'openstack-controller' in salt['pillar.get']('roles') %}
