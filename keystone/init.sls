@@ -7,7 +7,10 @@ keystone-package:
 keystone.conf:
     file.managed:
         - name: /etc/keystone/keystone.conf
-        - source: salt://keystone/files/keystone.conf
+        - source: 
+            - salt://keystone/files/keystone.conf_
+                {{- salt['pillar.get']('openstack:release') }}
+            - salt://keystone/files/keystone.conf
         - template: jinja
         - require:
             - pkg: keystone-package
