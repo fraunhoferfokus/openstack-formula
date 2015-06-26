@@ -12,7 +12,10 @@ cinder passwords in pillar:
 cinder.conf:
     file.managed:
         - name: {{ cinder.conf_dir }}/cinder.conf
-        - source: salt://cinder/files/cinder.conf
+        - source:
+            - salt://cinder/files/cinder.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://cinder/files/cinder.conf
         - template: jinja
         - user: cinder
         - group: cinder
@@ -30,7 +33,10 @@ cinder.conf:
 nfsshares:
     file.managed:
         - name: {{ cinder.conf_dir }}/nfsshares
-        - source: salt://cinder/files/nfsshares
+        - source:
+            - salt://cinder/files/nfsshares_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://cinder/files/nfsshares
         - template: jinja
         - user: root
         - group: cinder

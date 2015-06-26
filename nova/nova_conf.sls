@@ -36,7 +36,10 @@ neutron-credentials for Nova in pillar:
     file.managed:
       - user: nova
       - mode: 640
-      - source: salt://nova/files/nova.conf
+      - source: 
+            - salt://nova/files/nova.conf_
+                {{- salt['pillar.get']('openstack:release') }}
+            - salt://nova/files/nova.conf
       - template: jinja
       - failhard: True
 {%- if 'openstack-controller' in pillar.get('roles', []) %}

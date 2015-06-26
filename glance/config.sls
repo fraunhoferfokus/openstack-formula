@@ -2,7 +2,10 @@
 glance-api.conf:
     file.managed:
         - name: {{ glance.api_conf_file }}
-        - source: salt://glance/files/glance-api.conf
+        - source: 
+            - salt://glance/files/glance-api.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/glance-api.conf
         - template: jinja
         - user: glance
         - group: glance
@@ -14,7 +17,10 @@ glance-api.conf:
 glance-api-paste.ini:
     file.managed:
         - name: {{ glance.api_paste_ini }}
-        - source: salt://glance/files/glance-api-paste.ini
+        - source:
+            - salt://glance/files/glance-api-paste.ini_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/glance-api-paste.ini
         - template: jinja
         - user: glance
         - group: glance
@@ -25,7 +31,10 @@ glance-api-paste.ini:
 glance-cache.conf:
     file.managed:
         - name: {{ glance.cache_conf_file }}
-        - source: salt://glance/files/glance-cache.conf
+        - source: 
+            - salt://glance/files/glance-cache.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/glance-cache.conf
         - template: jinja
         - user: glance
         - group: glance
@@ -38,7 +47,10 @@ glance-cache.conf:
 glance-registry.conf:
     file.managed:
         - name: {{ glance.registry_conf_file }}
-        - source: salt://glance/files/glance-registry.conf
+        - source: 
+            - salt://glance/files/glance-registry.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/glance-registry.conf
         - template: jinja
         - user: glance
         - group: glance
@@ -51,7 +63,10 @@ glance-registry.conf:
 glance-registry-paste.ini:
     file.managed:
         - name: {{ glance.registry_paste_ini }}
-        - source: salt://glance/files/glance-registry-paste.ini
+        - source:
+            - salt://glance/files/glance-registry-paste.ini_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/glance-registry-paste.ini
         - template: jinja
         - user: glance
         - group: glance
@@ -62,7 +77,10 @@ glance-registry-paste.ini:
 glance-scrubber.conf:
     file.managed:
         - name: {{ glance.scrubber_conf_file }}
-        - source: salt://glance/files/glance-scrubber.conf
+        - source: 
+            - salt://glance/files/glance-scrubber.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/glance-scrubber.conf
         - template: jinja
         - user: glance
         - group: glance
@@ -75,7 +93,10 @@ glance-scrubber.conf:
 policy.json:
     file.managed:
         - name: {{ glance.policy_json_file }}
-        - source: salt://glance/files/policy.json
+        - source:
+            - salt://glance/files/policy.json_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/policy.json
         - template: jinja
         - user: glance
         - group: glance
@@ -86,7 +107,10 @@ policy.json:
 schema-image.json:
     file.managed:
         - name: {{ glance.schema_image_json_file }}
-        - source: salt://glance/files/schema-image.json
+        - source:
+            - salt://glance/files/schema-image.json_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://glance/files/schema-image.json
         - template: jinja
         - user: glance
         - group: glance
