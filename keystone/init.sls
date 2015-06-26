@@ -231,7 +231,10 @@ keystone_rc:
             salt['pillar.get'](
                 'keystone:keystone_rc:path',
                 '/root/keystone.rc') }}
-        - source: salt://keystone/files/keystone.rc
+        - source:
+            - salt://keystone/files/keystone.rc_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://keystone/files/keystone.rc
         - template: jinja
         - user: root
         - group: root
