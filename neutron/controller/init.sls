@@ -43,7 +43,10 @@ metadata_agent.ini:
         - user: root
         - group: neutron
         - mode: 640
-        - source: salt://neutron/files/metadata_agent.ini
+        - source:
+            - salt://neutron/files/metadata_agent.ini_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://neutron/files/metadata_agent.ini
         - template: jinja
         - require:
             - pkg: neutron-server

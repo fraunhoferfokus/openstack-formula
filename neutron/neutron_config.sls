@@ -56,7 +56,10 @@ neutron.conf:
 {% else %}
         - mode: 644
 {% endif %}
-        - source: salt://neutron/files/neutron.conf
+        - source:
+            - salt://neutron/files/neutron.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://neutron/files/neutron.conf
         - template: jinja
 {%- if 'openstack-controller' in pillar.get('roles', []) %}
         - context:
