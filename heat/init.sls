@@ -11,7 +11,10 @@ heat-packages:
 heat.conf:
     file.managed:
         - name: {{ heat['heat_conf_file'] }}
-        - source: salt://heat/files/heat.conf
+        - source:
+            - salt://heat/files/heat.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://heat/files/heat.conf
         - template: jinja
         - user: heat
         - group: heat
