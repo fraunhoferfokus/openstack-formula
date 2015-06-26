@@ -77,7 +77,7 @@ dnsmasq.conf:
         - name: {{ neutron.conf_dir }}/dnsmasq.conf
         - user: neutron
         - node: 640
-        - source: salt://neutron/files/dhcp_agent.ini
+        - source: salt://neutron/files/dnsmasq.conf
         - template: jinja
         - context: 
             config: {{ salt['pillar.get']('neutron:dhcp_agent:dnsmasq').items() }}
