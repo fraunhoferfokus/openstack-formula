@@ -409,6 +409,24 @@ password for its database and its Keystone user::
             admin_password:
                 howto_service_pass_glance
 
+If you want to deploy cinder, you will also need
+the following entries for cinder::
+
+    cinder:
+        admin_password: 'Howto Pass'
+        api_port: 8776
+        database:
+            password: 'Howto Pass'
+            user: 'cinder'
+            name: 'cinder'
+        nfs_shares_config: 'nfsshares'
+        rpc_backend: 'rabbit'
+        volume_driver: 
+            'cinder.volume.drivers.lvm.LVMISCSIDriver'
+        volume_group: 'cinder-volumes'
+        keystone_authtoken:
+            admin_password: 'Howto Pass'
+
 TODO: Not sure if special characters in
 pillar[mysql:server:root_password] work 
 in all configfiles...
@@ -491,6 +509,11 @@ Deploy the controller parts of Nova::
 
     sudo salt -I roles:openstack-controller \
         state.sls nova.controller saltenv=openstack
+
+Deploy cinder on the controller::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls cinder saltenv=openstack
 
 If you see high CPU-usage of the service `nova-consoleauth`
 re-run the state *nova.controller* [5]_.
