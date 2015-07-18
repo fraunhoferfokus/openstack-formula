@@ -245,13 +245,16 @@ In `openstack.sls` we define information needed on all hosts::
       keystone_authtoken:
         admin_password: 'Nova HowTo Password'
 
+    keystone.user: 'admin'
+    keystone.password: 'Howto Pass'
+    keystone.tenant: 'admin'
     keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
     keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
+    keystone.region_name: 'RegionOne'
 
 The `keystone.{user,password,...}` part is use on the salt-minion 
 on the compute nodes uses these credentials to get data from Keystone. 
-They're also used for the Nova configuration.
+They're also used for the Nova configuration and for the openstack salt modules using these as admin credentials.
 
 Compute Nodes
 `````````````
