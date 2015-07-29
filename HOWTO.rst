@@ -12,7 +12,7 @@ be sufficient. If it's not please open an issue.
 
 .. _OpenStack: http://www.openstack.org/
 .. _SaltStack: http://www.saltstack.org/
-.. _our formula: 
+.. _our formula:
   https://github.com/fraunhoferfokus/openstack-formula
 
 TODO
@@ -25,7 +25,7 @@ TODO
      authentication.", "code": 401, "title": "Unauthorized"}}
     root@hw-ctrl:~#
 
-   caused by missing `neutron:common:keystone_authtoken:admin_password`
+   caused by missing `neutron:keystone_authtoken:admin_password`
    to set `/etc/nova/nova.conf:neutron_admin_password`
 
  - and this::
@@ -111,7 +111,6 @@ Prepare your hosts
             - `MySQL formula`_
             - `OpenvSwitch formula`_
             - `OpenStack formula`_
-            - **TODO**: Use FOKUS repository URLs!
         - Configure your master's *file_roots* in 
           */etc/salt/master*::
 
@@ -142,7 +141,7 @@ Prepare your hosts
                 - salt.example.com
                 - 192.0.2.2
             master_type: failover
-
+        - Restart the salt-minion service
         - Run *salt-key -L* to list minion-keys on your
           master
         - Run *salt-key -A* to accept minion-keys on
@@ -160,9 +159,9 @@ a snapshot.
 .. _SaltStack PPA:
     https://launchpad.net/~saltstack/+archive/ubuntu/salt
 .. _MySQL Formula:
-    https://github.com/saltstack-formulas/mysql-formula/
+    https://github.com/saltstack-formulas/mysql-formula.git
 .. _OpenvSwitch Formula: 
-    https://github.com/fraunhoferfokus/openvswitch-formula
+    https://github.com/fraunhoferfokus/openvswitch-formula.git
 .. _OpenStack formula: 
     https://github.com/fraunhoferfokus/openstack-formula
 .. [1] We use Ubuntu 14.04 for which Canonical will 
@@ -187,7 +186,7 @@ Pillar data in SaltStack is private to the minions it's
 assigned to. Targeting for this assigning can be done in
 several ways (for details see `Storing Static Data in the 
 Pillar`_) and is done in a top file called *top.sls*
-placed in the directory specified unter *pillar_roots* on
+placed in the directory specified under *pillar_roots* on
 the master.
 
 .. _Storing Static Data in the Pillar: 
@@ -243,16 +242,19 @@ In `openstack.sls` we define information needed on all hosts::
     nova:
       database:
         password: 'HowTo-Nova-DB-Password'
+      keystone_authtoken:
+        admin_password: 'Nova HowTo Password'
 
-    keystone.user: nova
-    keystone.password: 'Keystone HowTo Password for Nova'
+    keystone.user: 'admin'
+    keystone.password: 'Howto Pass'
+    keystone.tenant: 'admin'
     keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
     keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
+    keystone.region_name: 'RegionOne'
 
 The `keystone.{user,password,...}` part is use on the salt-minion 
 on the compute nodes uses these credentials to get data from Keystone. 
-They're also used for the Nova configuration.
+They're also used for the Nova configuration and for the openstack salt modules using these as admin credentials.
 
 Compute Nodes
 `````````````
@@ -272,6 +274,7 @@ configuration of this interface::
                 ports: 
                     - eth0
                 reuse_netcfg: eth0
+    neutron.password: 'Neutron HowTo Password'
     
 In `compute-1.sls` and `compute-2.sls` we add options
 unique to the particular compute-node.
@@ -331,6 +334,8 @@ to our controller. Those sections you already know::
                 ports: 
                     - eth1
                 reuse_netcfg: eth1
+    nova:
+        neutron_admin_password: "Neutron HowTo Password"
 
 The controller uses a token which is set in the Keystone 
 configuration file to add users, endpoints and so on::
@@ -342,6 +347,7 @@ Keystone also need to no the password for its database::
     keystone:
         database:
             password: 'HowTo Keystone DB Pass'
+        admin_password: 'HowTO Keystone Pass'
 
 Those Neutron credentials are needed to let salt
 talk to Neutron. The Neutron *shared_secret* is
@@ -353,7 +359,10 @@ and its metadata-agent::
     neutron.user: neutron
     neutron.tenant: service
     neutron.password: 'Neutron HowTo Password'
-
+    neutron:
+        database:
+            password: 'Neutron HowTo Password'
+        nova_admin_password: 'Nova HowTo Password'
     openstack:
         neutron:
             shared_secret: Shared_secret_from_the_HowTo 
@@ -393,15 +402,32 @@ Speaking of MySQL - Glance also needs to know the
 password for its database and its Keystone user::
 
     glance:
-        common:
-            database:
-                password:
-                    glance_db_pass
-            keystone_authtoken:
-                admin_password:
-                    howto_service_pass_glance
+        database:
+            password:
+                glance_db_pass
+        keystone_authtoken:
+            admin_password:
+                howto_service_pass_glance
 
-TODO: Not sure if special characters in 
+If you want to deploy cinder, you will also need
+the following entries for cinder::
+
+    cinder:
+        admin_password: 'Howto Pass'
+        api_port: 8776
+        database:
+            password: 'Howto Pass'
+            user: 'cinder'
+            name: 'cinder'
+        nfs_shares_config: 'nfsshares'
+        rpc_backend: 'rabbit'
+        volume_driver: 
+            'cinder.volume.drivers.lvm.LVMISCSIDriver'
+        volume_group: 'cinder-volumes'
+        keystone_authtoken:
+            admin_password: 'Howto Pass'
+
+TODO: Not sure if special characters in
 pillar[mysql:server:root_password] work 
 in all configfiles...
 
@@ -483,6 +509,11 @@ Deploy the controller parts of Nova::
 
     sudo salt -I roles:openstack-controller \
         state.sls nova.controller saltenv=openstack
+
+Deploy cinder on the controller::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls cinder saltenv=openstack
 
 If you see high CPU-usage of the service `nova-consoleauth`
 re-run the state *nova.controller* [5]_.
