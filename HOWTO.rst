@@ -245,13 +245,16 @@ In `openstack.sls` we define information needed on all hosts::
       keystone_authtoken:
         admin_password: 'Nova HowTo Password'
 
+    keystone.user: 'admin'
+    keystone.password: 'Howto Pass'
+    keystone.tenant: 'admin'
     keystone.endpoint: 'http://203.0.113.10:35357/v2.0'
     keystone.auth_url: 'http://203.0.113.10:5000/v2.0'
-    keystone.region: 'RegionOne'
+    keystone.region_name: 'RegionOne'
 
 The `keystone.{user,password,...}` part is use on the salt-minion 
 on the compute nodes uses these credentials to get data from Keystone. 
-They're also used for the Nova configuration.
+They're also used for the Nova configuration and for the openstack salt modules using these as admin credentials.
 
 Compute Nodes
 `````````````
@@ -406,6 +409,24 @@ password for its database and its Keystone user::
             admin_password:
                 howto_service_pass_glance
 
+If you want to deploy cinder, you will also need
+the following entries for cinder::
+
+    cinder:
+        admin_password: 'Howto Pass'
+        api_port: 8776
+        database:
+            password: 'Howto Pass'
+            user: 'cinder'
+            name: 'cinder'
+        nfs_shares_config: 'nfsshares'
+        rpc_backend: 'rabbit'
+        volume_driver: 
+            'cinder.volume.drivers.lvm.LVMISCSIDriver'
+        volume_group: 'cinder-volumes'
+        keystone_authtoken:
+            admin_password: 'Howto Pass'
+
 TODO: Not sure if special characters in
 pillar[mysql:server:root_password] work 
 in all configfiles...
@@ -488,6 +509,11 @@ Deploy the controller parts of Nova::
 
     sudo salt -I roles:openstack-controller \
         state.sls nova.controller saltenv=openstack
+
+Deploy cinder on the controller::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls cinder saltenv=openstack
 
 If you see high CPU-usage of the service `nova-consoleauth`
 re-run the state *nova.controller* [5]_.
