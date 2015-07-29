@@ -19,7 +19,7 @@ nova-user in Keystone:
     - email: {{ salt['pillar.get'](
                     'openstack.service_email',
                     admin_user + salt['pillar.get'](
-                        'openstack:service_domain', 
+                        'openstack:service_domain',
                         openstack_defaults.service_domain)
                 ) }}
 {# This one isn't allowed to default or the if will break! #}
@@ -31,6 +31,7 @@ nova-user in Keystone:
                         'nova:keystone_authtoken:admin_password',
                         nova_defaults.keystone_password) }}
 {%- endif %}
+    {# get tenant from pillar, default to openstack_defaults #}
     - tenant: service
     - roles:
         service:
@@ -45,14 +46,14 @@ nova-service in Keystone:
     - name: nova
     - service_type: compute
     - description: OpenStack Compute Service
-    - require: 
+    - require:
         - keystone: nova-user in Keystone
 
 nova-endpoint in Keystone:
   keystone.endpoint_present:
     - name: nova
-    - publicurl: {{ 
-        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+    - publicurl: {{
+        "http://{0}:{1}/v2/$(tenant_id)s".format(
             salt['pillar.get'](
                 'nova:common:DEFAULT:my_ip',
                 salt['pillar.get']('openstack:controller:address_ext',
@@ -61,8 +62,8 @@ nova-endpoint in Keystone:
             salt['pillar.get'](
                 'openstack:nova:compute_port', '8774')
             ) }}
-    - internalurl: {{ 
-        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+    - internalurl: {{
+        "http://{0}:{1}/v2/$(tenant_id)s".format(
             salt['pillar.get'](
                 'nova:common:DEFAULT:my_ip',
                 salt['pillar.get']('openstack:controller:address_int',
@@ -71,8 +72,8 @@ nova-endpoint in Keystone:
             salt['pillar.get'](
                 'openstack:nova:compute_port', '8774')
             ) }}
-    - adminurl: {{ 
-        "http://{0}:{1}/v2/$(tenant_id)s".format( 
+    - adminurl: {{
+        "http://{0}:{1}/v2/$(tenant_id)s".format(
             salt['pillar.get'](
                 'nova:common:DEFAULT:my_ip',
                 salt['pillar.get']('openstack:controller:address_int',

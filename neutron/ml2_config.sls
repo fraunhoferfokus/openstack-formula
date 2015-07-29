@@ -15,7 +15,10 @@ ml2_conf.ini:
         - name: {{ neutron.conf_dir }}/plugins/ml2/ml2_conf.ini
         - user: neutron
         - mode: 640
-        - source: salt://neutron/files/ml2_conf.ini
+        - source:
+            - salt://neutron/files/ml2_conf.ini_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://neutron/files/ml2_conf.ini
         - template: jinja
         - require:
             - pkg: neutron-common

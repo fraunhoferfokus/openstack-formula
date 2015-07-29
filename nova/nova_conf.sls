@@ -16,69 +16,38 @@ nova passwords in pillar:
             - nova:keystone_authtoken:admin_password
 {% endif %}
 
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
 neutron-credentials for Nova in pillar:
     test.check_pillar:
         - failhard: True
         - verbose: {{ salt['pillar.get']('nova:verbose', False) or
                         salt['pillar.get']('nova:debug:', False) }}
         - string:
-{% if salt['pillar.get'](
+    {% if salt['pillar.get'](
     'neutron:keystone_authtoken:admin_password', False) %}
             - neutron:keystone_authtoken:admin_password
-{% else %}
+    {% else %}
             - nova:neutron_admin_password
-{% endif %}
+    {% endif %}
             - openstack:neutron:shared_secret
-
-{#- TODO:   Turn this into a jinja-macro that will be
-            used here and in neutron.neutron_config #}
-{%- set tenant_name = salt['pillar.get'](
-    'nova:DEFAULT:neutron_admin_tenant_name',
-        salt['pillar.get'](
-            'neutron:common:keystone_authtoken:admin_tenant_name',
-            salt['pillar.get']('openstack:keystone:admin_tenant_name',
-                openstack_defaults.keystone.admin_tenant_name)
-        )
-    ) %}
-{%- set mine_data =  salt['mine.get'](
-    'I@roles:openstack-controller and S@{0}'.format(
-            salt['pillar.get']('openstack:controller:address_int')),
-    'keystone.tenant_list', 'compound') %}
-
-neutron_admin_tenant_id in salt-mine:
-    test.configurable_test_state:
-        - failhard: True
-        - changes: False
-{%- if mine_data|length > 0 %}
-    {%- set controller_id, tenants = mine_data.items()[0] %}
-    {%- set tenant_id = tenants[tenant_name]['id'] %}
-        - result: True
-        - comment: |
-            Found UUID "{{ tenant_id }}"
-            for tenant "{{ tenant_name }}"
-{%- else %}
-    {%- set tenant_id = False %}
-        - result: False
-        - comment: |
-            Can't find UUID for tenant "{{ tenant_name }}".
-            Try running this command on your master:
-                sudo salt -C 'I@roles:openstack-controller' \
-                mine.send keystone.tenant_list
 {%- endif %}
-{#- End of not-yet-a-macro #}
 
 {{ nova.nova_conf_file }}:
     file.managed:
       - user: nova
       - mode: 640
-      - source: salt://nova/files/nova.conf
+      - source: 
+            - salt://nova/files/nova.conf_
+                {{- salt['pillar.get']('openstack:release') }}
+            - salt://nova/files/nova.conf
       - template: jinja
       - failhard: True
+{%- if 'openstack-controller' in pillar.get('roles', []) %}
       - context:
-            tenant_name: {{ tenant_name }}
-            tenant_id: {{ tenant_id }}
+            tenant_name: service
+            tenant_id: {{ salt['keystone.tenant_get'](name='service')['service']['id'] }}
+{%- endif %}
       - require:
-        - test: neutron_admin_tenant_id in salt-mine
         - test: nova passwords in pillar
 {% if 'openstack-controller' in salt['pillar.get']('roles') %}
         - pkg: nova-controller-packages

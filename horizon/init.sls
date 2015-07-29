@@ -31,7 +31,10 @@ controllers external address known to horizon:
 local_settings.py:
     file.managed:
         - name: {{ horizon.local_settings }}
-        - source: salt://horizon/files/local_settings.py
+        - source: 
+            - salt://horizon/files/local_settings.py_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://horizon/files/local_settings.py
         - template: jinja
         - user: horizon
         - group: horizon

@@ -40,7 +40,10 @@ neutron-l3-agent:
 l3_agent.ini:
     file.managed:
         - name: {{ neutron.l3_agent_ini }}
-        - source: salt://neutron/files/l3_agent.ini
+        - source:
+            - salt://neutron/files/l3_agent.ini_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://neutron/files/l3_agent.ini
         - template: jinja
         - user: root
         - group: neutron
@@ -65,7 +68,10 @@ dhcp_agent.ini:
         - name: {{ neutron.conf_dir}}/dhcp_agent.ini
         - user: neutron
         - mode: 640
-        - source: salt://neutron/files/dhcp_agent.ini
+        - source:
+            - salt://neutron/files/dhcp_agent.ini_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://neutron/files/dhcp_agent.ini
         - template: jinja
         - require:
             - pkg: neutron-network-packages
@@ -77,7 +83,10 @@ dnsmasq.conf:
         - name: {{ neutron.conf_dir }}/dnsmasq.conf
         - user: neutron
         - node: 640
-        - source: salt://neutron/files/dhcp_agent.ini
+        - source:
+            - salt://neutron/files/dnsmasq.conf_
+            {{- salt['pillar.get']('openstack:release') }}
+            - salt://neutron/files/dnsmasq.conf
         - template: jinja
         - context: 
             config: {{ salt['pillar.get']('neutron:dhcp_agent:dnsmasq').items() }}
