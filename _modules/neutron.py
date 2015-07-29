@@ -478,7 +478,7 @@ def router_add_interface(router=None, subnet=None,
     return result
 
 def router_create(name, admin_state_up = True, tenant_id = None, 
-        gateway_network = None, enable_snat = True):
+        gateway_network = None, enable_snat = True, tenant=None):
     '''
     Create a new router.
 
@@ -487,10 +487,15 @@ def router_create(name, admin_state_up = True, tenant_id = None,
 
     Optional parameters:
     - admin_state_up (defaults to True)
-    - tenant_id
+    - tenant_id XOR tenant
     - gateway_network (network_id of external network)
     - enable_snat (defaults to True)
     '''
+    if (tenant_id is None and tenant is None):
+        raise SaltInvocationError('Neither tenant_id nor tenant are set.')
+    if (tenant_id is not None and tenant is not None):
+        raise SaltInvocationError('tenant_id and tenant must not be set both.')
+    
     neutron = _auth()
     neutron.format = 'json'
     kwargs = {
@@ -506,6 +511,8 @@ def router_create(name, admin_state_up = True, tenant_id = None,
             }
     if tenant_id is not None:
         kwargs['tenant_id'] = tenant_id
+    if tenant is not None:
+        kwargs['tenant_id'] = _tenantname_to_id(tenant)
 
     return neutron.create_router({'router': kwargs})
 
