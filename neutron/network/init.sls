@@ -89,7 +89,7 @@ dnsmasq.conf:
             - salt://neutron/files/dnsmasq.conf
         - template: jinja
         - context: 
-            config: {{ salt['pillar.get']('neutron:dhcp_agent:dnsmasq').items() }}
+            config: {{ salt['pillar.get']('neutron:dhcp_agent:dnsmasq') }}
         - require: 
             - pkg: neutron-network-packages
 {% endif %}
