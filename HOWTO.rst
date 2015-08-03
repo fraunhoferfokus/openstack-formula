@@ -185,17 +185,24 @@ Pillar for Configuration Details
 Pillar data in SaltStack is private to the minions it's
 assigned to. Targeting for this assigning can be done in
 several ways (for details see `Storing Static Data in the 
-Pillar`_) and is done in a top file called *top.sls*
-placed in the directory specified under *pillar_roots* on
-the master.
+Pillar`_) and is done in a top file called ``top.sls``
+placed in the directory specified under ``pillar_roots`` on
+the master::
+
+    op@master:~% grep -A 2 '^pillar_roots' /etc/salt/master
+    pillar_roots:
+      base:
+        - /srv/salt/pillar
+
+Thus our topfile is ``/srv/salt/pillar/top.sls``.
 
 .. _Storing Static Data in the Pillar: 
     http://docs.saltstack.com/en/latest/topics/pillar/
 
-The Topfile
+Our Topfile
 ```````````
 
-We start with a rather simple top.sls::
+We start with a rather simple ``top.sls``::
 
     base:
         '(controller|network|compute-[0-9])':
@@ -204,18 +211,18 @@ We start with a rather simple top.sls::
         'compute-?':
             - compute_all
         '*':
-            - {{ grains.host }}
+            - {{ opts.is }}
 
-Minions matched by the regex (assuming minion IDs with 
-just nodenames, not fully qualified domain names) will 
-get the contents of `/srv/salt/pillar/openstack.sls`.
+Minions matched by the regex (assuming minion IDs with
+just nodenames, not fully qualified domain names) will
+get the contents of ``/srv/salt/pillar/openstack.sls``.
 
-Minions matching the glob *compute-?* get the information 
-needed on all compute nodes from `/srv/salt/pillar/compute_all.sls`.
+Minions matching the glob ``compute-?`` get the information
+needed on all compute nodes from ``/srv/salt/pillar/compute_all.sls``.
 
 All minions get the content of a file with a name equal
-to the minions hostname (plus `.sls` like 
-`/srv/salt/pillar/controller.sls`) included in its pillar.
+to the minions ID (plus ``.sls`` like
+``/srv/salt/pillar/controller.sls``) included in its pillar.
 
 Common Configuration Data
 `````````````````````````
