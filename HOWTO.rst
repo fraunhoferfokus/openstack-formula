@@ -90,6 +90,9 @@ Planning
 Prepare your hosts
 ------------------
 
+Network
+```````
+
     - Connect hosts to the networks you defined
         - Controller (and network node if on a separate host) 
           to the external and the management network
@@ -104,15 +107,18 @@ Prepare your hosts
         sudo apt-get install --yes software-properties-common
         sudo add-apt-repository ppa:saltstack/salt        
 
-    - Deploy salt-master
+
+``salt-master``
+```````````````
+
         - Preferably on a different host than your controller
         - Install package *salt-master*
         - Checkout formulas to */srv/salt/* [3]_
             - `MySQL formula`_
             - `OpenvSwitch formula`_
             - `OpenStack formula`_
-        - Configure your master's *file_roots* in 
-          */etc/salt/master*::
+        - Configure your master's ``file_roots`` in
+          ``/etc/salt/master``::
 
             file_roots:
               base:
@@ -122,7 +128,7 @@ Prepare your hosts
                 - /srv/salt/openvswitch-formula
                 - /srv/salt/mysql-formula
                   
-        - Configure your master's *pillar_roots*::
+        - Configure your master's ``pillar_roots`` [6]_::
 
             pillar_roots:
               base:
@@ -130,27 +136,32 @@ Prepare your hosts
     
         - Restart salt-master
 
-    - Deploy salt-minion on the OpenStack nodes
+.. [6] See `Pillar for Configuration Details`_ and
+    `Storing Static Data in the Pillar`_ for more
+    information on Salt's Pillar
+
+``salt-minion``
+```````````````
+
+On the OpenStack nodes:
         - Set hostnames (compute-1.example.com, 
           compute-2.example.com...)
-        - Install package *salt-minion*
+        - Install package ``salt-minion``
         - Point your minions to your master, add those
-          lines to */etc/salt/minion*::
+          lines to ``/etc/salt/minion``::
             
             master:
-                - salt.example.com
                 - 192.0.2.2
-            master_type: failover
+
         - Restart the salt-minion service
         - Run *salt-key -L* to list minion-keys on your
           master
         - Run *salt-key -A* to accept minion-keys on
           your master [2]_
 
-
 You may want to install more packages useful for debugging
 and fixing stuff (lsof, multitail, nmap, tmux, openssh-server)
-and add your SSH-keys to *~user/.ssh/authorized_keys* now.
+and add your SSH-keys to ``~user/.ssh/authorized_keys`` now.
 
 As this is a good point to roll back to you may also want
 to make a backup or - if you're testing this on VMs - take
