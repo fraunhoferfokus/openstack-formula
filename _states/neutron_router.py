@@ -32,6 +32,9 @@ def managed(name, admin_state_up = None, tenant = None,
     - enable_snat*
 
     TODO: use router_add_interface() to add subnets and ports
+
+    TODO: Figure out why some states always return a changed
+        but empty external_gateway_info
     
     *) defaults to True in neutron.router_create
     '''
