@@ -5,13 +5,17 @@
 {% set tenant_name = get('neutron:tenant',
                 openstack_defaults.keystone.admin_tenant_name) %}
 
-router for external network:
+{%- for router, details in get('neutron:routers').items() %}
+{{ router }}:
     neutron_router.managed:
+    {%- if 'tenant' in details %}
+        - tenant: {{ details.tenant }}
+    {%- else %}
         - tenant: {{ tenant_name }}
-
-test-router:
-    neutron_router.managed:
-        - tenant: test-tenant
-        - gateway_network: external network
-        - enable_snat: True
-        #- enable_snat: False
+    {%- endif %}
+    {%- for key in ['gateway_network', 'enable_snat'] %}
+        {%- if key in details %}
+        - {{ key }}: {{ details[key] }}
+        {%- endif %}
+    {%- endfor %}
+{%- endfor %}
