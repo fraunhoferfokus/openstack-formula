@@ -5,6 +5,7 @@
 {% set tenant_name = get('neutron:tenant',
                 openstack_defaults.keystone.admin_tenant_name) %}
 
+# Layer 2 Networks:
 {% for network, details in get('neutron:networks').items() %}
 {{ network }}:
     neutron_network.managed:
@@ -24,3 +25,47 @@
     {% endif %}
 {% endfor %}
 
+# Layer 3 Routers:
+{%- for router, details in get('neutron:routers').items() %}
+{{ router }}:
+    neutron_router.managed:
+    {%- if 'tenant' in details %}
+        - tenant: {{ details.tenant }}
+    {%- else %}
+        - tenant: {{ tenant_name }}
+    {%- endif %}
+    {%- for key in ['gateway_network', 'enable_snat'] %}
+        {%- if key in details %}
+        - {{ key }}: {{ details[key] }}
+        {%- endif %}
+    {%- endfor %}
+    {%- if 'gateway_network' in details and
+        details['gateway_network'] in get('neutron:networks') %}
+        - require:
+            - neutron_network: {{ details['gateway_network'] }}
+    {%- endif %}
+{%- endfor %}
+
+# ...and now Layer-3-Subnets:
+{%- for subnet, details in get('neutron:subnets').items() %}
+{{ subnet }}:
+    neutron_subnet.managed:
+    {%- for key in ['cidr', 'network', 'enable_dhcp', 'tenant'] %}
+        {%- if details.has_key(key) %}
+        - {{ key }}: {{ details[key] }}
+        {%- endif %}
+    {%- endfor %}
+        - allocation_pools:
+    {%- if details.allocation_pools is string %}
+        {% set allocation_pools = details.allocation_pools.split(',') %}
+    {%- else %}
+        {% set allocation_pools = details.allocation_pools %}
+    {% endif %}
+    {%- for pool in details.allocation_pools %}
+            - {{ pool }}
+    {%- endfor %}
+    {%- if details['network'] in get('neutron:networks') %}
+        - require:
+            - neutron_network: {{ details['network'] }}
+    {%- endif %}
+{% endfor %}
