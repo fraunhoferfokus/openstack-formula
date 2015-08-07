@@ -8,25 +8,22 @@
 {% set admin_tenant_id = salt['keystone.tenant_list']()[tenant_name]['id'] %}
 
 {# TODO: add support for multiple external networks - but not now #}
-external subnet:
-    neutron_subnet.managed:
-        {# TODO: get this one from pillar, too.
-            Re-use network-config?? #}
-        - cidr: 192.168.122.0/24
-        - network_id: {{ 
-            salt['neutron.network_show'](name='external network')['id'] }}
-        {# TODO: this defines the range if floating IPs in this
-            network, needs to be sed via pillar #}
-        - allocation_pools: 192.168.122.100-192.168.122.200
-        - enable_dhcp: True
-        - tenant_id: {{ admin_tenant_id }}
 
-test-subnet:
+{%- for subnet, details in get('neutron:subnets').items() %}
+{{ subnet }}:
     neutron_subnet.managed:
-        - cidr: 192.168.0.0/24
-        - network_id: {{
-            salt['neutron.network_show'](name='test-network')['id'] }}
-        - allocation_pools: 192.168.0.100-192.168.0.200
-        - enable_dhcp: True
-        - tenant_id: {#
-            salt['keystone.tenant_list']()['test-tenant']['id'] #}
+    {%- for key in ['cidr', 'network', 'enable_dhcp', 'tenant'] %}
+        {%- if details.has_key(key) %}
+        - {{ key }}: {{ details[key] }}
+        {%- endif %}
+    {%- endfor %}
+        - allocation_pools:
+    {%- if details.allocation_pools is string %}
+        {% set allocation_pools = details.allocation_pools.split(',') %}
+    {%- else %}
+        {% set allocation_pools = details.allocation_pools %}
+    {% endif %}
+    {%- for pool in details.allocation_pools %}
+            - {{ pool }}
+    {%- endfor %}
+{% endfor %}
