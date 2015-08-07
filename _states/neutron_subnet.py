@@ -63,7 +63,8 @@ def _update_subnet(subnet_id, subnet_params):
         name = subnet.pop('name')
         cidr = subnet.pop('cidr')
         network_id = subnet.pop('network_id')
-        subnet.pop('id')
+        for key in ['id', 'tenant_id', 'tenant_name', 'network_name']:
+            subnet.pop(key)
         log.debug('parameters passed to neutron.subnet_create: \n' + \
             'name = {0}, cidr = {1}, network_id = {2} and \n'.format(
                 name, cidr, network_id) + \
