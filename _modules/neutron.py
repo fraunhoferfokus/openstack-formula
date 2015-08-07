@@ -649,10 +649,7 @@ def subnet_create(name, cidr, network_id, tenant = None,
     - tenant
     - allocation_pools (either a comma separated string with <start>-<end> 
       tuples like "192.168.17.3-192.168.17.30,192.168.17.34-192.168.17.60"
-      or a YAML list of dictionaries with "start" and "end" keys. 
-      # TODO #
-      The later one should be changed to a YAML list with elements like 
-      "192.168.17.3-192.168.17.30".)
+      or a YAML list  with elements like "192.168.17.3-192.168.17.30".)
     - gateway_ip
     - ip_version (4 or 6)
     - enable_dhcp (bool)
@@ -681,13 +678,14 @@ def subnet_create(name, cidr, network_id, tenant = None,
     if isinstance(name, str):
         kwargs['name'] = name
     if isinstance(allocation_pools, str):
-        pools = []
-        for pool in allocation_pools.split(','):
+        allocation_pools = allocation_pools.split(',')
+    if allocation_pools is not None:
+        kwargs['allocation_pools'] = []
+        for pool in allocation_pools:
             (start, end) = pool.split('-')
-            pools += [{'start': start, 'end': end}]
-        kwargs['allocation_pools'] = pools
-    elif allocation_pools is not None:
-        kwargs['allocation_pools'] = allocation_pools
+            kwargs['allocation_pools'] += [
+                {'start': start,
+                'end': end}]
     if dns_nameservers is not None:
         kwargs['dns_nameservers'] = dns_nameservers
     if host_routes is not None:
