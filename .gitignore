@@ -4,3 +4,4 @@ _modules/glance.py
 _modules/keystone.py
 _states/glance.py
 _states/keystone.py
+*.pdf
