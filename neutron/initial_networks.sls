@@ -43,6 +43,11 @@
         details['gateway_network'] in get('neutron:networks') %}
         - require:
             - neutron_network: {{ details['gateway_network'] }}
+        {%- for sub_name, sub_details in get('neutron:subnets').items() %}
+            {%- if details['gateway_network'] == sub_details['network'] %}
+            - neutron_subnet: {{ sub_name }}
+            {%- endif %}
+        {%- endfor %}
     {%- endif %}
 {%- endfor %}
 
