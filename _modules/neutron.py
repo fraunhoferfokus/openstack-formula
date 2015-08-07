@@ -549,9 +549,9 @@ def router_list(name = None, status = None, tenant = None,
     if name is not None:
         kwargs['name'] = name
     if status is not None:
-        if status not in ['ACTIVE','ERROR', 'DOWN']:
-            raise SaltInvocationError, 'status has to be one of' +\
-                '"ACTIVE", "ERROR" or "DOWN"'
+        if status not in ['ACTIVE', 'ERROR', 'DOWN']:
+            raise SaltInvocationError('status has to be one of' +
+                '"ACTIVE", "ERROR" or "DOWN"')
         else:
             kwargs['status'] = status
     if tenant is not None:
@@ -561,15 +561,18 @@ def router_list(name = None, status = None, tenant = None,
     router_list = neutron.list_routers(**kwargs)
     if router_list.has_key('routers'):
         router_list = router_list['routers']
-    else:
-        return None
+    if isinstance(router_list, type(None)) or \
+            len(router_list) == 0:
+        return []
     for router in router_list:
         router['tenant'] = _id_to_tenantname(router['tenant_id'])
-        if router.has_key('external_gateway_info') and \
-                router['external_gateway_info'].has_key('network_id'):
-            net_id = router['external_gateway_info']['network_id']
-            net_name = __salt__['neutron.network_show'](net_id)['name']
-            router['external_gateway_info']['network'] = net_name
+        if router.has_key('external_gateway_info'):
+            if isinstance(router['external_gateway_info'], type(None)):
+                pass
+            elif router['external_gateway_info'].has_key('network_id'):
+                net_id = router['external_gateway_info']['network_id']
+                net_name = __salt__['neutron.network_show'](net_id)['name']
+                router['external_gateway_info']['network'] = net_name
     return router_list
 
 def router_set_gateway(router_id, ext_net_id, 
@@ -646,10 +649,7 @@ def subnet_create(name, cidr, network_id, tenant = None,
     - tenant
     - allocation_pools (either a comma separated string with <start>-<end> 
       tuples like "192.168.17.3-192.168.17.30,192.168.17.34-192.168.17.60"
-      or a YAML list of dictionaries with "start" and "end" keys. 
-      # TODO #
-      The later one should be changed to a YAML list with elements like 
-      "192.168.17.3-192.168.17.30".)
+      or a YAML list  with elements like "192.168.17.3-192.168.17.30".)
     - gateway_ip
     - ip_version (4 or 6)
     - enable_dhcp (bool)
@@ -678,13 +678,14 @@ def subnet_create(name, cidr, network_id, tenant = None,
     if isinstance(name, str):
         kwargs['name'] = name
     if isinstance(allocation_pools, str):
-        pools = []
-        for pool in allocation_pools.split(','):
+        allocation_pools = allocation_pools.split(',')
+    if allocation_pools is not None:
+        kwargs['allocation_pools'] = []
+        for pool in allocation_pools:
             (start, end) = pool.split('-')
-            pools += [{'start': start, 'end': end}]
-        kwargs['allocation_pools'] = pools
-    elif allocation_pools is not None:
-        kwargs['allocation_pools'] = allocation_pools
+            kwargs['allocation_pools'] += [
+                {'start': start,
+                'end': end}]
     if dns_nameservers is not None:
         kwargs['dns_nameservers'] = dns_nameservers
     if host_routes is not None:
