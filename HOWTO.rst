@@ -325,7 +325,10 @@ The Controller
 ``````````````
 
 In `controller.sls` we define information only available 
-to our controller. Those sections you already know::
+to our controller. The whole subsection is only about
+this one file.
+
+Those are values for pillar-keys you already know::
     
     roles:
         - openstack-controller
@@ -352,15 +355,18 @@ to our controller. Those sections you already know::
                 ports: 
                     - eth1
                 reuse_netcfg: eth1
+
     nova:
         neutron_admin_password: "Neutron HowTo Password"
 
 The controller uses a token which is set in the Keystone 
-configuration file to add users, endpoints and so on::
+configuration file to add users, endpoints and so on.
+Add the token to ``controller.sls`` like this::
 
     keystone.token: 'Keystone HowTo Token'
 
-Keystone also need to no the password for its database::
+Keystone also needs to know the password for its database
+and the password for its admin-user. Add those, too::
 
     keystone:
         database:
