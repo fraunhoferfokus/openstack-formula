@@ -330,6 +330,8 @@ to our controller. Those sections you already know::
     roles:
         - openstack-controller
         - openstack-network
+        - cinder-controller
+        - cinder-node
 
     interfaces:
         eth0:
