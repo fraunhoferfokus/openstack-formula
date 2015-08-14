@@ -385,6 +385,42 @@ and its metadata-agent::
         neutron:
             shared_secret: Shared_secret_from_the_HowTo 
 
+If you want salt to deploy initial networks, you have to define your networks, subnets and routers::
+
+    neutron:
+        networks:
+            shared_int_net:
+                admin_state_up: UP
+                shared: True
+                tenant: admin
+                network_type: gre
+    
+            shared_ext_net:
+                admin_state_up: UP
+                shared: True
+                tenant: admin
+                network_type: flat
+                external: True
+
+        routers:
+            shared_ext2int:
+                tenant: admin
+                gateway_network: shared_ext_net
+
+        subnets:
+            shared_int_subnet:
+                cidr: 192.168.42.0/24
+                network: shared_int_net
+                enable_dhcp: True
+                tenant: admin
+
+            shared_ext_subnet:
+                cidr: 203.0.113.0/24
+                network: shared_ext_net
+                enable_dhcp: True
+                tenant: admin
+                allocation_pools: 203.0.113.5-203.0.113.200
+
 Here are some settings we need for MySQL. We have to specify 
 the root password and the bind-address so `mysqld` only listens 
 on the management interface. Some encoding related settings are
@@ -568,6 +604,11 @@ Horizon (if generating `local_settings.py` fails try again [5]_)::
 
     sudo salt -I roles:openstack-controller \
         state.sls horizon saltenv=openstack
+
+Deploy initial networks::
+    
+    sudo salt -I roles:openstack-network \
+        state.sls neutron.initial_networks saltenv=openstack
 
 Next Steps
 ----------
