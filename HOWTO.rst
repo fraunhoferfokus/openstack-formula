@@ -333,6 +333,10 @@ to our controller. Those sections you already know::
         - cinder-controller
         - cinder-node
 
+    openstack:
+        common:
+            my_ip: 192.0.2.10
+
     interfaces:
         eth0:
             comment: management interface
