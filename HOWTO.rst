@@ -536,15 +536,45 @@ Make sure to sync all modules first::
 
     sudo salt \* saltutil.sync_all saltenv=base,openstack
 
-Configure openvswitch on network and compute nodes::
+Then tell all minions to refresh their Pillar-data,
+just in case::
+
+    sudo salt \* saltutil.refresh_pillar
+
+Generate the network configuration files from
+your Pillar::
+
+    sudo salt state.sls \* networking.config && \
+        sudo salt \* state.sls networking.resolvconf
+
+Take a look on the returned data and check if
+the changes made to configuration files look
+reasonable.
+
+.. note:: Now would be a good point to make another backup
+    of your setup as the nodes should come up with the
+    correct static IP addresses assigned at boot.
+
+The next step is creating the OpenvSwitch bridges.
+As we have to re-assign IP addresses "in flight"
+you may loose connectivity::
 
     sudo salt -C \
         'I@roles:openstack-network or I@roles:openstack-compute' \
         state.sls openvswitch saltenv=openstack
 
-Make sure network configuration is correct on all hosts::
+Make sure your controller is still online.
+If it isn't you have to login locally/over the other
+interface and run ``sudo ovs-vsctl del-port br-ex eth1``
+(with "eth1" being the interface used for the external
+network) and reboot the host. Afterwards running the
+``salt`` command above should work.
 
-    sudo salt \* state.sls networking saltenv=openstack
+Now that we have the bridges (you can check with ``salt \*
+ovs.bridge show``) we need to regenerate the hosts'
+network configuration files::
+
+    sudo salt \* state.sls networking.config saltenv=openstack
     
 Install MySQL, RabbitMQ and Keystone on your controller::
 
