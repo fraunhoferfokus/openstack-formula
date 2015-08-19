@@ -576,6 +576,9 @@ network configuration files::
 
     sudo salt \* state.sls networking.config saltenv=openstack
     
+Keystone
+--------
+
 Install MySQL, RabbitMQ and Keystone on your controller::
 
     sudo salt -I roles:openstack-controller \
@@ -612,20 +615,30 @@ on the controller. If you see similiar output Keystone works::
             service_id:
                 8ee50c9c787b4d46bb7300b57c83644f
 
+Neutron on the Controller
+-------------------------
+
 Deploy `neutron-server` on the controller::
 
     sudo salt -I roles:openstack-controller \
         state.sls neutron.controller saltenv=openstack
+
+To create initial networks run::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls neutron.initial_networks
+
+**TODO**: Add documentation on the pillar-data
+for those initial networks, subnets, routers.
+
+Nova on the Controller
+----------------------
 
 Deploy the controller parts of Nova::
 
     sudo salt -I roles:openstack-controller \
         state.sls nova.controller saltenv=openstack
 
-Deploy cinder on the controller::
-
-    sudo salt -I roles:openstack-controller \
-        state.sls cinder saltenv=openstack
 
 If you see high CPU-usage of the service `nova-consoleauth`
 re-run the state *nova.controller* [5]_.
@@ -638,26 +651,45 @@ re-run the state *nova.controller* [5]_.
         
        For now re-applying the states works in all cases.
 
+Cinder
+------
+
+Deploy Cinder on the controller::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls cinder saltenv=openstack
+
 Neutron agents on network-node::
     
     sudo salt -I roles:openstack-network \
         state.sls neutron.network saltenv=openstack
+
+Neutron on the Compute-Nodes
+----------------------------
 
 Neutron agents on compute-nodes::
     
     sudo salt -I roles:openstack-compute \
         state.sls neutron.compute saltenv=openstack
 
+Nova on the Compute-Nodes
+-------------------------
+
 `nova-compute`::
 
     sudo salt -I roles:openstack-compute \
         state.sls nova.compute saltenv=openstack
+
+Glance
+------
 
 Glance on controller [5]_::
 
     sudo salt -I roles:openstack-controller \
         state.sls glance saltenv=openstack
 
+Horizon
+-------
 Horizon (if generating `local_settings.py` fails try again [5]_)::
 
     sudo salt -I roles:openstack-controller \
