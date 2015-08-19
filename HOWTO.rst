@@ -455,6 +455,64 @@ TODO: Not sure if special characters in
 pillar[mysql:server:root_password] work 
 in all configfiles...
 
+How to Check Your Pillar
+````````````````````````
+
+First check if your minions are complaining about something
+pillar-related::
+
+    root@master:~# salt \* pillar.items _errors
+    compute-1:
+        ----------
+    compute-2:
+        ----------
+    controller:
+        ----------
+
+All your minions returning only those empty
+sets/only delimiters? Then you're good [5]_.
+
+.. [7] Any occuring errors with Pillar need to
+    be resolved before you can continue. Search
+    the `Salt documentation`_, the archives of
+    the Google Groups/`mailinglist "salt-users"`_
+    or try the IRC channel #salt on
+    `freenode.net`_.
+
+.. _Salt documentation: http://docs.saltstack.com
+.. _`mailinglist "salt-users"`:
+    https://groups.google.com/forum/#!forum/salt-users
+.. _`freenode.net`: https://freenode.net/
+
+To get the complete pillar of a certain minion
+run the following (where "controller" is the
+ID of the minion we're targeting here)::
+
+    root@master:~# salt controller pillar.items
+
+To check only on the (input data for the minion's)
+network configuration try::
+
+    root@master:~# salt controller pillar.items \
+        dns interfaces
+    controller:
+        ----------
+        dns:
+            ----------
+            domains:
+                - example.com
+            servers:
+                - 8.8.8.8
+                - 8.8.4.4
+        interfaces:
+            eth0:
+                comment: management interface
+                ipv4: 192.0.2.10/24
+            eth1:
+                comment: external interface
+                ipv4: 203.0.113.10/24
+                default_gw: 203.0.113.1
+
 Deployment
 ==========
 
