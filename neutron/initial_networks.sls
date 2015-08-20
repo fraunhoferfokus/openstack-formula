@@ -6,7 +6,7 @@
                 openstack_defaults.keystone.admin_tenant_name) %}
 
 # Layer 2 Networks:
-{% for network, details in get('neutron:networks').items() %}
+{% for network, details in get('neutron:networks', {}).items() %}
 {{ network }}:
     neutron_network.managed:
         - admin_state_up: {{ details.admin_state_up }}
@@ -26,7 +26,7 @@
 {% endfor %}
 
 # Layer 3 Routers:
-{%- for router, details in get('neutron:routers').items() %}
+{%- for router, details in get('neutron:routers', {}).items() %}
 {{ router }}:
     neutron_router.managed:
     {%- if 'tenant' in details %}
@@ -43,7 +43,8 @@
         details['gateway_network'] in get('neutron:networks') %}
         - require:
             - neutron_network: {{ details['gateway_network'] }}
-        {%- for sub_name, sub_details in get('neutron:subnets').items() %}
+        {%- for sub_name, sub_details in
+                get('neutron:subnets', {}).items() %}
             {%- if details['gateway_network'] == sub_details['network'] %}
             - neutron_subnet: {{ sub_name }}
             {%- endif %}
@@ -52,7 +53,7 @@
 {%- endfor %}
 
 # ...and now Layer-3-Subnets:
-{%- for subnet, details in get('neutron:subnets').items() %}
+{%- for subnet, details in get('neutron:subnets', {}).items() %}
 {{ subnet }}:
     neutron_subnet.managed:
     {%- for key in ['cidr', 'network', 'enable_dhcp', 'tenant'] %}
