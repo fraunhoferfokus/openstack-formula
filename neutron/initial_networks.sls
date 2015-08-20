@@ -16,13 +16,15 @@
     {% else %}
         - tenant: {{ tenant_name }}
     {% endif %}
-    {% if 'physical_network' in details %}
-        - physical_network: {{ details.physical_network }}
-    {% endif %}
-        - network_type: {{ details.network_type }}
-    {% if 'external' in details %}
-        - external: {{ details.external }}
-    {% endif %}
+    {% for key in [
+            'physical_network',
+            'external',
+            'network_type',
+            ] %}
+        {% if key in details %}
+        - {{ key }}: {{ details[key] }}
+        {% endif %}
+    {% endfor %}
 {% endfor %}
 
 # Layer 3 Routers:
@@ -61,15 +63,17 @@
         - {{ key }}: {{ details[key] }}
         {%- endif %}
     {%- endfor %}
+    {%- if 'allocation_pools' in details and allocation_pools %}
         - allocation_pools:
-    {%- if details.allocation_pools is string %}
-        {% set allocation_pools = details.allocation_pools.split(',') %}
-    {%- else %}
-        {% set allocation_pools = details.allocation_pools %}
-    {% endif %}
-    {%- for pool in details.allocation_pools %}
-            - {{ pool }}
-    {%- endfor %}
+        {%- if details.allocation_pools is string %}
+            {% set allocation_pools = details.allocation_pools.split(',') %}
+        {%- else %}
+            {% set allocation_pools = details.allocation_pools %}
+        {% endif %}
+        {%- for pool in details.allocation_pools %}
+                - {{ pool }}
+        {%- endfor %}
+    {%- endif %}
     {%- if details['network'] in get('neutron:networks') %}
         - require:
             - neutron_network: {{ details['network'] }}
