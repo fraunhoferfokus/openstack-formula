@@ -391,7 +391,8 @@ and its metadata-agent::
         neutron:
             shared_secret: Shared_secret_from_the_HowTo 
 
-If you want salt to deploy initial networks, you have to define your networks, subnets and routers::
+If you want salt to deploy initial networks, you have to
+define your networks, subnets and routers::
 
     neutron:
         networks:
@@ -663,9 +664,6 @@ To create initial networks run::
 
     sudo salt -I roles:openstack-controller \
         state.sls neutron.initial_networks
-
-**TODO**: Add documentation on the pillar-data
-for those initial networks, subnets, routers.
 
 Nova on the Controller
 ----------------------
