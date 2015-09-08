@@ -42,11 +42,11 @@ neutron-credentials for Nova in pillar:
             - salt://nova/files/nova.conf
       - template: jinja
       - failhard: True
-{%- if 'openstack-controller' in pillar.get('roles', []) %}
+{#- if 'openstack-controller' in pillar.get('roles', []) #}
       - context:
             tenant_name: service
-            tenant_id: {{ salt['keystone.tenant_get'](name='service')['service']['id'] }}
-{%- endif %}
+          {#tenant_id: {{ salt['keystone.tenant_get'](name='service')['service']['id'] }} #}
+{#- endif #}
       - require:
         - test: nova passwords in pillar
 {% if 'openstack-controller' in salt['pillar.get']('roles') %}
