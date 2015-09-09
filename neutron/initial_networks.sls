@@ -2,20 +2,80 @@
 {% from 'neutron/map.jinja' import neutron with context -%}
 {% from 'openstack/defaults.jinja' import openstack_defaults with context -%}
 {% set get = salt['pillar.get'] -%}
-{% set tenant_name = get(
-        'nova:DEFAULT:neutron_admin_tenant_name',
-        get('neutron:common:keystone_authtoken:admin_tenant_name',
-            get('openstack:keystone:admin_tenant_name',
-                openstack_defaults.keystone.admin_tenant_name)
-        )
-    ) -%}
+{% set tenant_name = get('neutron:tenant',
+                openstack_defaults.keystone.admin_tenant_name) %}
 
-external network:
+# Layer 2 Networks:
+{% for network, details in get('neutron:networks', {}).items() %}
+{{ network }}:
     neutron_network.managed:
-        - admin_state_up: True
-        - shared: True
+        - admin_state_up: {{ details.admin_state_up }}
+        - shared: {{ details.shared }}
+    {% if 'tenant' in details %}
+        - tenant: {{ details.tenant }}
+    {% else %}
         - tenant: {{ tenant_name }}
-        - physical_network: External
-        - network_type: flat
-        - external: True
+    {% endif %}
+    {% for key in [
+            'physical_network',
+            'external',
+            'network_type',
+            ] %}
+        {% if key in details %}
+        - {{ key }}: {{ details[key] }}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
 
+# Layer 3 Routers:
+{%- for router, details in get('neutron:routers', {}).items() %}
+{{ router }}:
+    neutron_router.managed:
+    {%- if 'tenant' in details %}
+        - tenant: {{ details.tenant }}
+    {%- else %}
+        - tenant: {{ tenant_name }}
+    {%- endif %}
+    {%- for key in ['gateway_network', 'enable_snat'] %}
+        {%- if key in details %}
+        - {{ key }}: {{ details[key] }}
+        {%- endif %}
+    {%- endfor %}
+    {%- if 'gateway_network' in details and
+        details['gateway_network'] in get('neutron:networks') %}
+        - require:
+            - neutron_network: {{ details['gateway_network'] }}
+        {%- for sub_name, sub_details in
+                get('neutron:subnets', {}).items() %}
+            {%- if details['gateway_network'] == sub_details['network'] %}
+            - neutron_subnet: {{ sub_name }}
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+{%- endfor %}
+
+# ...and now Layer-3-Subnets:
+{%- for subnet, details in get('neutron:subnets', {}).items() %}
+{{ subnet }}:
+    neutron_subnet.managed:
+    {%- for key in ['cidr', 'network', 'enable_dhcp', 'tenant'] %}
+        {%- if details.has_key(key) %}
+        - {{ key }}: {{ details[key] }}
+        {%- endif %}
+    {%- endfor %}
+    {%- if 'allocation_pools' in details and allocation_pools %}
+        - allocation_pools:
+        {%- if details.allocation_pools is string %}
+            {% set allocation_pools = details.allocation_pools.split(',') %}
+        {%- else %}
+            {% set allocation_pools = details.allocation_pools %}
+        {% endif %}
+        {%- for pool in details.allocation_pools %}
+                - {{ pool }}
+        {%- endfor %}
+    {%- endif %}
+    {%- if details['network'] in get('neutron:networks') %}
+        - require:
+            - neutron_network: {{ details['network'] }}
+    {%- endif %}
+{% endfor %}
