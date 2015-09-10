@@ -63,7 +63,7 @@
         - {{ key }}: {{ details[key] }}
         {%- endif %}
     {%- endfor %}
-    {%- if 'allocation_pools' in details and allocation_pools %}
+    {%- if 'allocation_pools' in details and allocation_pools is undefined %}
         - allocation_pools:
         {%- if details.allocation_pools is string %}
             {% set allocation_pools = details.allocation_pools.split(',') %}
