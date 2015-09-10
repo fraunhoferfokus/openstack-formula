@@ -69,7 +69,15 @@ def _update_subnet(subnet_id, subnet_params):
             'name = {0}, cidr = {1}, network_id = {2} and \n'.format(
                 name, cidr, network_id) + \
             'those additional parameters: \n{0}'.format(str(subnet)))
-        __salt__['neutron.subnet_create'](name, cidr, network_id, **subnet)
+        try:
+            __salt__['neutron.subnet_create'](name, cidr, network_id, **subnet)
+        except TypeError:
+            log.warn('TypeError encountered when calling ' +
+                '`neutron.subnet_create`. Removing "ipv6_ra_mode" ' +
+                'and "ipv6_address_mod" from `**subnet` parameter.')
+            subnet.pop('ipv6_ra_mode')
+            subnet.pop('ipv6_address_mode')
+            __salt__['neutron.subnet_create'](name, cidr, network_id, **subnet)
         return (True, to_update)
     else:
         __salt__['neutron.subnet_update'](subnet_id=subnet_id, **to_update)
