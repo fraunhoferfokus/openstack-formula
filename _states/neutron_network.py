@@ -39,6 +39,7 @@ def managed(name, admin_state_up = None, network_id = None,
             list_filters['tenant_id'] = tenant_dict['id']
         except KeyError:
             raise KeyError, 'no key "id": ' + str(tenant_dict)
+    log.debug('Running `network_list({0})`'.format(list_filters))
     net_list = __salt__['neutron.network_list'](**list_filters)
     log.debug(net_list)
     net_params = list_filters.copy()
