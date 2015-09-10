@@ -45,6 +45,7 @@ Module for handling openstack neutron calls.
 '''
 # Import salt libs
 from salt.exceptions import SaltInvocationError
+from salt.utils.odict import OrderedDict 
 
 # Import third party libs
 HAS_NEUTRON = False
@@ -647,9 +648,12 @@ def subnet_create(name, cidr, network_id, tenant = None,
     
     Optional arguments are:
     - tenant
-    - allocation_pools (either a comma separated string with <start>-<end> 
-      tuples like "192.168.17.3-192.168.17.30,192.168.17.34-192.168.17.60"
-      or a YAML list  with elements like "192.168.17.3-192.168.17.30".)
+    - allocation_pools:
+        If neither a comma separated string with <start>-<end> tuples 
+        like "192.168.17.3-192.168.17.30,192.168.17.34-192.168.17.60"
+        nor a YAML list  with elements like "192.168.17.3-192.168.17.30"
+        work for you try a list of dictionaries like this one:
+        ``{start: 192.168.17.3, end: 192.168.17.30}``
     - gateway_ip
     - ip_version (4 or 6)
     - enable_dhcp (bool)
@@ -677,11 +681,19 @@ def subnet_create(name, cidr, network_id, tenant = None,
         kwargs['tenant_id'] = _tenantname_to_id(tenant)
     if isinstance(name, str):
         kwargs['name'] = name
-    if isinstance(allocation_pools, str):
+    log.debug('allocation_pools "{0}" is {1}.'.format(
+        allocation_pools, type(allocation_pools)))
+    if isinstance(allocation_pools, dict) or \
+            isinstance(allocation_pools, OrderedDict):
+        pass
+    elif isinstance(allocation_pools, (str,unicode)):
         allocation_pools = allocation_pools.split(',')
     if allocation_pools is not None:
         kwargs['allocation_pools'] = []
         for pool in allocation_pools:
+            if isinstance(pool, dict):
+                if 'start' in pool and 'end' in pool:
+                    continue
             (start, end) = pool.split('-')
             kwargs['allocation_pools'] += [
                 {'start': start,
