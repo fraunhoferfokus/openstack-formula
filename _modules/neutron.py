@@ -694,6 +694,14 @@ def subnet_create(name, cidr, network_id, tenant = None,
             if isinstance(pool, dict):
                 if 'start' in pool and 'end' in pool:
                     continue
+                else:
+                    raise(ValueError, '{0} doesn\'t '.format(str(pool)) +\
+                        'contain required keys "start" and "end".')
+                # Maybe Juno-Neutron doesn't like unicode??
+                if isinstance(pool['start'], unicode):
+                    pool['start'] = str(pool['start'])
+                if isinstance(pool['end'], unicode):
+                    pool['end'] = str(pool['end'])
             (start, end) = pool.split('-')
             kwargs['allocation_pools'] += [
                 {'start': start,
