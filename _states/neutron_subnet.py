@@ -6,6 +6,7 @@ Managing subnets in OpenStack Neutron
 # Import python libs
 import logging
 import pprint
+import time
 #import yaml
 
 # Import salt libs and exceptions
@@ -178,8 +179,25 @@ def managed(name, cidr, network, allocation_pools=None,
             subnet_params.pop('new_name')
         #cidr = subnet_params.pop('cidr')
         network_id = __salt__['neutron.network_show'](name=network)['id']
+        # Wait up to X seconds for subnet to appear
+        wait = 15.0
+        # Query API again after this amount of seconds:
+        wait_int = 0.2
         subnet = __salt__['neutron.subnet_create'](
-                name, cidr, network_id, **subnet_params)
+            name, cidr, network_id, **subnet_params)
+        while wait > 0:
+            if subnet:
+                log.debug('Got subnet "{0}".'.format(subnet))
+                break
+            else:
+                subnet = __salt__['neutron.subnet_list'](name)
+                if isinstance(subnet, list) and len(subnet) > 0:
+                    subnet = subnet[0]
+                wait -= wait_int
+                if wait > 0:
+                    log.debug('Waiting another {0} seconds ({1}s left)'.format(
+                        wait_int, wait))
+                    time.sleep(wait_int)
         if not subnet:
             ret['result'] = False
             ret['comment'] = 'Failed to create subnet "{0}".'.format(name)
