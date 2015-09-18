@@ -202,7 +202,10 @@ def managed(name, cidr, network, allocation_pools=None,
             ret['result'] = False
             ret['comment'] = 'Failed to create subnet "{0}".'.format(name)
         else:
-            ret['changes'] = subnet
+            if isinstance(subnet, list):
+                ret['changes'] = subnet[0]
+            else:
+                ret['changes'] = subnet
             ret['comment'] = 'Created new subnet "{0}"'.format(name)
     else:
         ppr = pprint.PrettyPrinter(indent=4)
