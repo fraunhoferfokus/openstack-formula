@@ -427,7 +427,8 @@ define your networks, subnets and routers::
                 network: shared_ext_net
                 enable_dhcp: True
                 tenant: admin
-                allocation_pools: 203.0.113.5-203.0.113.200
+                allocation_pools:
+                    - 203.0.113.5-203.0.113.200
 
 Here are some settings we need for MySQL. We have to specify 
 the root password and the bind-address so `mysqld` only listens 
@@ -665,6 +666,9 @@ To create initial networks run::
 
     sudo salt -I roles:openstack-controller \
         state.sls neutron.initial_networks
+
+.. note:: There are currently some issues with Allocation
+    Pools not being created or updated.
 
 Nova on the Controller
 ----------------------
