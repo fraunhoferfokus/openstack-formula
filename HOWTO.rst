@@ -397,13 +397,13 @@ define your networks, subnets and routers::
     neutron:
         networks:
             shared_int_net:
-                admin_state_up: UP
+                admin_state_up: True
                 shared: True
                 tenant: admin
                 network_type: gre
     
             shared_ext_net:
-                admin_state_up: UP
+                admin_state_up: True
                 shared: True
                 tenant: admin
                 network_type: flat
