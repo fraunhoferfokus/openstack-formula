@@ -408,6 +408,7 @@ define your networks, subnets and routers::
                 tenant: admin
                 network_type: flat
                 external: True
+                physical_network: External
 
         routers:
             shared_ext2int:
