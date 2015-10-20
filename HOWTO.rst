@@ -404,7 +404,7 @@ define your networks, subnets and routers::
     
             shared_ext_net:
                 admin_state_up: True
-                shared: True
+                shared: False
                 tenant: admin
                 network_type: flat
                 external: True
