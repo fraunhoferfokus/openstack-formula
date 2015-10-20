@@ -325,7 +325,10 @@ The Controller
 ``````````````
 
 In `controller.sls` we define information only available 
-to our controller. Those sections you already know::
+to our controller. The whole subsection is only about
+this one file.
+
+Those are values for pillar-keys you already know::
     
     roles:
         - openstack-controller
@@ -358,15 +361,18 @@ to our controller. Those sections you already know::
                 ports: 
                     - eth1
                 reuse_netcfg: eth1
+
     nova:
         neutron_admin_password: "Neutron HowTo Password"
 
 The controller uses a token which is set in the Keystone 
-configuration file to add users, endpoints and so on::
+configuration file to add users, endpoints and so on.
+Add the token to ``controller.sls`` like this::
 
     keystone.token: 'Keystone HowTo Token'
 
-Keystone also need to no the password for its database::
+Keystone also needs to know the password for its database
+and the password for its admin-user. Add those, too::
 
     keystone:
         database:
@@ -391,22 +397,24 @@ and its metadata-agent::
         neutron:
             shared_secret: Shared_secret_from_the_HowTo 
 
-If you want salt to deploy initial networks, you have to define your networks, subnets and routers::
+If you want salt to deploy initial networks, you have to
+define your networks, subnets and routers::
 
     neutron:
         networks:
             shared_int_net:
-                admin_state_up: UP
+                admin_state_up: True
                 shared: True
                 tenant: admin
                 network_type: gre
     
             shared_ext_net:
-                admin_state_up: UP
-                shared: True
+                admin_state_up: True
+                shared: False
                 tenant: admin
                 network_type: flat
                 external: True
+                physical_network: External
 
         routers:
             shared_ext2int:
@@ -425,7 +433,8 @@ If you want salt to deploy initial networks, you have to define your networks, s
                 network: shared_ext_net
                 enable_dhcp: True
                 tenant: admin
-                allocation_pools: 203.0.113.5-203.0.113.200
+                allocation_pools:
+                    - 203.0.113.5-203.0.113.200
 
 Here are some settings we need for MySQL. We have to specify 
 the root password and the bind-address so `mysqld` only listens 
@@ -491,6 +500,64 @@ TODO: Not sure if special characters in
 pillar[mysql:server:root_password] work 
 in all configfiles...
 
+How to Check Your Pillar
+````````````````````````
+
+First check if your minions are complaining about something
+pillar-related::
+
+    root@master:~# salt \* pillar.items _errors
+    compute-1:
+        ----------
+    compute-2:
+        ----------
+    controller:
+        ----------
+
+All your minions returning only those empty
+sets/only delimiters? Then you're good [5]_.
+
+.. [7] Any occuring errors with Pillar need to
+    be resolved before you can continue. Search
+    the `Salt documentation`_, the archives of
+    the Google Groups/`mailinglist "salt-users"`_
+    or try the IRC channel #salt on
+    `freenode.net`_.
+
+.. _Salt documentation: http://docs.saltstack.com
+.. _`mailinglist "salt-users"`:
+    https://groups.google.com/forum/#!forum/salt-users
+.. _`freenode.net`: https://freenode.net/
+
+To get the complete pillar of a certain minion
+run the following (where "controller" is the
+ID of the minion we're targeting here)::
+
+    root@master:~# salt controller pillar.items
+
+To check only on the (input data for the minion's)
+network configuration try::
+
+    root@master:~# salt controller pillar.items \
+        dns interfaces
+    controller:
+        ----------
+        dns:
+            ----------
+            domains:
+                - example.com
+            servers:
+                - 8.8.8.8
+                - 8.8.4.4
+        interfaces:
+            eth0:
+                comment: management interface
+                ipv4: 192.0.2.10/24
+            eth1:
+                comment: external interface
+                ipv4: 203.0.113.10/24
+                default_gw: 203.0.113.1
+
 Deployment
 ==========
 
@@ -514,16 +581,49 @@ Make sure to sync all modules first::
 
     sudo salt \* saltutil.sync_all saltenv=base,openstack
 
-Configure openvswitch on network and compute nodes::
+Then tell all minions to refresh their Pillar-data,
+just in case::
+
+    sudo salt \* saltutil.refresh_pillar
+
+Generate the network configuration files from
+your Pillar::
+
+    sudo salt state.sls \* networking.config && \
+        sudo salt \* state.sls networking.resolvconf
+
+Take a look on the returned data and check if
+the changes made to configuration files look
+reasonable.
+
+.. note:: Now would be a good point to make another backup
+    of your setup as the nodes should come up with the
+    correct static IP addresses assigned at boot.
+
+The next step is creating the OpenvSwitch bridges.
+As we have to re-assign IP addresses "in flight"
+you may loose connectivity::
 
     sudo salt -C \
         'I@roles:openstack-network or I@roles:openstack-compute' \
         state.sls openvswitch saltenv=openstack
 
-Make sure network configuration is correct on all hosts::
+Make sure your controller is still online.
+If it isn't you have to login locally/over the other
+interface and run ``sudo ovs-vsctl del-port br-ex eth1``
+(with "eth1" being the interface used for the external
+network) and reboot the host. Afterwards running the
+``salt`` command above should work.
 
-    sudo salt \* state.sls networking saltenv=openstack
+Now that we have the bridges (you can check with ``salt \*
+ovs.bridge show``) we need to regenerate the hosts'
+network configuration files::
+
+    sudo salt \* state.sls networking.config saltenv=openstack
     
+Keystone
+--------
+
 Install MySQL, RabbitMQ and Keystone on your controller::
 
     sudo salt -I roles:openstack-controller \
@@ -560,20 +660,30 @@ on the controller. If you see similiar output Keystone works::
             service_id:
                 8ee50c9c787b4d46bb7300b57c83644f
 
+Neutron on the Controller
+-------------------------
+
 Deploy `neutron-server` on the controller::
 
     sudo salt -I roles:openstack-controller \
         state.sls neutron.controller saltenv=openstack
+
+To create initial networks run::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls neutron.initial_networks
+
+.. note:: There are currently some issues with Allocation
+    Pools not being created or updated.
+
+Nova on the Controller
+----------------------
 
 Deploy the controller parts of Nova::
 
     sudo salt -I roles:openstack-controller \
         state.sls nova.controller saltenv=openstack
 
-Deploy cinder on the controller::
-
-    sudo salt -I roles:openstack-controller \
-        state.sls cinder saltenv=openstack
 
 If you see high CPU-usage of the service `nova-consoleauth`
 re-run the state *nova.controller* [5]_.
@@ -586,26 +696,45 @@ re-run the state *nova.controller* [5]_.
         
        For now re-applying the states works in all cases.
 
+Cinder
+------
+
+Deploy Cinder on the controller::
+
+    sudo salt -I roles:openstack-controller \
+        state.sls cinder saltenv=openstack
+
 Neutron agents on network-node::
     
     sudo salt -I roles:openstack-network \
         state.sls neutron.network saltenv=openstack
+
+Neutron on the Compute-Nodes
+----------------------------
 
 Neutron agents on compute-nodes::
     
     sudo salt -I roles:openstack-compute \
         state.sls neutron.compute saltenv=openstack
 
+Nova on the Compute-Nodes
+-------------------------
+
 `nova-compute`::
 
     sudo salt -I roles:openstack-compute \
         state.sls nova.compute saltenv=openstack
+
+Glance
+------
 
 Glance on controller [5]_::
 
     sudo salt -I roles:openstack-controller \
         state.sls glance saltenv=openstack
 
+Horizon
+-------
 Horizon (if generating `local_settings.py` fails try again [5]_)::
 
     sudo salt -I roles:openstack-controller \
