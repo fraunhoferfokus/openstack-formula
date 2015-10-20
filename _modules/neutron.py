@@ -178,7 +178,8 @@ def network_create(name, admin_state_up=True, shared=False,
         param_list['provider:physical_network'] = physical_network
     if network_type is not None:
         param_list['provider:network_type'] = network_type
-    if segmentation_id is not None:
+    # Kilo might turn None into "null":
+    if segmentation_id is not None and segmentation_id != "null":
         param_list['provider:segmentation_id'] = segmentation_id
     if external is not None:
         param_list['router:external'] = external
@@ -630,6 +631,9 @@ def router_update(router_id, admin_state_up = None,
             'network_id': gateway_network,
             'enable_snat': enable_snat,
             }
+        if enable_snat is "null":
+            # Workaround for Neutron-API of Kilo:
+            kwargs['external_gateway_info'].pop('enable_snat')
     if new_name is not None:
         kwargs['name'] = new_name
     log.debug('options for router_update() on router {0}:\n{1}'.format(
