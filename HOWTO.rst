@@ -336,10 +336,6 @@ Those are values for pillar-keys you already know::
         - cinder-controller
         - cinder-node
 
-    openstack:
-        common:
-            my_ip: 192.0.2.10
-
     interfaces:
         eth0:
             comment: management interface
@@ -393,7 +389,10 @@ and its metadata-agent::
         database:
             password: 'Neutron HowTo Password'
         nova_admin_password: 'Nova HowTo Password'
+
     openstack:
+        common:
+            my_ip: 192.0.2.10
         neutron:
             shared_secret: Shared_secret_from_the_HowTo 
 
