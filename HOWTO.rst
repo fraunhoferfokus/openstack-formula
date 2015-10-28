@@ -328,6 +328,11 @@ In `controller.sls` we define information only available
 to our controller. The whole subsection is only about
 this one file.
 
+.. note:: You can't have two lines in a YAML file starting
+    with the same string as those a keys for mappings
+    (dictionaries in Python).
+    See http://yaml.org/ for the YAML specification.
+
 Those are values for pillar-keys you already know::
     
     roles:
@@ -361,6 +366,19 @@ Those are values for pillar-keys you already know::
     nova:
         neutron_admin_password: "Neutron HowTo Password"
 
+    openstack:
+        common:
+            my_ip: 192.0.2.10
+
+First add the *shared secret* for communications
+between the `neutron-server` and its metadata-agent::
+
+    openstack:
+        common:
+            my_ip: 192.0.2.10
+        neutron:
+            shared_secret: Shared_secret_from_the_HowTo
+
 The controller uses a token which is set in the Keystone 
 configuration file to add users, endpoints and so on.
 Add the token to ``controller.sls`` like this::
@@ -375,10 +393,8 @@ and the password for its admin-user. Add those, too::
             password: 'HowTo Keystone DB Pass'
         admin_password: 'HowTO Keystone Pass'
 
-Those Neutron credentials are needed to let salt
-talk to Neutron. The Neutron *shared_secret* is
-for communications between the `neutron-server`
-and its metadata-agent::
+Now Neutron credentials are needed to let salt
+talk to Neutron::
 
     neutron.endpoint: 'http://203.0.113.10:9696'
     #neutron.auth_url:  'http://203.0.113.10:5000/v2.0'
@@ -390,16 +406,14 @@ and its metadata-agent::
             password: 'Neutron HowTo Password'
         nova_admin_password: 'Nova HowTo Password'
 
-    openstack:
-        common:
-            my_ip: 192.0.2.10
-        neutron:
-            shared_secret: Shared_secret_from_the_HowTo 
-
 If you want salt to deploy initial networks, you have to
-define your networks, subnets and routers::
+define your networks, subnets and routers under
+``neutron``, too::
 
     neutron:
+        database:
+            password: 'Neutron HowTo Password'
+        nova_admin_password: 'Nova HowTo Password'
         networks:
             shared_int_net:
                 admin_state_up: True
