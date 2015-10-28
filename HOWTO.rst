@@ -668,10 +668,16 @@ Deploy `neutron-server` on the controller::
     sudo salt -I roles:openstack-controller \
         state.sls neutron.controller saltenv=openstack
 
-To create initial networks run::
+To create initial networks now run::
 
     sudo salt -I roles:openstack-controller \
-        state.sls neutron.initial_networks
+        state.sls neutron.initial_networks saltenv=openstack
+
+.. note:: You don't need those networks to continue
+    with the installation of OpenStack services.
+    Of course you'll need them to run instances on
+    top of your OpenStack setup but you can take
+    care of them later.
 
 .. note:: There are currently some issues with Allocation
     Pools not being created or updated.
