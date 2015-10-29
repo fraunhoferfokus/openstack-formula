@@ -1,5 +1,7 @@
 {% from 'openstack/defaults.jinja' import openstack_defaults -%}
 {% from 'keystone/defaults.jinja' import keystone_defaults -%}
+{% from 'openstack/macros.jinja' import salt_banner %}
+{{ salt_banner('#%;~&') }}
 # COMMON OPENSTACK ENVS
 #export SERVICE_TOKEN="{{ salt['pillar.get']('keystone.token', 
                             keystone_defaults.admin_token) }}"
