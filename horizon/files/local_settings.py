@@ -1,3 +1,5 @@
+{% from 'openstack/macros.jinja' import salt_banner -%}
+{{ salt_banner() }}
 {% from 'horizon/defaults.jinja' import horizon_defaults %}
 import os
 
