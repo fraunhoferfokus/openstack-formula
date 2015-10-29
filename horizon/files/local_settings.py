@@ -1,4 +1,4 @@
-{%- from 'horizon/defaults.jinja' import horizon_defaults -%}
+{% from 'horizon/defaults.jinja' import horizon_defaults %}
 import os
 
 from django.utils.translation import ugettext_lazy as _
@@ -8,9 +8,9 @@ from openstack_dashboard import exceptions
 DEBUG = {{ salt['pillar.get']('horizon:debug', False) }}
 TEMPLATE_DEBUG = DEBUG
 
-SITE_BRANDING = '{{ salt['pillar.get']('horizon:site_branding', 
+SITE_BRANDING = '{{ salt['pillar.get']('horizon:site_branding',
                 horizon_defaults.site_branding) }}'
-{% set webroot = salt['pillar.get']('horizon:webroot', 
+{% set webroot = salt['pillar.get']('horizon:webroot',
                 horizon_defaults.webroot) %}
 {%- if webroot or webroot != '' %}
 WEBROOT = '{{ webroot }}'
@@ -20,8 +20,8 @@ LOGOUT_URL = WEBROOT + '/auth/logout/'
 # HORIZON_CONFIG.user_home, if user_home is not set.
 # Do not set it to '/home/', as this will cause circular redirect loop
 LOGIN_REDIRECT_URL = WEBROOT
-{%- endif %}                
-                
+{%- endif %}
+
 # Required for Django 1.5.
 # If horizon is running in production (DEBUG is False), set this
 # with the list of host/domain names that the application can serve.
@@ -102,7 +102,7 @@ HORIZON_CONFIG = {
 
 #LOCAL_PATH = os.path.dirname(os.path.abspath(__file__))
 LOCAL_PATH = '{{ salt['pillar.get'](
-                    'horizon:lock_dir', 
+                    'horizon:lock_dir',
                     horizon_defaults.lock_dir) }}'
 
 # Set custom secret key:
