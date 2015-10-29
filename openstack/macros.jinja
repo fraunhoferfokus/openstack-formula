@@ -4,6 +4,7 @@
 {% for line in banner.split('\n') -%}
 {{ comment_char }} {{ line }}
 {% endfor -%}
+{{ comment_char }}
 {{ comment_char }} Source: {{ source }}
 {%- set contact = salt['pillar.get']('salt:contact', False) %}
 {%- if contact %}
