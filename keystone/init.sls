@@ -22,7 +22,7 @@ keystone passwords in pillar:
                         salt['pillar.get']('keystone:debug:', False) }}
         - string: 
             - keystone:database:password
-            - keystone:admin_password
+            - keystone.password
 
 {% set db_user = salt['pillar.get'](
                     'keystone:database:username', 
