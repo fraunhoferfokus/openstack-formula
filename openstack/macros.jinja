@@ -1,3 +1,17 @@
+{% from 'openstack/defaults.jinja' import default_banner %}
+{% macro salt_banner(comment_char='#') %}
+{%- set banner = salt['pillar.get']('salt:banner', default_banner) -%}
+{% for line in banner.split('\n') -%}
+{{ comment_char }} {{ line }}
+{% endfor -%}
+{{ comment_char }} Source: {{ source }}
+{%- set contact = salt['pillar.get']('salt:contact', False) %}
+{%- if contact %}
+{{ comment_char }} Managed by: {{ contact }}
+{%- endif %}
+{{ comment_char }}
+{%- endmacro %}
+
 {% from 'openstack/defaults.jinja' import openstack_defaults %}
 {% macro comment_if_default(get, pillar_key, 
     default='', quoted=False, no_space=False) -%}

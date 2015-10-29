@@ -1,3 +1,7 @@
+{% set default_banner =
+"""This file is managed by SaltStack using the openstack-formula.
+Manual changes may be reverted at any given point in time.""" %}
+
 {% set openstack_defaults = 
     {
         'auth_strategy': 'keystone',
