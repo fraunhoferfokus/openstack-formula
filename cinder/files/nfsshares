@@ -1,3 +1,5 @@
+{% from 'openstack/macros.jinja' import salt_banner -%}
+{{ salt_banner() }}
 {% for host, shares in salt['pillar.get']('cinder:nfs_shares', {}).items() -%}
   {%- if shares is not string and shares is iterable %}
     {%- for path in shares %}
